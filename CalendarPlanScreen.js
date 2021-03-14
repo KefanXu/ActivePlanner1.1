@@ -15,9 +15,7 @@ import {
   Animated,
 } from "react-native";
 import { getDataModel } from "./DataModel";
-import {google} from "googleapis";
-const fs = require('fs');
-const readline = require('readline');
+
 export class CalendarPlanScreen extends React.Component {
   constructor(props) {
     super(props);
