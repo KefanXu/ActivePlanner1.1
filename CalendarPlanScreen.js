@@ -27,8 +27,7 @@ export class CalendarPlanScreen extends React.Component {
 
   render() {
     return(
-      <View>
-      </View>
+      true
     );
   }
 }
