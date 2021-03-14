@@ -39,6 +39,9 @@ class DataModel {
     console.log("this.users", this.users);
   };
 
+
+
+
   createNewUser = async (username, password) => {
     let newUser = {
       email: username,
@@ -60,3 +63,4 @@ export function getDataModel() {
   }
   return theDataModel;
 }
+//add changes
