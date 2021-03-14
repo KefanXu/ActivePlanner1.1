@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { render } from "react-dom";
+import ApiCalendar from 'react-google-calendar-api';
 import {
   TextInput,
   Text,
@@ -15,18 +16,13 @@ import {
 } from "react-native";
 import { getDataModel } from "./DataModel";
 
-import ApiCalendar from 'react-google-calendar-api';
-import {google} from 'googleapis';
-
-
 export class CalendarPlanScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      events: []
+      
     };
   }
-
   
 
   render() {
