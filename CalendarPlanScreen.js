@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { render } from "react-dom";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import ApiCalendar from "react-google-calendar-api";
+=======
+>>>>>>> parent of 4ff0deb (add google calendar api 1)
 =======
 >>>>>>> parent of 4ff0deb (add google calendar api 1)
 import {
