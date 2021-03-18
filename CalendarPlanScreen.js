@@ -53,13 +53,21 @@ export class CalendarPlanScreen extends React.Component {
     //console.log("userInfoResponseJSON", userInfoResponseJSON);
 
     let calendarsList = await this.getUsersCalendarList(accessToken);
+    //console.log(calendarsList.items[0].backgroundColor);
     let calendarsListJSON = await calendarsList.json();
-    console.log(calendarsListJSON);
+    //let calendarsListParseJSON = JSON.parse(calendarsListJSON)
+    //console.log(calendarsListJSON.etag);
+    //console.log(calendarsListJSON.items[0].id);
+    let calendarsID = calendarsListJSON.items[0].id;
+    let calendarEventList = await this.getUsersCalendarEvents(accessToken, calendarsID);
+    let calendarEventListJSON =  await calendarEventList.json();
+    console.log(calendarEventListJSON);
+    //console.log(JSON.stringify(calendarsListJSON))
 
   };
 
   getUsersCalendarList = async (accessToken) => {
-    console.log("accessToken",accessToken)
+    //console.log("accessToken",accessToken)
     let calendarsList;
     calendarsList = await fetch(
       "https://www.googleapis.com/calendar/v3/users/me/calendarList",
@@ -67,9 +75,17 @@ export class CalendarPlanScreen extends React.Component {
     );
     return calendarsList;
   };
-  // getCalendarNames = async(calendarsList) => {
-  //   let calendarsListJSON = await calendarsList.json;
-  // }
+
+  getUsersCalendarEvents = async (accessToken, calendarsID) => {
+    console.log("calendarsID",calendarsID);
+    let calendarsEventList;
+    calendarsEventList = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/" + "kefanxu@umich.edu" + "/events",
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    return calendarsEventList;
+  }
+
 
   render() {
     return true;
