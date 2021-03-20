@@ -15,6 +15,12 @@ import {
 import { getDataModel } from "./DataModel";
 
 import * as Google from "expo-google-app-auth";
+import {
+  MonthlyBody,
+  MonthlyCalendar,
+  MonthlyNav,
+  DefaultMonthlyEventItem,
+} from '@zach.codes/react-calendar';
 
 const config = {
   // clientId:
@@ -33,7 +39,14 @@ export class CalendarPlanScreen extends React.Component {
     super(props);
     this.state = {};
     this.dataModel = getDataModel();
+    
+    this.state = {
+      currentMonth: new Date(),
+    }
     //this.googleServiceInit();
+  }
+  setCurrentMonth = (date) => {
+    this.setState({currentMonth:date})
   }
   googleServiceInit = async () => {
     const { type, accessToken, user } = await Google.logInAsync(config);
@@ -97,6 +110,28 @@ export class CalendarPlanScreen extends React.Component {
           title="Push a notification in 5s" 
           onPress = {this.dataModel.scheduleNotification}>
         </Button>
+        <MonthlyCalendar
+      currentMonth={this.state.currentMonth}
+      onCurrentMonthChange={date => this.setCurrentMonth(date)}
+    >
+      <MonthlyNav />
+      <MonthlyBody
+        events={[
+          { title: 'Call John', date: new Date() },
+          { title: 'Call John', date: new Date() },
+          { title: 'Meeting with Bob', date: new Date() },
+        ]}
+        renderDay={data =>
+          data.map((item, index) => (
+            <DefaultMonthlyEventItem
+              key={index}
+              title={item.title}
+              date={item.date}
+            />
+          ))
+        }
+      />
+    </MonthlyCalendar>
       </View>
     );
   }
