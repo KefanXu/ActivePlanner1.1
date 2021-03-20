@@ -3,6 +3,16 @@ import "@firebase/firestore";
 import "@firebase/storage";
 import { firebaseConfig } from "./Secret";
 
+import * as Notification from 'expo-notifications';
+
+Notification.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 class DataModel {
   constructor() {
     if (firebase.apps.length === 0) {
@@ -50,6 +60,29 @@ class DataModel {
   getUsers = () => {
     return this.users;
   };
+
+  askPermission = async() => {
+    const perms = await Notification.getPermissionsAsync()
+    let granted = perms.granted;
+    console.log('tried to get permissions', perms);
+    if (!granted) {
+      const newPerms = await Notification.requestPermissionsAsync();
+      granted = newPerms.granted;
+    }
+    return granted;
+  }
+  scheduleNotification = async() => {
+    await Notification.scheduleNotificationAsync({
+      content: {
+        titel:"test",
+        body:"notification in 5s",
+        data: {data:"goes here"},
+      },
+      trigger: {
+        seconds:5
+      },
+    })
+  }
 }
 
 let theDataModel = undefined;

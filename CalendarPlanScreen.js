@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { render } from "react-dom";
 import {
   TextInput,
   Text,
@@ -16,7 +15,6 @@ import {
 import { getDataModel } from "./DataModel";
 
 import * as Google from "expo-google-app-auth";
-import { log } from "react-native-reanimated";
 
 const config = {
   // clientId:
@@ -34,7 +32,8 @@ export class CalendarPlanScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.googleServiceInit();
+    this.dataModel = getDataModel();
+    //this.googleServiceInit();
   }
   googleServiceInit = async () => {
     const { type, accessToken, user } = await Google.logInAsync(config);
@@ -88,6 +87,17 @@ export class CalendarPlanScreen extends React.Component {
 
 
   render() {
-    return true;
+    return (
+      <View>
+        <Button 
+          title="Get permissions"
+          onPress= {this.dataModel.askPermission}>
+        </Button>
+        <Button
+          title="Push a notification in 5s" 
+          onPress = {this.dataModel.scheduleNotification}>
+        </Button>
+      </View>
+    );
   }
 }
