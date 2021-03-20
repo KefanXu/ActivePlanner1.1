@@ -14,6 +14,9 @@ import {
 } from "react-native";
 import { getDataModel } from "./DataModel";
 
+import Calendar from "@ericz1803/react-google-calendar";
+
+
 import * as Google from "expo-google-app-auth";
 
 const config = {
