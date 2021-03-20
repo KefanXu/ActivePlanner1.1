@@ -132,7 +132,7 @@ export class CalendarPlanScreen extends React.Component {
         </Button>
         <Dayz
           date = {this.date}
-          display='week' 
+          display='week'
       />
       </View>
     );
