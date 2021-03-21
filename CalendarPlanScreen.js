@@ -13,7 +13,7 @@ import {
   Animated,
 } from "react-native";
 import { getDataModel } from "./DataModel";
-
+import {Calendar} from "./Calendar"
 import * as Google from "expo-google-app-auth";
 
 const config = {
@@ -58,11 +58,13 @@ export class CalendarPlanScreen extends React.Component {
     //console.log(calendarsListJSON.etag);
     //console.log(calendarsListJSON.items[0].id);
     let calendarsID = calendarsListJSON.items[0].id;
-    let calendarEventList = await this.getUsersCalendarEvents(accessToken, calendarsID);
-    let calendarEventListJSON =  await calendarEventList.json();
+    let calendarEventList = await this.getUsersCalendarEvents(
+      accessToken,
+      calendarsID
+    );
+    let calendarEventListJSON = await calendarEventList.json();
     console.log(calendarEventListJSON);
     //console.log(JSON.stringify(calendarsListJSON))
-
   };
 
   getUsersCalendarList = async (accessToken) => {
@@ -76,28 +78,31 @@ export class CalendarPlanScreen extends React.Component {
   };
 
   getUsersCalendarEvents = async (accessToken, calendarsID) => {
-    console.log("calendarsID",calendarsID);
+    console.log("calendarsID", calendarsID);
     let calendarsEventList;
     calendarsEventList = await fetch(
-      "https://www.googleapis.com/calendar/v3/calendars/" + "kefanxu@umich.edu" + "/events",
+      "https://www.googleapis.com/calendar/v3/calendars/" +
+        "kefanxu@umich.edu" +
+        "/events",
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     return calendarsEventList;
-  }
-
+  };
 
   render() {
     return (
       <View>
-        <Button 
-          title="Get permissions"
-          onPress= {this.dataModel.askPermission}>
-        </Button>
         <Button
-          title="Push a notification in 5s" 
-          onPress = {this.dataModel.scheduleNotification}>
-        </Button>
+          title="Get permissions"
+          onPress={this.dataModel.askPermission}
+        ></Button>
+        <Button
+          title="Push a notification in 5s"
+          onPress={this.dataModel.scheduleNotification}
+        ></Button>
+        <Calendar/>
       </View>
     );
   }
 }
+
