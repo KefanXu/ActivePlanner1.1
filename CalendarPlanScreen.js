@@ -15,6 +15,35 @@ import {
 import { getDataModel } from "./DataModel";
 
 import * as Google from "expo-google-app-auth";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from 'moment';
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const localizer = momentLocalizer(moment);
+const myEventsList = [{
+  title: "string",
+  start: new Date('March 20, 2021 03:24:00'),
+  end: new Date('March 20, 2021 05:24:00'),
+  allDay: false,
+  resource: "any",
+}];
 
 const config = {
   // clientId:
@@ -33,8 +62,24 @@ export class CalendarPlanScreen extends React.Component {
     super(props);
     this.state = {};
     this.dataModel = getDataModel();
+    this.state = {
+      activeDate: new Date(),
+    };
     //this.googleServiceInit();
   }
+  generateMatrix = () => {
+    var matrix = [];
+    // Create header
+    matrix[0] = this.weekDays;
+
+    var year = this.state.activeDate.getFullYear();
+    var month = this.state.activeDate.getMonth();
+
+    var firstDay = new Date(year, month, 1).getDay();
+
+    // More code here
+  };
+
   googleServiceInit = async () => {
     const { type, accessToken, user } = await Google.logInAsync(config);
     let userInfoResponse;
@@ -47,6 +92,7 @@ export class CalendarPlanScreen extends React.Component {
         }
       );
     }
+
     //console.log("token",accessToken);
     //let userInfoResponseJSON = await userInfoResponse.json();
     //console.log("userInfoResponseJSON", userInfoResponseJSON);
@@ -58,11 +104,13 @@ export class CalendarPlanScreen extends React.Component {
     //console.log(calendarsListJSON.etag);
     //console.log(calendarsListJSON.items[0].id);
     let calendarsID = calendarsListJSON.items[0].id;
-    let calendarEventList = await this.getUsersCalendarEvents(accessToken, calendarsID);
-    let calendarEventListJSON =  await calendarEventList.json();
+    let calendarEventList = await this.getUsersCalendarEvents(
+      accessToken,
+      calendarsID
+    );
+    let calendarEventListJSON = await calendarEventList.json();
     console.log(calendarEventListJSON);
     //console.log(JSON.stringify(calendarsListJSON))
-
   };
 
   getUsersCalendarList = async (accessToken) => {
@@ -76,27 +124,37 @@ export class CalendarPlanScreen extends React.Component {
   };
 
   getUsersCalendarEvents = async (accessToken, calendarsID) => {
-    console.log("calendarsID",calendarsID);
+    console.log("calendarsID", calendarsID);
     let calendarsEventList;
     calendarsEventList = await fetch(
-      "https://www.googleapis.com/calendar/v3/calendars/" + "kefanxu@umich.edu" + "/events",
+      "https://www.googleapis.com/calendar/v3/calendars/" +
+        "kefanxu@umich.edu" +
+        "/events",
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     return calendarsEventList;
-  }
-
+  };
 
   render() {
     return (
       <View>
-        <Button 
-          title="Get permissions"
-          onPress= {this.dataModel.askPermission}>
-        </Button>
         <Button
-          title="Push a notification in 5s" 
-          onPress = {this.dataModel.scheduleNotification}>
-        </Button>
+          title="Get permissions"
+          onPress={this.dataModel.askPermission}
+        ></Button>
+        <Button
+          title="Push a notification in 5s"
+          onPress={this.dataModel.scheduleNotification}
+        ></Button>
+        <View>
+        {/* <Calendar
+          localizer={localizer}
+          events={myEventsList}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 500 }}
+        /> */}
+        </View>
       </View>
     );
   }
