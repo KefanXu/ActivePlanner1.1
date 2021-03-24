@@ -11,8 +11,15 @@ import {
   LayoutAnimation,
   Button,
   Animated,
+  Dimensions,
 } from "react-native";
-export class Calendar extends React.Component {
+
+import EventCalendar from "react-native-events-calendar";
+import { Calendar } from "react-native-big-calendar";
+import { log } from "react-native-reanimated";
+import { FlatList } from "react-native-gesture-handler";
+
+export class MonthCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.months = [
@@ -50,7 +57,7 @@ export class Calendar extends React.Component {
       }
     }
     var counter = 1;
-    for (var row = 1; row < 7; row++) {
+    for (var row = 1; row < 6; row++) {
       matrix[row] = [];
       for (var col = 0; col < 7; col++) {
         matrix[row][col] = -1;
@@ -71,45 +78,185 @@ export class Calendar extends React.Component {
   render() {
     var matrix = this.generateMatrix();
     var rows = [];
+    let { width } = Dimensions.get("window");
     rows = matrix.map((row, rowIndex) => {
+      // let countKey = 0;
+      // var additionalView = row.map(() => {
+      //   return (
+      //     <View
+      //       style={[
+      //         { flex: 0.5, backgroundColor: "blue" },
+      //         { transform: [{ scale: 0.5 }] },
+      //       ]}
+      //     >
+      //       <Text>1</Text>
+      //       {/* <EventCalendar
+      //         eventTapped={console.log("tap")}
+      //         size = {1}
+      //         width={width/10}
+      //       /> */}
+      //       {/* <Calendar
+      //         events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
+      //         height={100}
+      //         mode="day"
+
+      //       /> */}
+      //     </View>
+      //   );
+      // });
       var rowItems = row.map((item, colIndex) => {
+        //
+        if (rowIndex === 0) {
+          return (
+            // <Calendar
+            //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
+            //     height={5}
+            //     mode="day"
+
+            //   />
+            <View
+              style={{
+                flex: 1,
+                textAlign: "center",
+                height: 18,
+                flexDirection: "column",
+                alignContent: "space-between",
+              }}
+            >
+              <Text
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  height: 18,
+                  // Highlight header
+                  backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
+
+                  // Highlight Sundays
+                  color: colIndex == 0 ? "#a00" : "#000",
+                  // Highlight current date
+                  fontWeight:
+                    item == this.state.activeDate.getDate() ? "bold" : "",
+                }}
+                // onPress={() => this._onPress(item)}
+              >
+                {item != -1 ? item : ""}
+              </Text>
+            </View>
+          );
+        } else {
+          return (
+            // <Calendar
+            //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
+            //     height={5}
+            //     mode="day"
+
+            //   />
+
+            <View
+              style={{
+                flex: 1,
+                textAlign: "center",
+                height: "70%",
+                backgroundColor: "blue",
+                flexDirection: "column",
+                alignContent: "space-between",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text
+                style={{
+                  flex: 0.2,
+                  textAlign: "center",
+                  height: 18,
+                  justifyContent: "flex-start",
+                  alignContent: "flex-start",
+                  // Highlight header
+
+                  backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
+                  // Highlight Sundays
+                  color: colIndex == 0 ? "#a00" : "#000",
+                  // Highlight current date
+                  fontWeight:
+                    item == this.state.activeDate.getDate() ? "bold" : "",
+                }}
+                onPress={() => this._onPress(item)}
+              >
+                {item != -1 ? item : ""}
+              </Text>
+              {/* <Text style={{ flex: 1, textAlign: "center", backgroundColor:"red" }}>1</Text> */}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "column",
+                  // backgroundColor:"green",
+                  height: "100%",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "blue",
+                    flex: 1,
+                    height: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                  }}
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: "red",
+                    flex: 1,
+                    height: "100%",
+                    alignItems: "flex-end",
+                    justifyContent: "flex-end",
+                  }}
+                ></View>
+              </View>
+            </View>
+          );
+        }
+      });
+      if (rowIndex === 0) {
         return (
-          <Text
+          <View
+            style={{
+              flex: 0.1,
+              flexDirection: "column",
+              backgroundColor: "red",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
+          >
+            <View style={{ flexDirection: "row" }}>{rowItems}</View>
+            {/* <View style={{ flexDirection: "row" }}>{additionalView}</View> */}
+          </View>
+        );
+      } else {
+        return (
+          <View
             style={{
               flex: 1,
-              height: 18,
-              textAlign: "center",
-              // Highlight header
-              backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
-              // Highlight Sundays
-              color: colIndex == 0 ? "#a00" : "#000",
-              // Highlight current date
-              fontWeight: item == this.state.activeDate.getDate() ? "bold" : "",
+              flexDirection: "column",
+
+              paddingTop: 0,
+              marginTop: 0,
+              //backgroundColor: "blue",
+
+              justifyContent: "flex-start",
+              alignItems: "center",
             }}
-            onPress={() => this._onPress(item)}
           >
-            {item != -1 ? item : ""}
-          </Text>
+            <View style={{ flexDirection: "row" }}>{rowItems}</View>
+            {/* <View style={{ flexDirection: "row" }}>{additionalView}</View> */}
+          </View>
         );
-      });
-      return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            padding: 15,
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
-          {rowItems}
-        </View>
-      );
+      }
     });
     return (
-      <View>
+      <View style={{ height: "95%" }}>
         <Text
           style={{
+            backgroundColor: "blue",
             fontWeight: "bold",
             fontSize: 18,
             textAlign: "center",

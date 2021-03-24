@@ -52,6 +52,9 @@ export class LoginScreen extends React.Component {
       );
     }
   };
+  onGoogleSignIn = () => {
+    
+  }
 
   onRegist = () => {
     //console.log("Regist");
