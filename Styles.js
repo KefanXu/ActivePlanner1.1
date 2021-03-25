@@ -40,7 +40,7 @@ export const loginStyles = StyleSheet.create({
     fontSize: 20,
   },
   buttonArea: {
-    flex: 0.15,
+    flex: 0.3,
     width: "60%",
     flexDirection: "column",
     alignItems: "center",

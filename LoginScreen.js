@@ -12,6 +12,7 @@ import {
 
 import { loginStyles } from "./Styles";
 import { getDataModel } from "./DataModel";
+import moment, { min } from "moment";
 
 export class LoginScreen extends React.Component {
   constructor(props) {
@@ -23,12 +24,14 @@ export class LoginScreen extends React.Component {
   }
   componentDidMount = () => {
     this.dataModel = getDataModel();
-    this.focusUnsubscribe = this.props.navigation.addListener('focus', this.onFocus);
-
+    this.focusUnsubscribe = this.props.navigation.addListener(
+      "focus",
+      this.onFocus
+    );
   };
   onFocus = () => {
     this.dataModel.asyncInit();
-  }
+  };
 
   onLogin = () => {
     //console.log("Login");
@@ -52,9 +55,78 @@ export class LoginScreen extends React.Component {
       );
     }
   };
-  onGoogleSignIn = () => {
-    
-  }
+  onGoogleSignIn = async () => {
+    console.log("Google Sign In");
+    let [timeMin, timeMax] = this.processDate();
+    //console.log(timeMin, timeMax);
+    let [calEvents,calendarsID] = await this.dataModel.googleServiceInit(timeMin, timeMax);
+    let [
+      previousMonthList,
+      thisMonthList,
+      nextMonthList,
+    ] = this.processCalEvent(calEvents.items);
+    // console.log(previousMonthList);
+    // console.log(thisMonthList);
+    // console.log(nextMonthList);
+    this.props.navigation.navigate("Home Screen", {
+      userEmail: calendarsID,
+      eventsLastMonth:previousMonthList,
+      eventsThisMonth: thisMonthList,
+      eventsNextMonth: nextMonthList,
+    });
+  };
+
+  processDate = () => {
+    let currDate = new Date();
+    let month = currDate.getMonth();
+    let year = currDate.getFullYear();
+    let monthMin = month;
+    let monthMax = month + 2;
+    if (monthMin < 10) {
+      monthMin = "0" + monthMin;
+    }
+    if (monthMax < 10) {
+      monthMax = "0" + monthMax;
+    }
+    let dateMin = "timeMin=" + year + "-" + monthMin + "-01T10%3A00%3A00Z";
+    let monthDays = moment(year + "-" + monthMax, "YYYY-MM").daysInMonth();
+    let dateMax =
+      "timeMax=" + year + "-" + monthMax + "-" + monthDays + "T23%3A00%3A00Z";
+
+    return [dateMin, dateMax];
+  };
+
+  processCalEvent = (eventList) => {
+    let currMonth = moment().format("YYYY-MM");
+    let nextMonth = moment().add(1, "months").format("YYYY-MM");
+
+    let lastMonth = moment().subtract(1, "months").format("YYYY-MM");
+    //console.log(nextMonth,lastMonth);
+    let previousMonthList = [];
+    let thisMonthList = [];
+    let nextMonthList = [];
+
+    for (let dayEvent of eventList) {
+      if (dayEvent.start) {
+        let timeStamp = dayEvent.start.dateTime.slice(0, 7);
+        let simplifiedEvent = {
+          start: dayEvent.start.dateTime,
+          end: dayEvent.end.dateTime,
+        };
+        if (timeStamp === currMonth) {
+          thisMonthList.push(simplifiedEvent);
+        } else if (timeStamp === nextMonth) {
+          //console.log(timeStamp, "next month added");
+          nextMonthList.push(simplifiedEvent);
+        } else if (timeStamp === lastMonth) {
+          //console.log(timeStamp, "last month added");
+          previousMonthList.push(simplifiedEvent);
+        }
+      }
+    }
+    return [previousMonthList, thisMonthList, nextMonthList];
+    //console.log(currMonth);
+  };
 
   onRegist = () => {
     //console.log("Regist");
@@ -107,6 +179,24 @@ export class LoginScreen extends React.Component {
             onPress={() => this.onRegist()}
           >
             <Text style={loginStyles.buttonFont}>Sign up</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={loginStyles.buttonStyle}
+            onPress={() => this.onGoogleSignIn()}
+          >
+            <Text style={loginStyles.buttonFont}>Sign In with Google</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
+            style={loginStyles.buttonStyle}
+            onPress={() => this.processDate()}
+          >
+            <Text style={loginStyles.buttonFont}>Process Date</Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            style={loginStyles.buttonStyle}
+            onPress={() => this.processCalEvent()}
+          >
+            <Text style={loginStyles.buttonFont}>Process event</Text>
           </TouchableOpacity>
         </View>
       </View>

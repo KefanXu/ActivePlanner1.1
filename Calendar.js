@@ -12,12 +12,12 @@ import {
   Button,
   Animated,
   Dimensions,
+  FlatList
 } from "react-native";
 
 import EventCalendar from "react-native-events-calendar";
 import { Calendar } from "react-native-big-calendar";
 import { log } from "react-native-reanimated";
-import { FlatList } from "react-native-gesture-handler";
 
 export class MonthCalendar extends React.Component {
   constructor(props) {
@@ -41,7 +41,45 @@ export class MonthCalendar extends React.Component {
     this.state = {
       activeDate: new Date(),
     };
+    this.thisMonthEvents = this.props.thisMonthEvents;
+    this.lastMonthEvents = this.props.lastMonthEvents;
+    this.nextMonthEvents = this.props.nextMonthEvents;
+
+    this.dayEventsList;
+    this.processEvents();
   }
+  processEvents = () => {
+    //console.log(this.thisMonthEvents);
+    let eventListDates = [];
+    for (let event of this.thisMonthEvents) {
+      let dateNum = String(event.start).slice(8, 10);
+      if (!eventListDates.includes(dateNum)) {
+        eventListDates.push(dateNum);
+      }
+    }
+    let dayEventsList = [];
+    for (let dateNum of eventListDates) {
+      let dayEventObj = {
+        dateNum: parseInt(dateNum),
+        events: [],
+      };
+      dayEventsList.push(dayEventObj);
+    }
+    for (let date of dayEventsList) {
+      for (let event of this.thisMonthEvents) {
+        let dateNum = parseInt(String(event.start).slice(8, 10));
+        if (dateNum === date.dateNum) {
+          let newEvent = event;
+          newEvent.id = event.end + event.start;
+          newEvent.test = "1";
+          date.events.push(newEvent);
+        }
+      }
+    }
+    this.dayEventsList = dayEventsList;
+    //console.log(dayEventsList);
+  };
+
   generateMatrix = () => {
     var matrix = [];
     // Create header
@@ -78,7 +116,7 @@ export class MonthCalendar extends React.Component {
   render() {
     var matrix = this.generateMatrix();
     var rows = [];
-    let { width } = Dimensions.get("window");
+    //let { width } = Dimensions.get("window");
     rows = matrix.map((row, rowIndex) => {
       // let countKey = 0;
       // var additionalView = row.map(() => {
@@ -144,6 +182,17 @@ export class MonthCalendar extends React.Component {
             </View>
           );
         } else {
+          let flatEventList = [];
+          //console.log("else starting")
+          for (let dayEvent of this.dayEventsList) {
+            //console.log("dayEvent",dayEvent);
+            //console.log("item",item);
+            if (item == dayEvent.dateNum) {
+              flatEventList = dayEvent.events;
+              //console.log("flatEventList created");
+              
+            }
+          }
           return (
             // <Calendar
             //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
@@ -157,7 +206,7 @@ export class MonthCalendar extends React.Component {
                 flex: 1,
                 textAlign: "center",
                 height: "70%",
-                backgroundColor: "blue",
+                //backgroundColor: "blue",
                 flexDirection: "column",
                 alignContent: "space-between",
                 justifyContent: "space-between",
@@ -195,16 +244,39 @@ export class MonthCalendar extends React.Component {
               >
                 <View
                   style={{
-                    backgroundColor: "blue",
+                    //backgroundColor: "blue",
                     flex: 1,
                     height: "100%",
                     justifyContent: "flex-start",
                     alignItems: "flex-start",
                   }}
-                ></View>
+                >
+                  <View
+                    style={{
+                      flex: 0.5,
+                      width: "100%",
+                      marginHorizontal: 5,
+                      //backgroundColor: "green",
+                    }}
+                  >
+                    <FlatList
+                      data={flatEventList}
+                      renderItem={({item}) => {
+                        //console.log("render",item);
+                        return (
+                          <View style={{backgroundColor:"grey",borderRadius:5}}>
+                          <Text style={{ textAlign: "center", fontSize:10,}}>
+                            {item.start}
+                          </Text>
+                          </View>
+                        );
+                      }}
+                    />
+                  </View>
+                </View>
                 <View
                   style={{
-                    backgroundColor: "red",
+                    //backgroundColor: "red",
                     flex: 1,
                     height: "100%",
                     alignItems: "flex-end",
@@ -256,7 +328,7 @@ export class MonthCalendar extends React.Component {
       <View style={{ height: "95%" }}>
         <Text
           style={{
-            backgroundColor: "blue",
+            //backgroundColor: "blue",
             fontWeight: "bold",
             fontSize: 18,
             textAlign: "center",
