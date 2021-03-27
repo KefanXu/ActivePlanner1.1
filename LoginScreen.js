@@ -109,6 +109,7 @@ export class LoginScreen extends React.Component {
     for (let dayEvent of eventList) {
       if (dayEvent.start) {
         let timeStamp = dayEvent.start.dateTime.slice(0, 7);
+        //console.log("typeof(dayEvent.start.dateTime)",typeof(dayEvent.start.dateTime));
         let simplifiedEvent = {
           start: dayEvent.start.dateTime,
           end: dayEvent.end.dateTime,

@@ -87,7 +87,7 @@ class DataModel {
   scheduleNotification = async () => {
     await Notification.scheduleNotificationAsync({
       content: {
-        titel: "test",
+        title: "test",
         body: "notification in 5s",
         data: { data: "goes here" },
       },

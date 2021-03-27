@@ -12,7 +12,7 @@ import {
   Button,
   Animated,
   Dimensions,
-  FlatList
+  FlatList,
 } from "react-native";
 
 import EventCalendar from "react-native-events-calendar";
@@ -21,6 +21,7 @@ import { log } from "react-native-reanimated";
 
 export class MonthCalendar extends React.Component {
   constructor(props) {
+    console.log("change detected");
     super(props);
     this.months = [
       "January",
@@ -38,20 +39,60 @@ export class MonthCalendar extends React.Component {
     ];
     this.weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     this.nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    this.state = {
-      activeDate: new Date(),
-    };
+
     this.thisMonthEvents = this.props.thisMonthEvents;
     this.lastMonthEvents = this.props.lastMonthEvents;
     this.nextMonthEvents = this.props.nextMonthEvents;
 
     this.dayEventsList;
+
+    this.state = {
+      activeDate: new Date(),
+      thisMonthEvents: this.thisMonthEvents,
+      dayEventsList: [],
+    };
     this.processEvents();
+    //let currentEventList = [];
+    //currentEventList = props.lastMonthEvents;
+
+    //this.setState({thisMonthEvents:this.thisMonthEvents})
+    //console.log("this.thisMonthEvents", this.thisMonthEvents);
+    //console.log("this.state.thisMonthEvents", this.state.thisMonthEvents);
   }
+  // componentDidUpdate = (props) => {
+  //   console.log("update");
+  //   this.setState({thisMonthEvents: props.thisMonthEvents})
+  // }
+
+  // reSetEvents = (newEventList) => {
+  //   this.setState({thisMonthEvents:newEventList});
+  // }
+  // componentDidUpdate = (prevProps) => {
+  //   console.log("change detected");
+  //   if (this.state.thisMonthEvents === prevProps.thisMonthEvents) {
+  //   console.log("prevProps.thisMonthEvents",prevProps.thisMonthEvents);
+  //   console.log("this.state",this.state.thisMonthEvents);
+  //     this.processEvents();
+  //   }
+
+  //     //this.setState({ thisMonthEvents: prevProps.thisMonthEvents });
+
+  // };
+
+  onPress = async (item) => {
+    console.log("item pressed");
+    await this.props.onPress(
+      item,
+      this.state.activeDate.getMonth(),
+      this.months[this.state.activeDate.getMonth()]
+    );
+    this.processEvents();
+    // EventRegister.emit("calendarPressed","pressed"+item);
+  };
   processEvents = () => {
-    //console.log(this.thisMonthEvents);
+    //console.log("ProcessEvents", this.state.thisMonthEvents);
     let eventListDates = [];
-    for (let event of this.thisMonthEvents) {
+    for (let event of this.state.thisMonthEvents) {
       let dateNum = String(event.start).slice(8, 10);
       if (!eventListDates.includes(dateNum)) {
         eventListDates.push(dateNum);
@@ -66,18 +107,18 @@ export class MonthCalendar extends React.Component {
       dayEventsList.push(dayEventObj);
     }
     for (let date of dayEventsList) {
-      for (let event of this.thisMonthEvents) {
+      for (let event of this.state.thisMonthEvents) {
         let dateNum = parseInt(String(event.start).slice(8, 10));
         if (dateNum === date.dateNum) {
           let newEvent = event;
           newEvent.id = event.end + event.start;
-          newEvent.test = "1";
+          newEvent.identifier = "default";
           date.events.push(newEvent);
         }
       }
     }
     this.dayEventsList = dayEventsList;
-    //console.log(dayEventsList);
+    this.setState({ dayEventsList: dayEventsList });
   };
 
   generateMatrix = () => {
@@ -173,7 +214,7 @@ export class MonthCalendar extends React.Component {
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.state.activeDate.getDate() ? "bold" : "",
+                    item == this.state.activeDate.getDate() ? "bold" : "300",
                 }}
                 // onPress={() => this._onPress(item)}
               >
@@ -183,14 +224,20 @@ export class MonthCalendar extends React.Component {
           );
         } else {
           let flatEventList = [];
+          let dayEventsList;
+          if (this.state.dayEventsList.length === 0) {
+            dayEventsList = this.dayEventsList;
+          } else {
+            dayEventsList = this.state.dayEventsList;
+          }
           //console.log("else starting")
-          for (let dayEvent of this.dayEventsList) {
-            //console.log("dayEvent",dayEvent);
+          for (let dayEvent of dayEventsList) {
+            //console.log("dayEvent", dayEvent);
             //console.log("item",item);
+
             if (item == dayEvent.dateNum) {
               flatEventList = dayEvent.events;
               //console.log("flatEventList created");
-              
             }
           }
           return (
@@ -226,9 +273,9 @@ export class MonthCalendar extends React.Component {
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.state.activeDate.getDate() ? "bold" : "",
+                    item == this.state.activeDate.getDate() ? "bold" : "300",
                 }}
-                onPress={() => this._onPress(item)}
+                onPress={() => this.onPress(item)}
               >
                 {item != -1 ? item : ""}
               </Text>
@@ -247,32 +294,62 @@ export class MonthCalendar extends React.Component {
                     //backgroundColor: "blue",
                     flex: 1,
                     height: "100%",
+                    width: "100%",
                     justifyContent: "flex-start",
                     alignItems: "flex-start",
                   }}
                 >
-                  <View
+                  {/* <View
                     style={{
                       flex: 0.5,
                       width: "100%",
+                      height:"100%",
                       marginHorizontal: 5,
-                      //backgroundColor: "green",
+                      backgroundColor: "green",
                     }}
-                  >
-                    <FlatList
-                      data={flatEventList}
-                      renderItem={({item}) => {
-                        //console.log("render",item);
+                  > */}
+                  <FlatList
+                    style={{ marginTop: 1, height: "100%", width: "100%" }}
+                    data={flatEventList}
+                    renderItem={({ item }) => {
+                      //console.log("render flat",item);
+
+                      if (item.isPlanned) {
                         return (
-                          <View style={{backgroundColor:"grey",borderRadius:5}}>
-                          <Text style={{ textAlign: "center", fontSize:10,}}>
-                            {item.start}
-                          </Text>
+                          <View
+                            style={{
+                              width: "100%",
+                              backgroundColor: "red",
+                              borderRadius: 5,
+                              flex: 1,
+                            }}
+                          >
+                            <Text style={{ textAlign: "center", fontSize: 5 }}>
+                              {/* {item.start} */}
+                              event
+                            </Text>
                           </View>
                         );
-                      }}
-                    />
-                  </View>
+                      } else {
+                        return (
+                          <View
+                            style={{
+                              width: "100%",
+                              backgroundColor: "grey",
+                              borderRadius: 5,
+                              flex: 1,
+                            }}
+                          >
+                            <Text style={{ textAlign: "center", fontSize: 5 }}>
+                              {/* {item.start} */}
+                              event
+                            </Text>
+                          </View>
+                        );
+                      }
+                    }}
+                  />
+                  {/* </View> */}
                 </View>
                 <View
                   style={{
