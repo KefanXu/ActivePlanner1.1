@@ -64,8 +64,7 @@ export class CalendarPlanScreen extends React.Component {
       eventsNextMonth: this.eventsNextMonth,
       isFromWeekView: false,
       indexView: "Month",
-      newListByActivity:[],
-      
+      newListByActivity: [],
     };
     // this.monthCalRef = React.createRef();
   }
@@ -135,7 +134,7 @@ export class CalendarPlanScreen extends React.Component {
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
   updateView = () => {
-    console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
+    console.log("this.state.eventsThisMonth", this.state.eventsThisMonth);
     if (!this.state.isFromWeekView) {
       this.monthCalRef.current.processEvents();
 
@@ -146,13 +145,12 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ isMonthCalVis: true });
       this.setState({ indexView: "Week" });
     }
-  }
+  };
 
   render() {
-    let calView;
     console.log("render");
     // console.log(this.state.newListByActivity);
-    // let newListByActivity; 
+    // let newListByActivity;
     // if (this.state.newListByActivity.length !== 0) {
     //   newListByActivity = this.state.newListByActivity;
     //   // this.setState({eventsThisMonth:newListByActivity});
@@ -162,72 +160,19 @@ export class CalendarPlanScreen extends React.Component {
     // }
     // console.log("newListByActivity",newListByActivity);
     //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
-    
+    let monthViewScale;
+    let weekViewScale;
     if (this.state.isMonthCalVis) {
-      console.log("this.state.isMonthCalVis",this.state.isMonthCalVis);
-      
-      calView = (
-        <MonthCalendar
-          ref={this.monthCalRef}
-          thisMonthEvents={this.state.eventsThisMonth}
-          lastMonthEvents={this.state.eventsLastMonth}
-          nextMonthEvents={this.state.eventsNextMonth}
-          onPress={(item, monthNum, month) =>
-            this.onPress(item, monthNum, month)
-          }
-        />
-      );
+      console.log("this.state.isMonthCalVis", this.state.isMonthCalVis);
+      weekViewScale = 0;
+      monthViewScale = 1;
     } else {
       console.log("render week cal");
       //console.log("this state", this.state.eventsThisMonth);
-      calView = (
-        <View
-          style={
-            ({ backgroundColor: "red", justifyContent: "flex-start" },
-            [{ transform: [{ scaleY: 1 }] }])
-          }
-        >
-          <Calendar
-            // events={[{ title: "test", start: new Date(), end: new Date() }]}
-            refs={this.weekCalRef}
-            contentContainerStyle={{ justifyContent: "flex-start" }}
-            events={this.state.eventsThisMonth}
-            eventCellStyle={(event) => {
-              if (event.color) {
-                return { backgroundColor: event.color };
-              } else {
-                return { backgroundColor: "grey" };
-              }
-            }}
-            height={750}
-            scrollOffsetMinutes={480}
-            showTime={false}
-            mode="week"
-            showTime={true}
-            swipeEnabled={true}
-            onPressCell={() => alert("cell pressed")}
-            onPressDateHeader={(date) => {
-              let selectedDate = parseInt(date.toString().slice(8, 10));
-              //console.log(selectedDate);
-              this.setState({ selectedDate: selectedDate });
-
-              let monthNum = moment(date).month();
-              this.setState({ selectedMonth: monthNum });
-              let month = this.months[monthNum];
-
-              this.setState({
-                panelTop: "plan for " + month + " " + selectedDate,
-              });
-              this._panel.show();
-
-              this.setState({ isPlanBtnDisable: false });
-              this.setState({ isFromWeekView: true });
-            }}
-            onPressEvent={() => alert("event pressed")}
-          />
-        </View>
-      );
+      weekViewScale = 1;
+      monthViewScale = 0;
     }
+    console.log(monthViewScale,weekViewScale);
     return (
       <View>
         {/* <View style={{backgroundColor:"red"}}>
@@ -281,7 +226,63 @@ export class CalendarPlanScreen extends React.Component {
               showTime={true}
             />
           </View> */}
-          {calView}
+          <View style={{display:"none"}}>
+          <MonthCalendar
+            ref={this.monthCalRef}
+            
+            thisMonthEvents={this.state.eventsThisMonth}
+            lastMonthEvents={this.state.eventsLastMonth}
+            nextMonthEvents={this.state.eventsNextMonth}
+            onPress={(item, monthNum, month) =>
+              this.onPress(item, monthNum, month)
+            }
+          />
+          </View>
+          <View
+            style={
+              ({ backgroundColor: "red", justifyContent: "flex-start" },
+              [{ transform: [{ scale: weekViewScale }] }])
+            }
+          >
+            <Calendar
+              // events={[{ title: "test", start: new Date(), end: new Date() }]}
+              refs={this.weekCalRef}
+              contentContainerStyle={{ justifyContent: "flex-start" }}
+              events={this.state.eventsThisMonth}
+              eventCellStyle={(event) => {
+                if (event.color) {
+                  return { backgroundColor: event.color };
+                } else {
+                  return { backgroundColor: "grey" };
+                }
+              }}
+              height={750}
+              scrollOffsetMinutes={480}
+              showTime={false}
+              mode="week"
+              showTime={true}
+              swipeEnabled={true}
+              onPressCell={() => alert("cell pressed")}
+              onPressDateHeader={(date) => {
+                let selectedDate = parseInt(date.toString().slice(8, 10));
+                //console.log(selectedDate);
+                this.setState({ selectedDate: selectedDate });
+
+                let monthNum = moment(date).month();
+                this.setState({ selectedMonth: monthNum });
+                let month = this.months[monthNum];
+
+                this.setState({
+                  panelTop: "plan for " + month + " " + selectedDate,
+                });
+                this._panel.show();
+
+                this.setState({ isPlanBtnDisable: false });
+                this.setState({ isFromWeekView: true });
+              }}
+              onPressEvent={() => alert("event pressed")}
+            />
+          </View>
         </View>
         <SlidingUpPanel
           draggableRange={{ top: 500, bottom: 100 }}
@@ -352,15 +353,13 @@ export class CalendarPlanScreen extends React.Component {
                       }
                     }
                   }
-                  console.log("newListByActivity",newListByActivity);
-                  
+                  console.log("newListByActivity", newListByActivity);
+
                   //this.setState({eventsThisMonth:newListByActivity});
                   //this.monthCalRef.current.processEvents();
                   //this.updateView();
                   //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
                   //console.log("this.state.newListByActivity",this.state.newListByActivity);
-                  
-
                 }}
               />
               <DateTimePicker
