@@ -91,6 +91,7 @@ export class MonthCalendar extends React.Component {
   };
   processEvents = () => {
     //console.log("ProcessEvents", this.state.thisMonthEvents);
+    console.log("ProcessEvents");
     let eventListDates = [];
     for (let event of this.state.thisMonthEvents) {
       let dateNum = String(event.start).slice(8, 10);
