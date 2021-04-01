@@ -292,31 +292,71 @@ export class MonthCalendar extends React.Component {
 
                       if (item.isPlanned) {
                         if (item.isReported) {
-                          return (
-                            <View
-                              style={{
-                                width: "100%",
-                                backgroundColor: "red",
-                                borderRadius: 5,
-                                flex: 1,
-                              }}
-                            >
-                              <Text
-                                style={{ textAlign: "center", fontSize: 5 }}
+                          if (!item.isActivityCompleted) {
+                            return (
+                              <View
+                                style={{
+                                  width: "100%",
+                                  backgroundColor: "red",
+                                  borderRadius: 5,
+                                  flex: 1,
+                                }}
                               >
-                                {/* {item.start} */}
-                                event
-                              </Text>
-                            </View>
-                          );
+                                <Text
+                                  style={{ textAlign: "center", fontSize: 5 }}
+                                >
+                                  {/* {item.start} */}
+                                  event
+                                </Text>
+                              </View>
+                            );
+                          } else {
+                            if (item.isThirtyMin) {
+                              return (
+                                <View
+                                  style={{
+                                    width: "100%",
+                                    backgroundColor: "green",
+                                    borderRadius: 5,
+                                    flex: 1,
+                                  }}
+                                >
+                                  <Text
+                                    style={{ textAlign: "center", fontSize: 5 }}
+                                  >
+                                    {/* {item.start} */}
+                                    event
+                                  </Text>
+                                </View>
+                              );
+                            } else {
+                              return (
+                                <View
+                                  style={{
+                                    width: "100%",
+                                    backgroundColor: "yellow",
+                                    borderRadius: 5,
+                                    flex: 1,
+                                  }}
+                                >
+                                  <Text
+                                    style={{ textAlign: "center", fontSize: 5 }}
+                                  >
+                                    {/* {item.start} */}
+                                    event
+                                  </Text>
+                                </View>
+                              );
+                            }
+                          }
                         } else {
                           return (
                             <View
                               style={{
                                 width: "100%",
                                 backgroundColor: "white",
-                                borderWidth:1,
-                                borderColor:"black",
+                                borderWidth: 1,
+                                borderColor: "black",
                                 borderRadius: 5,
                                 flex: 1,
                               }}

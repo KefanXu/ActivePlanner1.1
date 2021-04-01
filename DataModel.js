@@ -99,6 +99,10 @@ class DataModel {
   getUsers = () => {
     return this.users;
   };
+  updatePlan = async(userKey, newEvent) => {
+    let newEventRef = this.usersRef.doc(userKey).collection("activity_plans").doc(newEvent.key);
+    newEventRef.update(newEvent);
+  }
 
   askPermission = async () => {
     const perms = await Notification.getPermissionsAsync();

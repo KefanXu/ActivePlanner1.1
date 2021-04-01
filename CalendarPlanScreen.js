@@ -27,6 +27,8 @@ import moment, { min } from "moment";
 
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import SwitchSelector from "react-native-switch-selector";
+// import AnimatedMultistep from "react-native-animated-multistep";
 // const reportOptions = [
 //   {
 //     title: "Options",
@@ -37,6 +39,18 @@ import { MaterialIcons } from "@expo/vector-icons";
 //       { key: 4, text: "d", color: "blue" },
 //     ],
 //   },
+// ];
+
+// import Step1 from "./steps/step1";
+// import Step2 from "./steps/step2";
+// import Step3 from "./steps/step3";
+// import Step4 from "./steps/step4";
+
+// const allSteps = [
+//   { name: "step 1", component: Step1 },
+//   { name: "step 2", component: Step2 },
+//   { name: "step 3", component: Step3 },
+//   { name: "step 4", component: Step4 },
 // ];
 export class CalendarPlanScreen extends React.Component {
   constructor(props) {
@@ -67,6 +81,11 @@ export class CalendarPlanScreen extends React.Component {
     this.isActivitySelected = false;
     //console.log(this.eventsThisMonth);
 
+    this.eventToday = {
+      title: "default",
+      start: "default",
+    };
+
     this.userKey = this.props.route.params.userInfo.key;
     this.userPlans = this.props.route.params.userInfo.userPlans;
     this.isReportModalVis = false;
@@ -75,8 +94,8 @@ export class CalendarPlanScreen extends React.Component {
     for (let event of this.userPlans) {
       if (event.title) {
         //console.log("event", event);
-        let plannedEvent = Object.assign({}, event);
-        combinedEventList.push(plannedEvent);
+        //let plannedEvent = Object.assign({}, event);
+        combinedEventList.push(event);
       }
     }
 
@@ -96,23 +115,53 @@ export class CalendarPlanScreen extends React.Component {
       newListByActivity: [],
       isReportModalVis: this.isReportModalVis,
       isDayReportModalVis: false,
+      //Update Report Modal
+      isActivityCompleted: false,
+      isThirtyMin: false,
+
+      isFirstStepVis: "flex",
+      isSecondYesStepVis: "none",
+      isSecondNoStepVis: "none",
+      isBackBtnVis: true,
+
+      //Update Report Modal Button
+      isButtonFirstStage: true,
+      btnName: "Next",
+      submitBtnState: true,
+      reason: "",
     };
     // this.monthCalRef = React.createRef();
   }
-  getEventToday = () => {
-    let userPlanList = this.userPlanList;
-    let eventToday;
-    let currentDate = moment(new Date()).format().slice(0, 10);
-    for (let event of userPlanList) {
-      if (event.end) {
-        let eventDate = event.end.slice(0, 10);
-        if (currentDate === eventDate) {
-          eventToday = Object.assign({}, event);
-        }
-      }
-    }
-    return eventToday;
-  };
+
+  // onNext = () => {
+  //   console.log("Next");
+  // };
+
+  // /* define the method to be called when you go on back step */
+
+  // onBack = () => {
+  //   console.log("Back");
+  // };
+
+  // /* define the method to be called when the wizard is finished */
+
+  // finish = (finalState) => {
+  //   console.log(finalState);
+  // };
+  // getEventToday = () => {
+  //   let userPlanList = this.userPlanList;
+  //   let eventToday;
+  //   let currentDate = moment(new Date()).format().slice(0, 10);
+  //   for (let event of userPlanList) {
+  //     if (event.end) {
+  //       let eventDate = event.end.slice(0, 10);
+  //       if (currentDate === eventDate) {
+  //         console.log(event);
+  //       }
+  //     }
+  //   }
+  //   // return eventToday;
+  // };
   reportPopUp = (userPlanList) => {
     let currentDate = moment(new Date()).format().slice(0, 10);
     //console.log("userPlanList", userPlanList);
@@ -123,6 +172,7 @@ export class CalendarPlanScreen extends React.Component {
         if (currentDate === eventDate) {
           if (!event.isReported) {
             this.isReportModalVis = true;
+            this.eventToday = event;
           }
         }
       }
@@ -324,12 +374,14 @@ export class CalendarPlanScreen extends React.Component {
           >
             <View
               style={{
-                flex: 0.9,
+                flex: 0.5,
                 width: "95%",
                 backgroundColor: "white",
+
                 borderWidth: 2,
                 borderColor: "black",
                 flexDirection: "column",
+                justifyContent: "space-between",
                 alignItems: "center",
                 borderRadius: 15,
               }}
@@ -341,16 +393,30 @@ export class CalendarPlanScreen extends React.Component {
                   return <Text style={{ color: color }}>{item.text}</Text>;
                 }}
               /> */}
-              <View style={{width:"100%", flexDirection:"column", justifyContent:"flex-end"}}>
-                <TouchableOpacity
-                  onPress={() => this.setState({ isReportModalVis: false })}
-                  style={{justifyContent: "flex-end", alignContent:"flex-end" }}
-                >
-                  <MaterialIcons name="cancel" size={24} color="black" />
-
-                </TouchableOpacity>
+              <View
+                style={{
+                  flex: 0.1,
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <View>
+                  <TouchableOpacity
+                    onPress={() => this.setState({ isReportModalVis: false })}
+                  >
+                    <MaterialIcons name="cancel" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={{ width: "80%", marginTop: "10%" }}>
+              <View
+                style={{
+                  flex: 0.25,
+                  width: "80%",
+                  marginTop: 0,
+                  //backgroundColor: "blue",
+                }}
+              >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
                   Tell us your day!
                 </Text>
@@ -359,9 +425,192 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   The following questions only take seconds to complete
                 </Text>
-                <Text style={{fontSize:18, fontWeight:"bold",marginTop: 10}}>Question 1/3</Text>
-                <View></View>
               </View>
+              <View
+                style={{
+                  flex: 1,
+                  width: "80%",
+                  //backgroundColor: "red",
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    display: this.state.isFirstStepVis,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                      marginTop: "20%",
+                    }}
+                  >
+                    Question 1/2
+                  </Text>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    Did you {this.eventToday.title} at {this.eventToday.start}
+                  </Text>
+                  <SwitchSelector
+                    options={[
+                      { label: "No", value: false },
+                      { label: "Yes", value: true },
+                    ]}
+                    initial={0}
+                    buttonMargin={5}
+                    borderWidth={2}
+                    borderColor="black"
+                    buttonColor="black"
+                    onPress={(value) =>
+                      // console.log(`Call onPress with value: ${value}`)
+                      {
+                        this.setState({ isActivityCompleted: value });
+                      }
+                    }
+                  />
+                </View>
+                <View style={{ display: this.state.isSecondYesStepVis }}>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                      marginTop: "20%",
+                    }}
+                  >
+                    Did you {this.eventToday.title} for 30 min
+                  </Text>
+                  <SwitchSelector
+                    options={[
+                      { label: "No", value: false },
+                      { label: "Yes", value: true },
+                    ]}
+                    initial={0}
+                    buttonMargin={5}
+                    borderWidth={2}
+                    borderColor="black"
+                    buttonColor="black"
+                    onPress={(value) =>
+                      // console.log(`Call onPress with value: ${value}`)
+                      {
+                        this.setState({ isThirtyMin: value });
+                      }
+                    }
+                  />
+                </View>
+                <View style={{ display: this.state.isSecondNoStepVis }}>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                      marginTop: "20%",
+                    }}
+                  >
+                    Give us a reason
+                  </Text>
+                  <View
+                    style={{
+                      flex: 0.15,
+
+                      marginTop: 10,
+                      width: "100%",
+                      borderWidth: 2,
+                      borderRadius: 30,
+                      borderColor: "#6E6E6E",
+                    }}
+                  >
+                    <TextInput
+                      secureTextEntry={true}
+                      style={{
+                        flex: 1,
+                        marginLeft: 20,
+                        marginRight: 20,
+                        fontSize: 20,
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={this.state.reason}
+                      onChangeText={(text) => {
+                        this.setState({ reason: text });
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+              <View style={{ flexDirection: "row" }}>
+                <Button
+                  title="Back"
+                  disabled={this.state.isBackBtnVis}
+                  onPress={() => {
+                    this.setState({ isBackBtnVis: true });
+                    this.setState({ isFirstStepVis: "flex" });
+                    this.setState({ isSecondYesStepVis: "none" });
+
+                    this.setState({ isSecondNoStepVis: "none" });
+                    //this.setState({ isButtonFirstStage: true });
+                    this.setState({ btnName: "Next" });
+                  }}
+                ></Button>
+                <Button
+                  title={this.state.btnName}
+                  onPress={async () => {
+                    if (this.state.btnName === "Submit") {
+                      this.setState({ isReportModalVis: false });
+                      let eventToUpdate = this.eventToday;
+                      eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;
+                      eventToUpdate.isReported = true;
+
+                      if (this.state.submitBtnState) {
+                        // console.log("this.state.isThirtyMin",this.state.isThirtyMin);
+                        // console.log("isActivityCompleted",this.state.isActivityCompleted);
+
+                        eventToUpdate.isThirtyMin = this.state.isThirtyMin;
+                      } else {
+                        eventToUpdate.reason = this.state.reason;
+                      }
+                      await this.dataModel.updatePlan(
+                        this.userKey,
+                        eventToUpdate
+                      );
+                      let eventList = this.state.eventsThisMonth;
+                      await this.setState({ eventsThisMonth: eventList });
+                      this.updateView();
+                    } else {
+                      this.setState({ isBackBtnVis: false });
+                      this.setState({ isFirstStepVis: "none" });
+                      this.setState({ btnName: "Submit" });
+                      if (this.state.isActivityCompleted) {
+                        this.setState({ submitBtnState: true });
+                        this.setState({ isSecondYesStepVis: "flex" });
+                        //this.setState({ isButtonFirstStage: false });
+                      } else {
+                        this.setState({ submitBtnState: false });
+                        this.setState({ isSecondNoStepVis: "flex" });
+                      }
+                    }
+                  }}
+                ></Button>
+              </View>
+              {/* <View style={{ flex: 1 }}>
+                <AnimatedMultistep
+                  steps={allSteps}
+                  onFinish={this.finish}
+                  onBack={this.onBack}
+                  onNext={this.onNext}
+                  comeInOnNext="bounceInUp"
+                  OutOnNext="bounceOutDown"
+                  comeInOnBack="bounceInDown"
+                  OutOnBack="bounceOutUp"
+                />
+              </View> */}
             </View>
           </View>
         </Modal>

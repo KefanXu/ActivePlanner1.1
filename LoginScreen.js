@@ -69,8 +69,10 @@ export class LoginScreen extends React.Component {
     ] = this.processCalEvent(calEvents.items);
     let key;
     let isUserFound = false;
+    console.log("calendarsID",calendarsID);
     for (let user of userList) {
       if (calendarsID === user.email) {
+        console.log("user.email",user.email);
         isUserFound = true;
         key = user.key;
       }
@@ -91,7 +93,7 @@ export class LoginScreen extends React.Component {
       key:key,
       userPlans: userPlans,
     }
-
+    //console.log("userInfo",userInfo);
     // console.log("userPlans",userPlans);
     this.props.navigation.navigate("Home Screen", {
       userEmail: calendarsID,
