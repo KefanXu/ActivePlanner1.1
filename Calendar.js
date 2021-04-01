@@ -40,7 +40,7 @@ export class MonthCalendar extends React.Component {
     this.weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     this.nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    this.thisMonthEvents = this.props.thisMonthEvents;
+    //this.thisMonthEvents = this.props.thisMonthEvents;
     this.lastMonthEvents = this.props.lastMonthEvents;
     this.nextMonthEvents = this.props.nextMonthEvents;
 
@@ -48,36 +48,11 @@ export class MonthCalendar extends React.Component {
 
     this.state = {
       activeDate: new Date(),
-      thisMonthEvents: this.thisMonthEvents,
+      //thisMonthEvents: this.thisMonthEvents,
       dayEventsList: [],
     };
     this.processEvents();
-    //let currentEventList = [];
-    //currentEventList = props.lastMonthEvents;
-
-    //this.setState({thisMonthEvents:this.thisMonthEvents})
-    //console.log("this.thisMonthEvents", this.thisMonthEvents);
-    //console.log("this.state.thisMonthEvents", this.state.thisMonthEvents);
   }
-  // componentDidUpdate = (props) => {
-  //   console.log("update");
-  //   this.setState({thisMonthEvents: props.thisMonthEvents})
-  // }
-
-  // reSetEvents = (newEventList) => {
-  //   this.setState({thisMonthEvents:newEventList});
-  // }
-  // componentDidUpdate = (prevProps) => {
-  //   console.log("change detected");
-  //   if (this.state.thisMonthEvents === prevProps.thisMonthEvents) {
-  //   console.log("prevProps.thisMonthEvents",prevProps.thisMonthEvents);
-  //   console.log("this.state",this.state.thisMonthEvents);
-  //     this.processEvents();
-  //   }
-
-  //     //this.setState({ thisMonthEvents: prevProps.thisMonthEvents });
-
-  // };
 
   onPress = async (item) => {
     console.log("item pressed");
@@ -93,7 +68,7 @@ export class MonthCalendar extends React.Component {
     //console.log("ProcessEvents", this.state.thisMonthEvents);
     console.log("ProcessEvents");
     let eventListDates = [];
-    for (let event of this.state.thisMonthEvents) {
+    for (let event of this.props.thisMonthEvents) {
       let dateNum = String(event.start).slice(8, 10);
       if (!eventListDates.includes(dateNum)) {
         eventListDates.push(dateNum);
@@ -108,10 +83,10 @@ export class MonthCalendar extends React.Component {
       dayEventsList.push(dayEventObj);
     }
     for (let date of dayEventsList) {
-      for (let event of this.state.thisMonthEvents) {
+      for (let event of this.props.thisMonthEvents) {
         let dateNum = parseInt(String(event.start).slice(8, 10));
         if (dateNum === date.dateNum) {
-          let newEvent = event;
+          let newEvent = Object.assign({}, event);
           newEvent.id = event.end + event.start;
           newEvent.identifier = "default";
           date.events.push(newEvent);
@@ -316,21 +291,45 @@ export class MonthCalendar extends React.Component {
                       //console.log("render flat",item);
 
                       if (item.isPlanned) {
-                        return (
-                          <View
-                            style={{
-                              width: "100%",
-                              backgroundColor: "red",
-                              borderRadius: 5,
-                              flex: 1,
-                            }}
-                          >
-                            <Text style={{ textAlign: "center", fontSize: 5 }}>
-                              {/* {item.start} */}
-                              event
-                            </Text>
-                          </View>
-                        );
+                        if (item.isReported) {
+                          return (
+                            <View
+                              style={{
+                                width: "100%",
+                                backgroundColor: "red",
+                                borderRadius: 5,
+                                flex: 1,
+                              }}
+                            >
+                              <Text
+                                style={{ textAlign: "center", fontSize: 5 }}
+                              >
+                                {/* {item.start} */}
+                                event
+                              </Text>
+                            </View>
+                          );
+                        } else {
+                          return (
+                            <View
+                              style={{
+                                width: "100%",
+                                backgroundColor: "white",
+                                borderWidth:1,
+                                borderColor:"black",
+                                borderRadius: 5,
+                                flex: 1,
+                              }}
+                            >
+                              <Text
+                                style={{ textAlign: "center", fontSize: 5 }}
+                              >
+                                {/* {item.start} */}
+                                event
+                              </Text>
+                            </View>
+                          );
+                        }
                       } else {
                         return (
                           <View

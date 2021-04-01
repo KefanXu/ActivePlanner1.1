@@ -33,6 +33,8 @@ class DataModel {
     }
     this.usersRef = firebase.firestore().collection("users");
     this.users = [];
+    this.plans = [];
+    this.key = "";
     this.asyncInit();
     console.log("Data Model created");
   }
@@ -41,7 +43,7 @@ class DataModel {
     await this.loadUsers();
     //console.log("this.users", this.users);
   };
-
+  
   loadUsers = async () => {
     let querySnap = await this.usersRef.get();
     querySnap.forEach(async (qDocSnap) => {
@@ -61,15 +63,39 @@ class DataModel {
     console.log("load user", this.users.length);
     console.log("this.users", this.users);
   };
+  loadUserPlans = async(key) => {
+    let userPlanCollection = await this.usersRef.doc(key).collection("activity_plans").get();
+    userPlanCollection.forEach(async qDocSnap => {
+      let key = qDocSnap.id;
+      let plan = qDocSnap.data();
+      plan.key = key;
+      this.plans.push(plan);
+    });
+  }
+  getUserPlans = () => {
+    return this.plans;
+  }
 
-  createNewUser = async (username, password) => {
+  createNewUser = async (username) => {
     let newUser = {
       email: username,
-      password: password,
     };
     let newUsersDocRef = await this.usersRef.add(newUser);
+    let key = newUsersDocRef.id;
+    await this.usersRef.doc(key).update({id:key})
+    let testColl = {
+      test:1
+    };
+    let newUserColl = await newUsersDocRef.collection("activity_plans");
+    await newUserColl.add(testColl);
+    this.key = key;
   };
-
+  createNewPlan = async(key, newEvent) => {
+    let userPlanCollection = this.usersRef.doc(key).collection("activity_plans").add(newEvent);
+  }
+  getUserKey = () => {
+    return this.key;
+  }
   getUsers = () => {
     return this.users;
   };

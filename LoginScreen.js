@@ -33,30 +33,32 @@ export class LoginScreen extends React.Component {
     this.dataModel.asyncInit();
   };
 
-  onLogin = () => {
-    //console.log("Login");
-    let userList = this.dataModel.getUsers();
-    let userName = this.state.displayNameInput;
-    let password = this.state.passwordInput;
-    let isUserFound = false;
-    for (let user of userList) {
-      if (user.email === userName && user.password === password) {
-        console.log("user found");
-        isUserFound = true;
-      }
-    }
-    if (isUserFound) {
-      this.props.navigation.navigate("Home Screen");
-    } else {
-      Alert.alert(
-        "Login Failed",
-        "No match found for this email and password.",
-        [{ text: "OK", style: "OK" }]
-      );
-    }
-  };
+  // onLogin = () => {
+  //   //console.log("Login");
+  //   let userList = this.dataModel.getUsers();
+
+  //   let userName = this.state.displayNameInput;
+  //   let password = this.state.passwordInput;
+  //   let isUserFound = false;
+  //   for (let user of userList) {
+  //     if (user.email === userName && user.password === password) {
+  //       console.log("user found");
+  //       isUserFound = true;
+  //     }
+  //   }
+  //   if (isUserFound) {
+  //     this.props.navigation.navigate("Home Screen");
+  //   } else {
+  //     Alert.alert(
+  //       "Login Failed",
+  //       "No match found for this email and password.",
+  //       [{ text: "OK", style: "OK" }]
+  //     );
+  //   }
+  // };
   onGoogleSignIn = async () => {
     console.log("Google Sign In");
+    let userList = this.dataModel.getUsers();
     let [timeMin, timeMax] = this.processDate();
     //console.log(timeMin, timeMax);
     let [calEvents,calendarsID] = await this.dataModel.googleServiceInit(timeMin, timeMax);
@@ -65,11 +67,35 @@ export class LoginScreen extends React.Component {
       thisMonthList,
       nextMonthList,
     ] = this.processCalEvent(calEvents.items);
+    let key;
+    let isUserFound = false;
+    for (let user of userList) {
+      if (calendarsID === user.email) {
+        isUserFound = true;
+        key = user.key;
+      }
+    }
+    if (!isUserFound) {
+      await this.dataModel.createNewUser(calendarsID);
+      key = this.dataModel.getUserKey();
+    } 
     // console.log(previousMonthList);
     // console.log(thisMonthList);
     // console.log(nextMonthList);
+
+    // console.log("user key:",key);
+    await this.dataModel.loadUserPlans(key);
+    let userPlans = this.dataModel.getUserPlans();
+
+    let userInfo = {
+      key:key,
+      userPlans: userPlans,
+    }
+
+    // console.log("userPlans",userPlans);
     this.props.navigation.navigate("Home Screen", {
       userEmail: calendarsID,
+      userInfo: userInfo,
       eventsLastMonth:previousMonthList,
       eventsThisMonth: thisMonthList,
       eventsNextMonth: nextMonthList,
@@ -129,10 +155,10 @@ export class LoginScreen extends React.Component {
     //console.log(currMonth);
   };
 
-  onRegist = () => {
-    //console.log("Regist");
-    this.props.navigation.navigate("SignUp", {});
-  };
+  // onRegist = () => {
+  //   //console.log("Regist");
+  //   this.props.navigation.navigate("SignUp", {});
+  // };
   render() {
     return (
       <View
@@ -140,7 +166,7 @@ export class LoginScreen extends React.Component {
         behavior={"height"}
         keyboardVerticalOffset={1}
       >
-        <View style={loginStyles.inputField}>
+        {/* <View style={loginStyles.inputField}>
           <Text style={loginStyles.inputFont}>Email</Text>
           <View style={loginStyles.inputText}>
             <TextInput
@@ -167,9 +193,9 @@ export class LoginScreen extends React.Component {
               }}
             />
           </View>
-        </View>
+        </View> */}
         <View style={loginStyles.buttonArea}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.onLogin()}
           >
@@ -180,7 +206,7 @@ export class LoginScreen extends React.Component {
             onPress={() => this.onRegist()}
           >
             <Text style={loginStyles.buttonFont}>Sign up</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.onGoogleSignIn()}
@@ -193,12 +219,12 @@ export class LoginScreen extends React.Component {
           >
             <Text style={loginStyles.buttonFont}>Process Date</Text>
           </TouchableOpacity> */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.processCalEvent()}
           >
             <Text style={loginStyles.buttonFont}>Process event</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     );
