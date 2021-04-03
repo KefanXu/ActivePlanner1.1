@@ -62,10 +62,12 @@ export class LoginScreen extends React.Component {
     let [timeMin, timeMax] = this.processDate();
     //console.log(timeMin, timeMax);
     let [calEvents,calendarsID] = await this.dataModel.googleServiceInit(timeMin, timeMax);
+    //console.log("calEvents",calEvents);
     let [
       previousMonthList,
       thisMonthList,
       nextMonthList,
+      fullEventList
     ] = this.processCalEvent(calEvents.items);
     let key;
     let isUserFound = false;
@@ -101,6 +103,7 @@ export class LoginScreen extends React.Component {
       eventsLastMonth:previousMonthList,
       eventsThisMonth: thisMonthList,
       eventsNextMonth: nextMonthList,
+      fullEventList: fullEventList
     });
   };
 
@@ -120,7 +123,7 @@ export class LoginScreen extends React.Component {
     let monthDays = moment(year + "-" + monthMax, "YYYY-MM").daysInMonth();
     let dateMax =
       "timeMax=" + year + "-" + monthMax + "-" + monthDays + "T23%3A00%3A00Z";
-
+    console.log("dateMin, dateMax",dateMin, dateMax);
     return [dateMin, dateMax];
   };
 
@@ -134,7 +137,11 @@ export class LoginScreen extends React.Component {
     let thisMonthList = [];
     let nextMonthList = [];
 
+    let fullEventList = []
+
     for (let dayEvent of eventList) {
+      //console.log("dayEvent.start ",dayEvent.start);
+
       if (dayEvent.start) {
         let timeStamp = dayEvent.start.dateTime.slice(0, 7);
         //console.log("typeof(dayEvent.start.dateTime)",typeof(dayEvent.start.dateTime));
@@ -142,6 +149,7 @@ export class LoginScreen extends React.Component {
           start: dayEvent.start.dateTime,
           end: dayEvent.end.dateTime,
         };
+        fullEventList.push(simplifiedEvent);
         if (timeStamp === currMonth) {
           thisMonthList.push(simplifiedEvent);
         } else if (timeStamp === nextMonth) {
@@ -153,7 +161,7 @@ export class LoginScreen extends React.Component {
         }
       }
     }
-    return [previousMonthList, thisMonthList, nextMonthList];
+    return [previousMonthList, thisMonthList, nextMonthList, fullEventList];
     //console.log(currMonth);
   };
 

@@ -41,13 +41,13 @@ export class MonthCalendar extends React.Component {
     this.nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     //this.thisMonthEvents = this.props.thisMonthEvents;
-    this.lastMonthEvents = this.props.lastMonthEvents;
-    this.nextMonthEvents = this.props.nextMonthEvents;
+    // this.lastMonthEvents = this.props.lastMonthEvents;
+    // this.nextMonthEvents = this.props.nextMonthEvents;
 
     this.dayEventsList;
 
     this.state = {
-      activeDate: new Date(),
+      activeDate: this.props.monthCalCurrDate,
       //thisMonthEvents: this.thisMonthEvents,
       dayEventsList: [],
     };
@@ -58,8 +58,8 @@ export class MonthCalendar extends React.Component {
     console.log("item pressed");
     await this.props.onPress(
       item,
-      this.state.activeDate.getMonth(),
-      this.months[this.state.activeDate.getMonth()]
+      this.props.monthCalCurrDate.getMonth(),
+      this.months[this.props.monthCalCurrDate.getMonth()]
     );
     this.processEvents();
     // EventRegister.emit("calendarPressed","pressed"+item);
@@ -101,8 +101,8 @@ export class MonthCalendar extends React.Component {
     var matrix = [];
     // Create header
     matrix[0] = this.weekDays;
-    var year = this.state.activeDate.getFullYear();
-    var month = this.state.activeDate.getMonth();
+    var year = this.props.monthCalCurrDate.getFullYear();
+    var month = this.props.monthCalCurrDate.getMonth();
     var firstDay = new Date(year, month, 1).getDay();
 
     var maxDays = this.nDays[month];
@@ -190,7 +190,7 @@ export class MonthCalendar extends React.Component {
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.state.activeDate.getDate() ? "bold" : "300",
+                    item == this.props.monthCalCurrDate.getDate() ? "bold" : "300",
                 }}
                 // onPress={() => this._onPress(item)}
               >
@@ -249,7 +249,7 @@ export class MonthCalendar extends React.Component {
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.state.activeDate.getDate() ? "bold" : "300",
+                    item == this.props.monthCalCurrDate.getDate() ? "bold" : "300",
                 }}
                 onPress={() => this.onPress(item)}
               >
@@ -451,8 +451,8 @@ export class MonthCalendar extends React.Component {
             textAlign: "center",
           }}
         >
-          {this.months[this.state.activeDate.getMonth()]}
-          {this.state.activeDate.getFullYear()}
+          {this.months[this.props.monthCalCurrDate.getMonth()]}
+          {this.props.monthCalCurrDate.getFullYear()}
         </Text>
         {rows}
       </View>

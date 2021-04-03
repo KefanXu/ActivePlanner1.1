@@ -77,6 +77,8 @@ export class CalendarPlanScreen extends React.Component {
     this.eventsThisMonth = this.props.route.params.eventsThisMonth;
     this.eventsNextMonth = this.props.route.params.eventsNextMonth;
 
+    this.fullEventList = this.props.route.params.fullEventList;
+
     this.selectedActivity;
     this.isActivitySelected = false;
     //console.log(this.eventsThisMonth);
@@ -90,12 +92,25 @@ export class CalendarPlanScreen extends React.Component {
     this.userPlans = this.props.route.params.userInfo.userPlans;
     this.isReportModalVis = false;
 
-    let combinedEventList = this.eventsThisMonth;
+    this.combinedEventListThis = this.eventsThisMonth;
+    this.combinedEventListLast = this.eventsLastMonth;
+    this.combinedEventListNext = this.eventsNextMonth;
+    this.combineEventListFull = this.fullEventList;
+
     for (let event of this.userPlans) {
       if (event.title) {
-        //console.log("event", event);
+        this.combineEventListFull.push(event);
+
+        let monthNum = parseInt(event.end.slice(5, 7));
+        let currMonth = new Date();
+        if (monthNum === currMonth.getMonth() + 1) {
+          this.combinedEventListThis.push(event);
+        } else if (monthNum === currMonth.getMonth()) {
+          this.combinedEventListLast.push(event);
+        } else {
+          this.combinedEventListNext.push(event);
+        }
         //let plannedEvent = Object.assign({}, event);
-        combinedEventList.push(event);
       }
     }
 
@@ -107,9 +122,10 @@ export class CalendarPlanScreen extends React.Component {
       selectedDate: "",
       selectedMonth: "",
       isPlanBtnDisable: true,
-      eventsLastMonth: this.eventsLastMonth,
-      eventsThisMonth: combinedEventList,
-      eventsNextMonth: this.eventsNextMonth,
+      eventsLastMonth: this.combinedEventListLast,
+      eventsThisMonth: this.combinedEventListThis,
+      eventsNextMonth: this.combinedEventListNext,
+      fullEventList: this.combineEventListFull,
       isFromWeekView: false,
       indexView: "Month",
       newListByActivity: [],
@@ -129,6 +145,11 @@ export class CalendarPlanScreen extends React.Component {
       btnName: "Next",
       submitBtnState: true,
       reason: "",
+
+      monthCalCurrDate: new Date(),
+      isMonthPreBtnAble: true,
+      isMonthNextBtnAble: true,
+      monthCalCurrentMonth: new Date().getMonth(),
     };
     // this.monthCalRef = React.createRef();
   }
@@ -245,7 +266,7 @@ export class CalendarPlanScreen extends React.Component {
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
   updateView = () => {
-    console.log("this.state.eventsThisMonth", this.state.eventsThisMonth);
+    //console.log("this.state.eventsThisMonth", this.state.eventsThisMonth);
     if (!this.state.isFromWeekView) {
       this.monthCalRef.current.processEvents();
 
@@ -277,15 +298,79 @@ export class CalendarPlanScreen extends React.Component {
       console.log("this.state.isMonthCalVis", this.state.isMonthCalVis);
 
       calView = (
-        <MonthCalendar
-          ref={this.monthCalRef}
-          thisMonthEvents={this.state.eventsThisMonth}
-          lastMonthEvents={this.state.eventsLastMonth}
-          nextMonthEvents={this.state.eventsNextMonth}
-          onPress={(item, monthNum, month) =>
-            this.onPress(item, monthNum, month)
-          }
-        />
+        <View>
+          <MonthCalendar
+            ref={this.monthCalRef}
+            thisMonthEvents={this.state.eventsThisMonth}
+            monthCalCurrDate={this.state.monthCalCurrDate}
+            onPress={(item, monthNum, month) =>
+              this.onPress(item, monthNum, month)
+            }
+          />
+          <TouchableOpacity
+            style={{ flex: 1, position: "absolute", top: 0 }}
+            disabled={!this.state.isMonthPreBtnAble}
+            onPress={async () => {
+              let currMonth = this.state.date.getMonth();
+              let currMonthOnCal = this.state.monthCalCurrentMonth;
+              if (currMonthOnCal === currMonth) {
+                this.setState({ isMonthPreBtnAble: false });
+                currMonthOnCal = this.state.monthCalCurrentMonth - 1;
+                this.setState({ monthCalCurrentMonth: currMonthOnCal });
+                //console.log("currMonthOnCal",currMonthOnCal);
+                let monthCalCurrDate = new Date(2021, currMonthOnCal, 15);
+                //console.log("monthCalCurrDate",monthCalCurrDate);
+                await this.setState({ monthCalCurrDate: monthCalCurrDate });
+                let preMonthList = this.combinedEventListLast;
+                await this.setState({ eventsThisMonth: preMonthList });
+                this.updateView();
+                //console.log("this.state.monthCalCurrDate",this.state.monthCalCurrDate);
+              } else {
+                this.setState({ isMonthNextBtnAble: true });
+                currMonthOnCal = this.state.date.getMonth();
+                this.setState({ monthCalCurrentMonth: currMonthOnCal });
+                let monthCalCurrDate = this.state.date;
+                await this.setState({ monthCalCurrDate: monthCalCurrDate });
+                let thisMonthList = this.combinedEventListThis;
+                await this.setState({ eventsThisMonth: thisMonthList });
+                this.updateView();
+              }
+            }}
+          >
+            <Text>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1, position: "absolute", top: 0, right: 0 }}
+            disabled={!this.state.isMonthNextBtnAble}
+            onPress={async () => {
+              //console.log("condition1",this.state.monthCalCurrentMonth);
+              let currMonth = this.state.date.getMonth();
+              let currMonthOnCal = this.state.monthCalCurrentMonth;
+              if (currMonthOnCal === currMonth) {
+                this.setState({ isMonthNextBtnAble: false });
+                currMonthOnCal = this.state.monthCalCurrentMonth + 1;
+                this.setState({ monthCalCurrentMonth: currMonthOnCal });
+                let monthCalCurrDate = new Date(2021, currMonthOnCal, 15);
+                await this.setState({ monthCalCurrDate: monthCalCurrDate });
+                let nextMonthList = this.combinedEventListNext;
+                await this.setState({ eventsThisMonth: nextMonthList });
+                this.updateView();
+              } else {
+                //console.log("condition2",this.state.monthCalCurrentMonth);
+                this.setState({ isMonthPreBtnAble: true });
+                currMonthOnCal = this.state.date.getMonth();
+                this.setState({ monthCalCurrentMonth: currMonthOnCal });
+                let monthCalCurrDate = this.state.date;
+                await this.setState({ monthCalCurrDate: monthCalCurrDate });
+                let thisMonthList = this.combinedEventListThis;
+                await this.setState({ eventsThisMonth: thisMonthList });
+                this.updateView();
+              }
+            }}
+          >
+            <Text>Next</Text>
+          </TouchableOpacity>
+        </View>
       );
     } else {
       console.log("render week cal");
@@ -301,7 +386,7 @@ export class CalendarPlanScreen extends React.Component {
             // events={[{ title: "test", start: new Date(), end: new Date() }]}
             refs={this.weekCalRef}
             contentContainerStyle={{ justifyContent: "flex-start" }}
-            events={this.state.eventsThisMonth}
+            events={this.state.fullEventList}
             eventCellStyle={(event) => {
               if (event.color) {
                 return { backgroundColor: event.color, borderWidth: 2 };
