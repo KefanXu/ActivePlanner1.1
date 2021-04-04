@@ -76,6 +76,7 @@ export class CalendarPlanScreen extends React.Component {
     this.eventsLastMonth = this.props.route.params.eventsLastMonth;
     this.eventsThisMonth = this.props.route.params.eventsThisMonth;
     this.eventsNextMonth = this.props.route.params.eventsNextMonth;
+  
 
     this.fullEventList = this.props.route.params.fullEventList;
 
@@ -96,6 +97,11 @@ export class CalendarPlanScreen extends React.Component {
     this.combinedEventListLast = this.eventsLastMonth;
     this.combinedEventListNext = this.eventsNextMonth;
     this.combineEventListFull = this.fullEventList;
+
+
+    this.lastMonthWeather = this.props.route.params.lastMonthWeather;
+    this.thisMonthWeather = this.props.route.params.thisMonthWeather;
+    this.nextMonthWeather = this.props.route.params.nextMonthWeather;
 
     for (let event of this.userPlans) {
       if (event.title) {
@@ -150,7 +156,10 @@ export class CalendarPlanScreen extends React.Component {
       isMonthPreBtnAble: true,
       isMonthNextBtnAble: true,
       monthCalCurrentMonth: new Date().getMonth(),
+
+      weatherThisMonth: this.thisMonthWeather,
     };
+    //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
   }
 
@@ -303,6 +312,7 @@ export class CalendarPlanScreen extends React.Component {
             ref={this.monthCalRef}
             thisMonthEvents={this.state.eventsThisMonth}
             monthCalCurrDate={this.state.monthCalCurrDate}
+            weatherThisMonth={this.state.weatherThisMonth}
             onPress={(item, monthNum, month) =>
               this.onPress(item, monthNum, month)
             }
@@ -323,6 +333,7 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ monthCalCurrDate: monthCalCurrDate });
                 let preMonthList = this.combinedEventListLast;
                 await this.setState({ eventsThisMonth: preMonthList });
+                await this.setState({ weatherThisMonth: this.lastMonthWeather})
                 this.updateView();
                 //console.log("this.state.monthCalCurrDate",this.state.monthCalCurrDate);
               } else {

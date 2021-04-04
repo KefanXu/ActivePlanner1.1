@@ -13,6 +13,9 @@ import {
 import { loginStyles } from "./Styles";
 import { getDataModel } from "./DataModel";
 import moment, { min } from "moment";
+import * as Location from "expo-location";
+
+const WEATHER_API_KEY = "38e37d6792982c51e50d914fd160ae89";
 
 export class LoginScreen extends React.Component {
   constructor(props) {
@@ -20,6 +23,7 @@ export class LoginScreen extends React.Component {
     this.state = {
       displayNameInput: "",
       passwordInput: "",
+      imageURI: "http://openweathermap.org/img/w/unknown.png",
     };
   }
   componentDidMount = () => {
@@ -56,25 +60,153 @@ export class LoginScreen extends React.Component {
   //     );
   //   }
   // };
+  fetchWeatherInfo = async (userPlans) => {
+    let location = await this.getLocation();
+    let latitude = location.coords.latitude;
+    let longitude = location.coords.longitude;
+    let today = new Date();
+    //console.log("userPlans",userPlans);
+    let backDate = new Date();
+    let historyDateList = [];
+
+    let thisMonthWeather = [];
+    let nextMonthWeather = [];
+    let lastMonthWeather = [];
+
+    let fullHistoryWeatherList = [];
+
+    for (let i = 28; i > 0; i--) {
+      let yesterday = new Date(backDate);
+      yesterday.setDate(yesterday.getDate() - 1);
+      backDate = yesterday;
+      historyDateList.push(yesterday);
+    }
+    for (let date of historyDateList) {
+      date.setHours(date.getHours() - 5);
+      let ifPlanExist = false;
+      for (let event of userPlans) {
+        if (event.start) {
+          let planDate = new Date(event.start);
+          if (
+            date.getMonth() === planDate.getMonth() &&
+            date.getDate() === planDate.getDate()
+          ) {
+            ifPlanExist = true;
+            planDate.setHours(planDate.getHours() - 5);
+            date = planDate;
+          }
+        }
+      }
+      let isoPlanDate = moment(date).unix();
+      let weatherHistoryURL = `http://history.openweathermap.org/data/2.5/history/city?lat=${latitude}&lon=${longitude}&type=hour&start=${isoPlanDate}&cnt=1&appid=${WEATHER_API_KEY}`;
+      let weatherHistoryResponse = await fetch(weatherHistoryURL);
+      let weatherHistoryJSON = await weatherHistoryResponse.json();
+      let historicalWeatherItem = Object.assign(
+        {},
+        weatherHistoryJSON.list[0].weather[0]
+      );
+      historicalWeatherItem.date = new Date(
+        weatherHistoryJSON.list[0].dt * 1000
+      );
+      fullHistoryWeatherList.push(historicalWeatherItem);
+    }
+    //console.log(fullHistoryWeatherList);
+
+    for (let weather of fullHistoryWeatherList) {
+      let weatherImgList = {
+        date: weather.date.getDate(),
+        img: weather.icon,
+      };
+      if (weather.date.getMonth() === today.getMonth()) {
+        if (weather.date.getDate() != today.getDate()) {
+          thisMonthWeather.push(weatherImgList);
+        }
+      } else {
+        lastMonthWeather.push(weatherImgList);
+      }
+    }
+
+    let weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}`;
+    let currWeatherResponse = await fetch(weatherURL);
+    let weatherJson = await currWeatherResponse.json();
+    let weatherNow = {
+      date: today.getDate(),
+      img: weatherJson.weather[0].icon,
+    }
+    thisMonthWeather.push(weatherNow);
+    let imageURI =
+      "http://openweathermap.org/img/w/" + weatherJson.weather[0].icon + ".png";
+    this.setState({ imageURI: imageURI });
+
+    let weatherForecastList = [];
+    let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&appid=${WEATHER_API_KEY}`;
+    let weatherForecastResponse = await fetch(weatherForecastURL);
+    let weatherForecastJSON = await weatherForecastResponse.json();
+    for (let weather of weatherForecastJSON.list) {
+      let newWeatherForecast = Object.assign({}, weather.weather[0]);
+      newWeatherForecast.date = new Date(weather.dt * 1000);
+      weatherForecastList.push(newWeatherForecast);
+    }
+    // console.log("weatherForecastList",weatherForecastList);
+
+    for (let weather of weatherForecastList) {
+      let weatherImgList = {
+        date: weather.date.getDate(),
+        img: weather.icon,
+      };
+      if (weather.date.getMonth() === today.getMonth()) {
+        if (weather.date.getDate() != today.getDate()) {
+          thisMonthWeather.push(weatherImgList);
+        }
+      } else {
+        nextMonthWeather.push(weatherImgList);
+      }
+    }
+
+    return [lastMonthWeather,thisMonthWeather,nextMonthWeather];
+  };
+
+  getLocation = async () => {
+    let { status } = await Location.requestPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission Denied");
+      return;
+    }
+    let location = await Location.getCurrentPositionAsync({});
+    return location;
+  };
+  getStartEndDate = () => {
+    let today = new Date();
+    let startDate = new Date(2021, today.getMonth(), 1);
+    let isoStartDate = moment(startDate).unix();
+    let endDate = new Date(2021, today.getMonth() + 1, 0);
+    let isoEndDate = moment(endDate).unix();
+
+    console.log("isoStartDate", isoStartDate);
+    console.log("isoEndDate", isoEndDate);
+  };
   onGoogleSignIn = async () => {
     console.log("Google Sign In");
     let userList = this.dataModel.getUsers();
     let [timeMin, timeMax] = this.processDate();
     //console.log(timeMin, timeMax);
-    let [calEvents,calendarsID] = await this.dataModel.googleServiceInit(timeMin, timeMax);
+    let [calEvents, calendarsID] = await this.dataModel.googleServiceInit(
+      timeMin,
+      timeMax
+    );
     //console.log("calEvents",calEvents);
     let [
       previousMonthList,
       thisMonthList,
       nextMonthList,
-      fullEventList
+      fullEventList,
     ] = this.processCalEvent(calEvents.items);
     let key;
     let isUserFound = false;
-    console.log("calendarsID",calendarsID);
+    console.log("calendarsID", calendarsID);
     for (let user of userList) {
       if (calendarsID === user.email) {
-        console.log("user.email",user.email);
+        console.log("user.email", user.email);
         isUserFound = true;
         key = user.key;
       }
@@ -82,7 +214,7 @@ export class LoginScreen extends React.Component {
     if (!isUserFound) {
       await this.dataModel.createNewUser(calendarsID);
       key = this.dataModel.getUserKey();
-    } 
+    }
     // console.log(previousMonthList);
     // console.log(thisMonthList);
     // console.log(nextMonthList);
@@ -92,18 +224,27 @@ export class LoginScreen extends React.Component {
     let userPlans = this.dataModel.getUserPlans();
 
     let userInfo = {
-      key:key,
+      key: key,
       userPlans: userPlans,
-    }
+    };
     //console.log("userInfo",userInfo);
     // console.log("userPlans",userPlans);
+    let [lastMonthWeather,thisMonthWeather,nextMonthWeather] = await this.fetchWeatherInfo(userPlans);
+
+    console.log("lastMonthWeather", lastMonthWeather);
+    console.log("thisMonthWeather", thisMonthWeather);
+    
+    console.log("nextMonthWeather", nextMonthWeather);
     this.props.navigation.navigate("Home Screen", {
       userEmail: calendarsID,
       userInfo: userInfo,
-      eventsLastMonth:previousMonthList,
+      eventsLastMonth: previousMonthList,
       eventsThisMonth: thisMonthList,
       eventsNextMonth: nextMonthList,
-      fullEventList: fullEventList
+      fullEventList: fullEventList,
+      lastMonthWeather: lastMonthWeather,
+      thisMonthWeather: thisMonthWeather,
+      nextMonthWeather:nextMonthWeather,
     });
   };
 
@@ -123,7 +264,7 @@ export class LoginScreen extends React.Component {
     let monthDays = moment(year + "-" + monthMax, "YYYY-MM").daysInMonth();
     let dateMax =
       "timeMax=" + year + "-" + monthMax + "-" + monthDays + "T23%3A00%3A00Z";
-    console.log("dateMin, dateMax",dateMin, dateMax);
+    console.log("dateMin, dateMax", dateMin, dateMax);
     return [dateMin, dateMax];
   };
 
@@ -137,7 +278,7 @@ export class LoginScreen extends React.Component {
     let thisMonthList = [];
     let nextMonthList = [];
 
-    let fullEventList = []
+    let fullEventList = [];
 
     for (let dayEvent of eventList) {
       //console.log("dayEvent.start ",dayEvent.start);
@@ -223,18 +364,24 @@ export class LoginScreen extends React.Component {
           >
             <Text style={loginStyles.buttonFont}>Sign In with Google</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={loginStyles.buttonStyle}
-            onPress={() => this.processDate()}
+            onPress={() => this.fetchWeatherInfo()}
           >
-            <Text style={loginStyles.buttonFont}>Process Date</Text>
-          </TouchableOpacity> */}
-          {/* <TouchableOpacity
+            <Text style={loginStyles.buttonFont}>Fetch weather</Text>
+          </TouchableOpacity>
+          <View>
+            <Image
+              source={{ uri: this.state.imageURI }}
+              style={{ width: 100, height: 100 }}
+            />
+          </View>
+          <TouchableOpacity
             style={loginStyles.buttonStyle}
-            onPress={() => this.processCalEvent()}
+            onPress={() => this.getStartEndDate()}
           >
-            <Text style={loginStyles.buttonFont}>Process event</Text>
-          </TouchableOpacity> */}
+            <Text style={loginStyles.buttonFont}>Test date</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );

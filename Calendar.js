@@ -196,6 +196,7 @@ export class MonthCalendar extends React.Component {
               >
                 {item != -1 ? item : ""}
               </Text>
+              {/* <View><Text>1</Text></View> */}
             </View>
           );
         } else {
@@ -214,6 +215,19 @@ export class MonthCalendar extends React.Component {
             if (item == dayEvent.dateNum) {
               flatEventList = dayEvent.events;
               //console.log("flatEventList created");
+            }
+          }
+          let iconNum = "";
+          let findWeather = false;
+          for (let dayWeather of this.props.weatherThisMonth) {
+            console.log("dayWeather",dayWeather);
+            
+            if (item == dayWeather.date) {
+              findWeather = true;
+              iconNum = dayWeather.img;
+            }
+            if (!findWeather) {
+              iconNum = "unknown"
             }
           }
           return (
@@ -235,9 +249,10 @@ export class MonthCalendar extends React.Component {
                 justifyContent: "space-between",
               }}
             >
+            <View style={{flex:0.2,height: 18, flexDirection:"row", backgroundColor:"white"}}>
               <Text
                 style={{
-                  flex: 0.2,
+                  flex: 0.5,
                   textAlign: "center",
                   height: 18,
                   justifyContent: "flex-start",
@@ -255,7 +270,10 @@ export class MonthCalendar extends React.Component {
               >
                 {item != -1 ? item : ""}
               </Text>
-              {/* <Text style={{ flex: 1, textAlign: "center", backgroundColor:"red" }}>1</Text> */}
+
+              {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
+              <Image source={{uri: "http://openweathermap.org/img/w/" + iconNum + ".png"}} style={{width:20, height:20}}></Image>
+              </View>
               <View
                 style={{
                   flex: 1,
@@ -411,7 +429,7 @@ export class MonthCalendar extends React.Component {
             style={{
               flex: 0.1,
               flexDirection: "column",
-              backgroundColor: "red",
+              //backgroundColor: "red",
               justifyContent: "space-around",
               alignItems: "center",
             }}
