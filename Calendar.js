@@ -272,7 +272,7 @@ export class MonthCalendar extends React.Component {
               </Text>
 
               {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
-              <Image source={{uri: "http://openweathermap.org/img/w/" + iconNum + ".png"}} style={{width:20, height:20}}></Image>
+              <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image>
               </View>
               <View
                 style={{

@@ -52,6 +52,9 @@ import SwitchSelector from "react-native-switch-selector";
 //   { name: "step 3", component: Step3 },
 //   { name: "step 4", component: Step4 },
 // ];
+
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export class CalendarPlanScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -76,7 +79,6 @@ export class CalendarPlanScreen extends React.Component {
     this.eventsLastMonth = this.props.route.params.eventsLastMonth;
     this.eventsThisMonth = this.props.route.params.eventsThisMonth;
     this.eventsNextMonth = this.props.route.params.eventsNextMonth;
-  
 
     this.fullEventList = this.props.route.params.fullEventList;
 
@@ -97,7 +99,6 @@ export class CalendarPlanScreen extends React.Component {
     this.combinedEventListLast = this.eventsLastMonth;
     this.combinedEventListNext = this.eventsNextMonth;
     this.combineEventListFull = this.fullEventList;
-
 
     this.lastMonthWeather = this.props.route.params.lastMonthWeather;
     this.thisMonthWeather = this.props.route.params.thisMonthWeather;
@@ -158,6 +159,13 @@ export class CalendarPlanScreen extends React.Component {
       monthCalCurrentMonth: new Date().getMonth(),
 
       weatherThisMonth: this.thisMonthWeather,
+
+      isEventDetailModalVis: false,
+
+      detailViewTemp: "",
+      detailViewIcon: "",
+
+      detailViewTop: "",
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -198,7 +206,7 @@ export class CalendarPlanScreen extends React.Component {
     for (let event of userPlanList) {
       if (event.end) {
         let eventDate = event.end.slice(0, 10);
-        console.log(eventDate);
+        //console.log(eventDate);
         if (currentDate === eventDate) {
           if (!event.isReported) {
             this.isReportModalVis = true;
@@ -207,15 +215,74 @@ export class CalendarPlanScreen extends React.Component {
         }
       }
     }
-    console.log("this.isReportModalVis", this.isReportModalVis);
+    //console.log("this.isReportModalVis", this.isReportModalVis);
   };
   onPress = (item, monthNum, month) => {
-    this.setState({ panelTop: "plan for " + month + " " + item });
-    this._panel.show();
-    this.setState({ isFromWeekView: false });
-    this.setState({ selectedDate: item });
-    this.setState({ selectedMonth: monthNum });
-    this.setState({ isPlanBtnDisable: false });
+    //console.log("item,monthNum,month", item, monthNum, month);
+    //console.log("this.userPlans", this.userPlans);
+    let isPlanAble = false;
+    let isPlanOnThatDay = false;
+    let planDetailList = [];
+    for (let plan of this.userPlans) {
+      if (plan.end) {
+        let plannedMonth = parseInt(plan.end.slice(5, 7));
+        let plannedDate = parseInt(plan.end.slice(8, 10));
+        if (monthNum + 1 == plannedMonth && item == plannedDate) {
+          isPlanOnThatDay = true;
+          let planDetail = plan;
+          planDetailList.push(planDetail);
+        }
+      }
+    }
+
+    //console.log(planDetailList);
+    if (monthNum >= this.state.date.getMonth()) {
+      if (item >= this.state.date.getDate() && planDetailList.length === 0) {
+        isPlanAble = true;
+      }
+    }
+    if (isPlanAble) {
+      this.setState({ panelTop: "plan for " + month + " " + item });
+      this._panel.show();
+      this.setState({ isFromWeekView: false });
+      this.setState({ selectedDate: item });
+      this.setState({ selectedMonth: monthNum });
+      this.setState({ isPlanBtnDisable: false });
+    } else {
+      if (planDetailList[0].isReported) {
+        this.eventToday = planDetailList[0];
+        //console.log(" this.eventToday", this.eventToday);
+        this.setState({ detailViewTop: month + " " + item });
+        this.setState({ isEventDetailModalVis: true });
+        let currMonthNum = parseInt(this.eventToday.end.slice(5, 7));
+        let currDate = parseInt(this.eventToday.end.slice(8, 10));
+        let weatherList = [];
+        if (currMonthNum === this.state.date.getMonth() + 1) {
+          weatherList = this.thisMonthWeather;
+        } else {
+          weatherList = this.lastMonthWeather;
+        }
+        for (let weather of weatherList) {
+          if (weather.date === currDate) {
+            this.setState({ detailViewTemp: weather.temp });
+            this.setState({ detailViewIcon: weather.img });
+          }
+        }
+      } else {
+        if (
+          monthNum < this.state.date.getMonth() &&
+          item > this.state.date.getDate()
+        ) {
+          // console.log("Please report");
+          // let currEvent = {
+          //   title: planDetailList[0].title,
+          //   start: planDetailList[0].start,
+          // }
+          this.eventToday = planDetailList[0];
+          this.setState({ isReportModalVis: true });
+        }
+      }
+    }
   };
   // updateMonthCalView = () => {
   //   let newListByActivity = this.state.newListByActivity;
@@ -333,7 +400,9 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ monthCalCurrDate: monthCalCurrDate });
                 let preMonthList = this.combinedEventListLast;
                 await this.setState({ eventsThisMonth: preMonthList });
-                await this.setState({ weatherThisMonth: this.lastMonthWeather})
+                await this.setState({
+                  weatherThisMonth: this.lastMonthWeather,
+                });
                 this.updateView();
                 //console.log("this.state.monthCalCurrDate",this.state.monthCalCurrDate);
               } else {
@@ -344,6 +413,9 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ monthCalCurrDate: monthCalCurrDate });
                 let thisMonthList = this.combinedEventListThis;
                 await this.setState({ eventsThisMonth: thisMonthList });
+                await this.setState({
+                  weatherThisMonth: this.thisMonthWeather,
+                });
                 this.updateView();
               }
             }}
@@ -365,6 +437,9 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ monthCalCurrDate: monthCalCurrDate });
                 let nextMonthList = this.combinedEventListNext;
                 await this.setState({ eventsThisMonth: nextMonthList });
+                await this.setState({
+                  weatherThisMonth: this.nextMonthWeather,
+                });
                 this.updateView();
               } else {
                 //console.log("condition2",this.state.monthCalCurrentMonth);
@@ -375,6 +450,9 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ monthCalCurrDate: monthCalCurrDate });
                 let thisMonthList = this.combinedEventListThis;
                 await this.setState({ eventsThisMonth: thisMonthList });
+                await this.setState({
+                  weatherThisMonth: this.thisMonthWeather,
+                });
                 this.updateView();
               }
             }}
@@ -713,7 +791,7 @@ export class CalendarPlanScreen extends React.Component {
         <Modal
           animationType="slide"
           transparent={true}
-          visible={this.state.isDayReportModalVis}
+          visible={this.state.isEventDetailModalVis}
           onRequestClose={() => {
             Alert.alert("Modal has been closed");
           }}
@@ -729,19 +807,93 @@ export class CalendarPlanScreen extends React.Component {
             <View
               style={{
                 flex: 0.9,
-                width: "90%",
-                backgroundColor: "red",
+                width: "95%",
+                backgroundColor: "white",
+                borderWidth: 2,
+                borderColor: "black",
                 flexDirection: "column",
+                justifyContent: "flex-start",
                 alignItems: "center",
                 borderRadius: 15,
               }}
             >
-              <TouchableOpacity
-                onPress={() => this.setState({ isDayReportModalVis: false })}
-                style={{ flex: 1, justifyContent: "flex-end" }}
+              <View
+                style={{
+                  flex: 0.05,
+                  width: "100%",
+                  flexDirection: "row",
+                  // backgroundColor:"red",
+
+                  justifyContent: "flex-end",
+                  alignItems: "flex-start",
+                }}
               >
-                <MaterialIcons name="cancel" size={24} color="black" />
-              </TouchableOpacity>
+                <View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      this.setState({ isEventDetailModalVis: false })
+                    }
+                  >
+                    <MaterialIcons name="cancel" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{ flex: 0.9, width: "90%" }}>
+                <View
+                  style={{
+                    flex: 0.2,
+                    width: "100%",
+                    backgroundColor: "#BDBDBD",
+                    borderRadius: 15,
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 0.3,
+                      width: "90%",
+                      marginTop: 10,
+                      marginLeft: 10,
+                      marginBottom: 0,
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                      Records on {this.eventToday.title},{" "}
+                      {this.state.detailViewTop}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.7,
+                      width: "90%",
+                      marginTop: 0,
+                      marginLeft: 10,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexDirection: "row",
+                      // backgroundColor: "red",
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                      {WEEKDAY[new Date(this.eventToday.end).getDay()]}
+                    </Text>
+                    <Image
+                      source={{
+                        uri:
+                          "http://openweathermap.org/img/wn/" +
+                          this.state.detailViewIcon +
+                          ".png",
+                      }}
+                      style={{ width: 60, height: 60 }}
+                    ></Image>
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                      {this.state.detailViewTemp}°C
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
         </Modal>
@@ -806,7 +958,7 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            this.setState({ isReportModalVis: true });
+            this.setState({ isEventDetailModalVis: true });
           }}
           style={{
             width: "100%",

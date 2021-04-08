@@ -108,6 +108,7 @@ export class LoginScreen extends React.Component {
       historicalWeatherItem.date = new Date(
         weatherHistoryJSON.list[0].dt * 1000
       );
+      historicalWeatherItem.temp = parseInt(weatherHistoryJSON.list[0].main.temp - 273);
       fullHistoryWeatherList.push(historicalWeatherItem);
     }
     //console.log(fullHistoryWeatherList);
@@ -116,6 +117,7 @@ export class LoginScreen extends React.Component {
       let weatherImgList = {
         date: weather.date.getDate(),
         img: weather.icon,
+        temp: weather.temp,
       };
       if (weather.date.getMonth() === today.getMonth()) {
         if (weather.date.getDate() != today.getDate()) {
@@ -126,12 +128,13 @@ export class LoginScreen extends React.Component {
       }
     }
 
-    let weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}`;
+    let weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${WEATHER_API_KEY}`;
     let currWeatherResponse = await fetch(weatherURL);
     let weatherJson = await currWeatherResponse.json();
     let weatherNow = {
       date: today.getDate(),
       img: weatherJson.weather[0].icon,
+      temp: weatherJson.main.feels_like,
     }
     thisMonthWeather.push(weatherNow);
     let imageURI =
@@ -139,12 +142,13 @@ export class LoginScreen extends React.Component {
     this.setState({ imageURI: imageURI });
 
     let weatherForecastList = [];
-    let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&appid=${WEATHER_API_KEY}`;
+    let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&units=metric&appid=${WEATHER_API_KEY}`;
     let weatherForecastResponse = await fetch(weatherForecastURL);
     let weatherForecastJSON = await weatherForecastResponse.json();
     for (let weather of weatherForecastJSON.list) {
       let newWeatherForecast = Object.assign({}, weather.weather[0]);
       newWeatherForecast.date = new Date(weather.dt * 1000);
+      newWeatherForecast.temp = weather.feels_like.day;
       weatherForecastList.push(newWeatherForecast);
     }
     // console.log("weatherForecastList",weatherForecastList);
@@ -153,6 +157,7 @@ export class LoginScreen extends React.Component {
       let weatherImgList = {
         date: weather.date.getDate(),
         img: weather.icon,
+        temp: weather.temp,
       };
       if (weather.date.getMonth() === today.getMonth()) {
         if (weather.date.getDate() != today.getDate()) {
@@ -162,7 +167,9 @@ export class LoginScreen extends React.Component {
         nextMonthWeather.push(weatherImgList);
       }
     }
-
+    //console.log("lastMonthWeather",lastMonthWeather);
+    //console.log("thisMonthWeather",thisMonthWeather);
+    //console.log("nextMonthWeather",nextMonthWeather);
     return [lastMonthWeather,thisMonthWeather,nextMonthWeather];
   };
 
@@ -364,7 +371,7 @@ export class LoginScreen extends React.Component {
           >
             <Text style={loginStyles.buttonFont}>Sign In with Google</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.fetchWeatherInfo()}
           >
@@ -381,7 +388,7 @@ export class LoginScreen extends React.Component {
             onPress={() => this.getStartEndDate()}
           >
             <Text style={loginStyles.buttonFont}>Test date</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     );
