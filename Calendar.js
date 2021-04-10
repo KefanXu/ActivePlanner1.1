@@ -217,19 +217,19 @@ export class MonthCalendar extends React.Component {
               //console.log("flatEventList created");
             }
           }
-          // let iconNum = "";
-          // let findWeather = false;
-          // for (let dayWeather of this.props.weatherThisMonth) {
-          //   console.log("dayWeather",dayWeather);
+          let iconNum = "";
+          let findWeather = false;
+          for (let dayWeather of this.props.weatherThisMonth) {
+            console.log("dayWeather",dayWeather);
             
-          //   if (item == dayWeather.date) {
-          //     findWeather = true;
-          //     iconNum = dayWeather.img;
-          //   }
-          //   if (!findWeather) {
-          //     iconNum = "unknown"
-          //   }
-          // }
+            if (item == dayWeather.date) {
+              findWeather = true;
+              iconNum = dayWeather.img;
+            }
+            if (!findWeather) {
+              iconNum = "unknown"
+            }
+          }
           return (
             // <Calendar
             //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
@@ -272,7 +272,7 @@ export class MonthCalendar extends React.Component {
               </Text>
 
               {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
-              {/* <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image> */}
+              <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image>
               </View>
               <View
                 style={{
