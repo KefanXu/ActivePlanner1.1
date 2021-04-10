@@ -64,13 +64,16 @@ class DataModel {
     console.log("this.users", this.users);
   };
   loadUserPlans = async(key) => {
+    let emptyPlanList = [];
     let userPlanCollection = await this.usersRef.doc(key).collection("activity_plans").get();
     userPlanCollection.forEach(async qDocSnap => {
       let key = qDocSnap.id;
       let plan = qDocSnap.data();
       plan.key = key;
-      this.plans.push(plan);
+      emptyPlanList.push(plan);
     });
+    this.plans = emptyPlanList;
+    return emptyPlanList;
   }
   getUserPlans = () => {
     return this.plans;
