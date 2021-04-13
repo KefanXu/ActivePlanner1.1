@@ -78,7 +78,8 @@ export class MonthCalendar extends React.Component {
     for (let dateNum of eventListDates) {
       let dayEventObj = {
         dateNum: parseInt(dateNum),
-        events: [],
+        morningEvents: [],
+        afternoonEvents: [],
       };
       dayEventsList.push(dayEventObj);
     }
@@ -89,11 +90,21 @@ export class MonthCalendar extends React.Component {
           let newEvent = Object.assign({}, event);
           newEvent.id = event.end + event.start;
           newEvent.identifier = "default";
-          date.events.push(newEvent);
+          if (parseInt(newEvent.start.slice(11, 13)) < 12) {
+            date.morningEvents.push(newEvent);
+          } else {
+            date.afternoonEvents.push(newEvent);
+          }
         }
       }
+      date.morningEvents.sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+      });
+      date.afternoonEvents.sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+      });
     }
-    console.log("this.dayEventsList", dayEventsList);
+    //console.log("this.dayEventsList", dayEventsList);
     this.dayEventsList = dayEventsList;
     this.setState({ dayEventsList: dayEventsList });
   };
@@ -203,7 +214,8 @@ export class MonthCalendar extends React.Component {
             </View>
           );
         } else {
-          let flatEventList = [];
+          let flatEventListMorning = [];
+          let flatEventListAfternoon = [];
           let dayEventsList;
           if (this.state.dayEventsList.length === 0) {
             dayEventsList = this.dayEventsList;
@@ -216,7 +228,9 @@ export class MonthCalendar extends React.Component {
             //console.log("item",item);
 
             if (item == dayEvent.dateNum) {
-              flatEventList = dayEvent.events;
+              flatEventListMorning = dayEvent.morningEvents;
+              flatEventListAfternoon = dayEvent.afternoonEvents;
+
               //console.log("flatEventList created");
             }
           }
@@ -316,7 +330,7 @@ export class MonthCalendar extends React.Component {
                   > */}
                   <FlatList
                     style={{ marginTop: 1, height: "100%", width: "100%" }}
-                    data={flatEventList}
+                    data={flatEventListMorning}
                     renderItem={({ item }) => {
                       //console.log("render flat",item);
 
@@ -423,7 +437,7 @@ export class MonthCalendar extends React.Component {
                 </View>
                 <View
                   style={{
-                    backgroundColor: "red",
+                    backgroundColor: "#D8D8D8",
                     flex: 1,
                     height: "100%",
                     alignItems: "flex-end",
@@ -432,7 +446,7 @@ export class MonthCalendar extends React.Component {
                 >
                   <FlatList
                     style={{ marginTop: 1, height: "100%", width: "100%" }}
-                    data={flatEventList}
+                    data={flatEventListAfternoon}
                     renderItem={({ item }) => {
                       //console.log("render flat",item);
 
@@ -443,7 +457,7 @@ export class MonthCalendar extends React.Component {
                               <View
                                 style={{
                                   width: "100%",
-                                  backgroundColor: "red",
+                                  // backgroundColor: "red",
                                   borderRadius: 5,
                                   flex: 1,
                                 }}
