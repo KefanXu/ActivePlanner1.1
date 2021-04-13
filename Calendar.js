@@ -93,6 +93,7 @@ export class MonthCalendar extends React.Component {
         }
       }
     }
+    console.log("this.dayEventsList", dayEventsList);
     this.dayEventsList = dayEventsList;
     this.setState({ dayEventsList: dayEventsList });
   };
@@ -190,7 +191,9 @@ export class MonthCalendar extends React.Component {
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.props.monthCalCurrDate.getDate() ? "bold" : "300",
+                    item == this.props.monthCalCurrDate.getDate()
+                      ? "bold"
+                      : "300",
                 }}
                 // onPress={() => this._onPress(item)}
               >
@@ -221,7 +224,7 @@ export class MonthCalendar extends React.Component {
           // let findWeather = false;
           // for (let dayWeather of this.props.weatherThisMonth) {
           //   console.log("dayWeather",dayWeather);
-            
+
           //   if (item == dayWeather.date) {
           //     findWeather = true;
           //     iconNum = dayWeather.img;
@@ -249,30 +252,39 @@ export class MonthCalendar extends React.Component {
                 justifyContent: "space-between",
               }}
             >
-            <View style={{flex:0.2,height: 18, flexDirection:"row", backgroundColor:"white"}}>
-              <Text
+              <View
                 style={{
-                  flex: 0.5,
-                  textAlign: "center",
+                  flex: 0.2,
                   height: 18,
-                  justifyContent: "flex-start",
-                  alignContent: "flex-start",
-                  // Highlight header
-
-                  backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
-                  // Highlight Sundays
-                  color: colIndex == 0 ? "#a00" : "#000",
-                  // Highlight current date
-                  fontWeight:
-                    item == this.props.monthCalCurrDate.getDate() ? "bold" : "300",
+                  flexDirection: "row",
+                  backgroundColor: "white",
                 }}
-                onPress={() => this.onPress(item)}
               >
-                {item != -1 ? item : ""}
-              </Text>
+                <Text
+                  style={{
+                    flex: 0.5,
+                    textAlign: "center",
+                    height: 18,
+                    justifyContent: "flex-start",
+                    alignContent: "flex-start",
+                    // Highlight header
 
-              {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
-              {/* <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image> */}
+                    backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
+                    // Highlight Sundays
+                    color: colIndex == 0 ? "#a00" : "#000",
+                    // Highlight current date
+                    fontWeight:
+                      item == this.props.monthCalCurrDate.getDate()
+                        ? "bold"
+                        : "300",
+                  }}
+                  onPress={() => this.onPress(item)}
+                >
+                  {item != -1 ? item : ""}
+                </Text>
+
+                {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
+                {/* <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image> */}
               </View>
               <View
                 style={{
@@ -411,13 +423,119 @@ export class MonthCalendar extends React.Component {
                 </View>
                 <View
                   style={{
-                    //backgroundColor: "red",
+                    backgroundColor: "red",
                     flex: 1,
                     height: "100%",
                     alignItems: "flex-end",
                     justifyContent: "flex-end",
                   }}
-                ></View>
+                >
+                  <FlatList
+                    style={{ marginTop: 1, height: "100%", width: "100%" }}
+                    data={flatEventList}
+                    renderItem={({ item }) => {
+                      //console.log("render flat",item);
+
+                      if (item.isPlanned) {
+                        if (item.isReported) {
+                          if (!item.isActivityCompleted) {
+                            return (
+                              <View
+                                style={{
+                                  width: "100%",
+                                  backgroundColor: "red",
+                                  borderRadius: 5,
+                                  flex: 1,
+                                }}
+                              >
+                                <Text
+                                  style={{ textAlign: "center", fontSize: 5 }}
+                                >
+                                  {/* {item.start} */}
+                                  event
+                                </Text>
+                              </View>
+                            );
+                          } else {
+                            if (item.isThirtyMin) {
+                              return (
+                                <View
+                                  style={{
+                                    width: "100%",
+                                    backgroundColor: "green",
+                                    borderRadius: 5,
+                                    flex: 1,
+                                  }}
+                                >
+                                  <Text
+                                    style={{ textAlign: "center", fontSize: 5 }}
+                                  >
+                                    {/* {item.start} */}
+                                    event
+                                  </Text>
+                                </View>
+                              );
+                            } else {
+                              return (
+                                <View
+                                  style={{
+                                    width: "100%",
+                                    backgroundColor: "yellow",
+                                    borderRadius: 5,
+                                    flex: 1,
+                                  }}
+                                >
+                                  <Text
+                                    style={{ textAlign: "center", fontSize: 5 }}
+                                  >
+                                    {/* {item.start} */}
+                                    event
+                                  </Text>
+                                </View>
+                              );
+                            }
+                          }
+                        } else {
+                          return (
+                            <View
+                              style={{
+                                width: "100%",
+                                backgroundColor: "white",
+                                borderWidth: 1,
+                                borderColor: "black",
+                                borderRadius: 5,
+                                flex: 1,
+                              }}
+                            >
+                              <Text
+                                style={{ textAlign: "center", fontSize: 5 }}
+                              >
+                                {/* {item.start} */}
+                                event
+                              </Text>
+                            </View>
+                          );
+                        }
+                      } else {
+                        return (
+                          <View
+                            style={{
+                              width: "100%",
+                              backgroundColor: "grey",
+                              borderRadius: 5,
+                              flex: 1,
+                            }}
+                          >
+                            <Text style={{ textAlign: "center", fontSize: 5 }}>
+                              {/* {item.start} */}
+                              event
+                            </Text>
+                          </View>
+                        );
+                      }
+                    }}
+                  />
+                </View>
               </View>
             </View>
           );

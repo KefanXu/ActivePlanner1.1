@@ -106,16 +106,44 @@ export class CalendarPlanScreen extends React.Component {
 
     for (let event of this.userPlans) {
       if (event.title && !event.isDeleted) {
-        this.combineEventListFull.push(event);
+        if (
+          !this.combineEventListFull.includes(event) &&
+          !this.combineEventListFull.some(
+            (e) => e.timeStamp === event.timeStamp
+          )
+        ) {
+          this.combineEventListFull.push(event);
+        }
 
         let monthNum = parseInt(event.end.slice(5, 7));
         let currMonth = new Date();
         if (monthNum === currMonth.getMonth() + 1) {
-          this.combinedEventListThis.push(event);
+          if (
+            !this.combinedEventListThis.includes(event) &&
+            !this.combinedEventListThis.some(
+              (e) => e.timeStamp === event.timeStamp
+            )
+          ) {
+            this.combinedEventListThis.push(event);
+          }
         } else if (monthNum === currMonth.getMonth()) {
-          this.combinedEventListLast.push(event);
+          if (
+            !this.combinedEventListLast.includes(event) &&
+            !this.combinedEventListLast.some(
+              (e) => e.timeStamp === event.timeStamp
+            )
+          ) {
+            this.combinedEventListLast.push(event);
+          }
         } else {
-          this.combinedEventListNext.push(event);
+          if (
+            !this.combinedEventListNext.includes(event) &&
+            !this.combinedEventListNext.some(
+              (e) => e.timeStamp === event.timeStamp
+            )
+          ) {
+            this.combinedEventListNext.push(event);
+          }
         }
         //let plannedEvent = Object.assign({}, event);
       }
@@ -208,7 +236,7 @@ export class CalendarPlanScreen extends React.Component {
     let currentDate = moment(new Date()).format().slice(0, 10);
     //console.log("userPlanList", userPlanList);
     for (let event of userPlanList) {
-      if (event.end) {
+      if (event.end && !event.isDeleted) {
         let eventDate = event.end.slice(0, 10);
         //console.log(eventDate);
         if (currentDate === eventDate) {
@@ -222,7 +250,7 @@ export class CalendarPlanScreen extends React.Component {
     //console.log("this.isReportModalVis", this.isReportModalVis);
   };
   onPress = (item, monthNum, month) => {
-    //console.log("item,monthNum,month", item, monthNum, month);
+    console.log("item,monthNum,month", item, monthNum, month);
     //console.log("this.userPlans", this.userPlans);
     let isPlanAble = false;
     let isPlanOnThatDay = false;
@@ -241,9 +269,23 @@ export class CalendarPlanScreen extends React.Component {
     }
     //console.log("planDetailList[0]",planDetailList[0]);
     //console.log(planDetailList);
-    if (monthNum >= this.state.date.getMonth()) {
-      if (item > this.state.date.getDate() && planDetailList.length === 0) {
+    if (monthNum === this.state.date.getMonth()) {
+      if (item > this.state.date.getDate()) {
+        if (planDetailList.length === 0) {
+          isPlanAble = true;
+        } else {
+          if (planDetailList[0].isDeleted) {
+            isPlanAble = true;
+          }
+        }
+      }
+    } else if (monthNum > this.state.date.getMonth()) {
+      if (planDetailList.length === 0) {
         isPlanAble = true;
+      } else {
+        if (planDetailList[0].isDeleted) {
+          isPlanAble = true;
+        }
       }
     }
     if (isPlanAble) {
@@ -271,37 +313,39 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ isPlanBtnDisable: false });
       this.setState({ isWeatherVisOnPanel: "flex" });
     } else {
-      this.eventToday = planDetailList[0];
-      //console.log(this.eventToday);
-      let currMonthNum = parseInt(this.eventToday.end.slice(5, 7));
-      let currDate = parseInt(this.eventToday.end.slice(8, 10));
-      let weatherList = [];
-      if (currMonthNum === this.state.date.getMonth() + 1) {
-        weatherList = this.thisMonthWeather;
-      } else {
-        weatherList = this.lastMonthWeather;
-      }
-      for (let weather of weatherList) {
-        if (weather.date === currDate) {
-          this.setState({ detailViewTemp: weather.temp });
-          this.setState({ detailViewIcon: weather.img });
-        }
-      }
-      if (this.eventToday.isReported) {
-        //show event detail
-        //console.log("this.eventToday.isReported",this.eventToday.isReported);
-        this.setState({ detailViewTop: month + " " + item });
-        this.setState({ isEventDetailModalVis: true });
-      } else {
-        if (
-          monthNum <= this.state.date.getMonth() &&
-          item <= this.state.date.getDate()
-        ) {
-          this.setState({ isReportModalVis: true });
+      if (!planDetailList[0].isDeleted) {
+        this.eventToday = planDetailList[0];
+        //console.log(this.eventToday);
+        let currMonthNum = parseInt(this.eventToday.end.slice(5, 7));
+        let currDate = parseInt(this.eventToday.end.slice(8, 10));
+        let weatherList = [];
+        if (currMonthNum === this.state.date.getMonth() + 1) {
+          weatherList = this.thisMonthWeather;
         } else {
-          //show planned info
-          this.eventToday = planDetailList[0];
-          this.setState({ isPlannedEventModalVis: true });
+          weatherList = this.lastMonthWeather;
+        }
+        for (let weather of weatherList) {
+          if (weather.date === currDate) {
+            this.setState({ detailViewTemp: weather.temp });
+            this.setState({ detailViewIcon: weather.img });
+          }
+        }
+        if (this.eventToday.isReported) {
+          //show event detail
+          //console.log("this.eventToday.isReported",this.eventToday.isReported);
+          this.setState({ detailViewTop: month + " " + item });
+          this.setState({ isEventDetailModalVis: true });
+        } else {
+          if (
+            monthNum <= this.state.date.getMonth() &&
+            item <= this.state.date.getDate()
+          ) {
+            this.setState({ isReportModalVis: true });
+          } else {
+            //show planned info
+            this.eventToday = planDetailList[0];
+            this.setState({ isPlannedEventModalVis: true });
+          }
         }
       }
     }
@@ -347,10 +391,17 @@ export class CalendarPlanScreen extends React.Component {
       title: activityName,
     };
     // console.log(this.state.eventsThisMonth);
-    let newEventList = this.eventsThisMonth;
-    console.log("newEventList", newEventList);
-    newEventList.push(newEvent);
-    await this.setState({ eventsThisMonth: newEventList });
+    if (parseInt(monthNum) === this.state.date.getMonth() + 1) {
+      this.combinedEventListThis.push(newEvent);
+      await this.setState({ eventsThisMonth: this.combinedEventListThis });
+    } else {
+      this.combinedEventListNext.push(newEvent);
+      await this.setState({ eventsThisMonth: this.combinedEventListNext });
+    }
+    // let newEventList = this.eventsThisMonth;
+    // console.log("newEventList", newEventList);
+    // newEventList.push(newEvent);
+    // await this.setState({ eventsThisMonth: newEventList });
     console.log("updateEvent in main view");
     this._panel.hide();
     this.updateView();
@@ -360,13 +411,41 @@ export class CalendarPlanScreen extends React.Component {
     newEvent.timeStamp = timeStamp;
     newEvent.isReported = false;
     await this.dataModel.createNewPlan(this.userKey, newEvent);
+    await this.dataModel.loadUserPlans(this.userKey);
+    this.userPlans = this.dataModel.getUserPlans();
 
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
-  onDeletePressed = () => {
+  onDeletePressed = async () => {
     console.log(this.eventToday);
-  }
+
+    this.setState({ isPlannedEventModalVis: false });
+    this.eventToday.isDeleted = true;
+    await this.dataModel.updatePlan(this.userKey, this.eventToday);
+    let monthNum = parseInt(this.eventToday.end.slice(5, 7));
+    if (monthNum === this.state.date.getMonth() + 1) {
+      let deleteIndex;
+      //let deleteItem;
+      for (let event of this.combinedEventListThis) {
+        if (event.timeStamp === this.eventToday.timeStamp) {
+          deleteIndex = this.combinedEventListThis.indexOf(event);
+        }
+      }
+      this.combinedEventListThis.splice(deleteIndex, 1);
+      await this.setState({ eventsThisMonth: this.combinedEventListThis });
+    } else {
+      let deleteIndex;
+      for (let event of this.combinedEventListNext) {
+        if (event.timeStamp === this.eventToday.timeStamp) {
+          deleteIndex = this.combinedEventListNext.indexOf(event);
+        }
+      }
+      this.combinedEventListNext.splice(deleteIndex, 1);
+      await this.setState({ eventsThisMonth: this.combinedEventListNext });
+    }
+    this.updateView();
+  };
   updateView = () => {
     //console.log("this.state.eventsThisMonth", this.state.eventsThisMonth);
     if (!this.state.isFromWeekView) {
@@ -380,8 +459,6 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ indexView: "Week" });
     }
   };
-
-
 
   render() {
     let calView;
@@ -1004,18 +1081,22 @@ export class CalendarPlanScreen extends React.Component {
                     </Text>
                     <View>
                       {/* <Button title="Report" style={{backgroundColor:"black"}}></Button> */}
-                      <TouchableOpacity
+                      {/* <TouchableOpacity
                         style={{
                           backgroundColor: "black",
                           borderRadius: 15,
                           padding: 5,
                           marginBottom: 10,
                         }}
+                        onPress={() => {
+                          this.setState({ isPlannedEventModalVis: false });
+                          this.setState({ isReportModalVis: true });
+                        }}
                       >
                         <Text style={{ color: "white", fontWeight: "bold" }}>
                           Report
                         </Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
                       <TouchableOpacity
                         onPress={this.onDeletePressed}
                         style={{
