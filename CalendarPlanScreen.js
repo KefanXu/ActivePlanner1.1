@@ -1236,12 +1236,12 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity> */}
 
         <SlidingUpPanel
-          draggableRange={{ top: 500, bottom: 100 }}
+          draggableRange={{ top: 300, bottom: 100 }}
           ref={(c) => (this._panel = c)}
         >
           <View
             style={{
-              height: 500,
+              height: 300,
               justifyContent: "space-between",
               alignItems: "center",
               borderRadius: 40,
@@ -1258,7 +1258,17 @@ export class CalendarPlanScreen extends React.Component {
                 backgroundColor: "#6E6E6E",
               }}
             >
-              <Text>{this.state.panelTop}</Text>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "white",
+                  marginTop: 10,
+                  marginLeft: 10,
+                }}
+              >
+                {this.state.panelTop}
+              </Text>
               <View
                 style={{
                   flex: 0.8,
@@ -1291,75 +1301,133 @@ export class CalendarPlanScreen extends React.Component {
                 flex: 0.4,
                 width: "90%",
                 borderRadius: 20,
-                justifyContent: "flex-start",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
                 marginTop: 20,
                 backgroundColor: "#6E6E6E",
               }}
             >
-              <DropDownPicker
-                items={[
-                  {
-                    label: "Walking",
-                    value: "walking",
-                    //icon: () => <Icon name="flag" size={18} color="#900" />,
-                    //hidden: true,
-                  },
-                  {
-                    label: "Jogging",
-                    value: "Jogging",
-                    //icon: () => <Icon name="flag" size={18} color="#900" />,
-                  },
-                ]}
-                defaultValue={"walking"}
-                containerStyle={{ height: 40 }}
-                style={{ backgroundColor: "#fafafa", width: "50%", margin: 5 }}
-                itemStyle={{
-                  justifyContent: "flex-start",
-                }}
-                dropDownStyle={{ backgroundColor: "#fafafa" }}
-                onChangeItem={async (item) => {
-                  this.selectedActivity = item.label;
-                  this.isActivitySelected = true;
-                  let newListByActivity = [];
-                  let currentList = this.state.eventsThisMonth;
-                  //console.log("currentList",currentList);
-                  for (let event of currentList) {
-                    if (event.title) {
-                      if (event.title === item.label) {
-                        newListByActivity.push(event);
+              <View style={{ flex: 0.5, alignContent: "flex-start" }}>
+                <Text
+                  style={{
+                    margin: 5,
+                    fontWeight: "bold",
+                    fontSize: 12,
+                    color: "white",
+                  }}
+                >
+                  Activity Type
+                </Text>
+                <DropDownPicker
+                  items={[
+                    {
+                      label: "Walking",
+                      value: "walking",
+                      //icon: () => <Icon name="flag" size={18} color="#900" />,
+                      //hidden: true,
+                    },
+                    {
+                      label: "Jogging",
+                      value: "Jogging",
+                      //icon: () => <Icon name="flag" size={18} color="#900" />,
+                    },
+                  ]}
+                  defaultValue={"walking"}
+                  containerStyle={{ height: 40 }}
+                  style={{
+                    backgroundColor: "#fafafa",
+                    width: "100%",
+                    margin: 5,
+                  }}
+                  itemStyle={{
+                    justifyContent: "flex-start",
+                  }}
+                  dropDownStyle={{ backgroundColor: "#fafafa" }}
+                  onChangeItem={async (item) => {
+                    this.selectedActivity = item.label;
+                    this.isActivitySelected = true;
+                    let newListByActivity = [];
+                    let currentList = this.state.eventsThisMonth;
+                    //console.log("currentList",currentList);
+                    for (let event of currentList) {
+                      if (event.title) {
+                        if (event.title === item.label) {
+                          newListByActivity.push(event);
+                        }
                       }
                     }
-                  }
-                  console.log("newListByActivity", newListByActivity);
+                    console.log("newListByActivity", newListByActivity);
 
-                  await this.setState({ eventsThisMonth: newListByActivity });
-                  //this.monthCalRef.current.processEvents();
-                  //this.updateView();
-                  //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
-                  //console.log("this.state.newListByActivity",this.state.newListByActivity);
-                  this.monthCalRef.current.processEvents();
-                }}
-              />
-              <DateTimePicker
-                value={this.state.date}
-                mode="default"
-                is24Hour={true}
-                display="default"
-                onChange={(e, date) => {
-                  //let setDate = moment(date);
-                  console.log(date.toString());
-                  this.setState({ date: date });
-                }}
+                    await this.setState({ eventsThisMonth: newListByActivity });
+                    //this.monthCalRef.current.processEvents();
+                    //this.updateView();
+                    //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
+                    //console.log("this.state.newListByActivity",this.state.newListByActivity);
+                    this.monthCalRef.current.processEvents();
+                  }}
+                />
+              </View>
+              <View
                 style={{
-                  width: 100,
-                  alignContent: "center",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
+                  flex: 0.25,
+                  width: "100%",
+                  height:"100%",
+                  justifyContent: "flex-start",
+                  // backgroundColor:"blue"
                 }}
-              />
-              <Text>
-                {moment(this.state.date).add(30, "minutes").format("hh:mm")}
-              </Text>
+              >
+                <Text
+                  style={{
+                    margin: 5,
+                    fontWeight: "bold",
+                    fontSize: 12,
+                    color: "white",
+                  }}
+                >
+                  Start
+                </Text>
+                <DateTimePicker
+                  value={this.state.date}
+                  mode="default"
+                  is24Hour={true}
+                  display="default"
+                  onChange={(e, date) => {
+                    //let setDate = moment(date);
+                    console.log(date.toString());
+                    this.setState({ date: date });
+                  }}
+                  style={{
+                    width: 100,
+                    alignContent: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  flex: 0.25,
+                  width: "100%",
+                  height:"100%",
+                  justifyContent: "flex-start",
+                  
+                }}
+              >
+                <Text
+                  style={{
+                    margin: 5,
+                    fontWeight: "bold",
+                    fontSize: 12,
+                    color: "white",
+                  }}
+                >
+                  End
+                </Text>
+                <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+                  {moment(this.state.date).add(30, "minutes").format("hh:mm")}
+                </Text>
+              </View>
             </View>
             <View
               style={{
