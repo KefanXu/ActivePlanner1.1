@@ -28,7 +28,8 @@ import moment, { min } from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
-// import AnimatedMultistep from "react-native-animated-multistep";
+
+import RNPickerSelect from "@react-native-picker/picker";
 // const reportOptions = [
 //   {
 //     title: "Options",
@@ -1372,7 +1373,7 @@ export class CalendarPlanScreen extends React.Component {
                 style={{
                   flex: 0.25,
                   width: "100%",
-                  height:"100%",
+                  height: "100%",
                   justifyContent: "flex-start",
                   // backgroundColor:"blue"
                 }}
@@ -1409,9 +1410,8 @@ export class CalendarPlanScreen extends React.Component {
                 style={{
                   flex: 0.25,
                   width: "100%",
-                  height:"100%",
+                  height: "100%",
                   justifyContent: "flex-start",
-                  
                 }}
               >
                 <Text
@@ -1432,7 +1432,7 @@ export class CalendarPlanScreen extends React.Component {
             <View
               style={{
                 flex: 0.4,
-                width: "90%",
+                width: "20%",
                 borderRadius: 20,
                 justifyContent: "flex-start",
                 marginTop: 20,
@@ -1444,6 +1444,14 @@ export class CalendarPlanScreen extends React.Component {
                 disabled={this.state.isPlanBtnDisable}
                 onPress={() => this.onPlanBtnPressed()}
               ></Button>
+              <RNPickerSelect
+                onValueChange={(value) => console.log(value)}
+                items={[
+                  { label: "Football", value: "football" },
+                  { label: "Baseball", value: "baseball" },
+                  { label: "Hockey", value: "hockey" },
+                ]}
+              />
             </View>
           </View>
         </SlidingUpPanel>
