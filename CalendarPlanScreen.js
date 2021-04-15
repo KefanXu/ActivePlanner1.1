@@ -291,7 +291,7 @@ export class CalendarPlanScreen extends React.Component {
       }
     }
     //console.log("planDetailList[0]",planDetailList[0]);
-    //console.log(planDetailList);
+    console.log("planDetailList", planDetailList);
     if (monthNum === this.state.date.getMonth()) {
       if (item > this.state.date.getDate()) {
         if (planDetailList.length === 0) {
@@ -299,6 +299,11 @@ export class CalendarPlanScreen extends React.Component {
         } else {
           if (planDetailList[0].isDeleted) {
             isPlanAble = true;
+            for (let event of planDetailList) {
+              if (event.isDeleted === false) {
+                isPlanAble = false;
+              }
+            }
           }
         }
       }
@@ -336,7 +341,7 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ isPlanBtnDisable: false });
       this.setState({ isWeatherVisOnPanel: "flex" });
     } else {
-      if (!planDetailList[0].isDeleted) {
+      if (!planDetailList[0].isDeleted && planDetailList.length === 1) {
         this.eventToday = planDetailList[0];
         //console.log(this.eventToday);
         let currMonthNum = parseInt(this.eventToday.end.slice(5, 7));
@@ -367,6 +372,13 @@ export class CalendarPlanScreen extends React.Component {
           } else {
             //show planned info
             this.eventToday = planDetailList[0];
+            this.setState({ isPlannedEventModalVis: true });
+          }
+        }
+      } else if (planDetailList.length != 1){
+        for (let event of planDetailList) {
+          if (event.isDeleted === false) {
+            this.eventToday = event;
             this.setState({ isPlannedEventModalVis: true });
           }
         }
