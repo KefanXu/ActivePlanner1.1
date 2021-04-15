@@ -43,7 +43,7 @@ class DataModel {
     await this.loadUsers();
     //console.log("this.users", this.users);
   };
-  
+
   loadUsers = async () => {
     let querySnap = await this.usersRef.get();
     querySnap.forEach(async (qDocSnap) => {
@@ -63,18 +63,21 @@ class DataModel {
     console.log("load user", this.users.length);
     console.log("this.users", this.users);
   };
-  loadUserPlans = async(key) => {
-    let userPlanCollection = await this.usersRef.doc(key).collection("activity_plans").get();
-    userPlanCollection.forEach(async qDocSnap => {
+  loadUserPlans = async (key) => {
+    let userPlanCollection = await this.usersRef
+      .doc(key)
+      .collection("activity_plans")
+      .get();
+    userPlanCollection.forEach(async (qDocSnap) => {
       let key = qDocSnap.id;
       let plan = qDocSnap.data();
       plan.key = key;
       this.plans.push(plan);
     });
-  }
+  };
   getUserPlans = () => {
     return this.plans;
-  }
+  };
 
   createNewUser = async (username) => {
     let newUser = {
@@ -82,27 +85,42 @@ class DataModel {
     };
     let newUsersDocRef = await this.usersRef.add(newUser);
     let key = newUsersDocRef.id;
-    await this.usersRef.doc(key).update({id:key})
+    await this.usersRef.doc(key).update({ id: key });
     let testColl = {
-      test:1
+      test: 1,
     };
     let newUserColl = await newUsersDocRef.collection("activity_plans");
     await newUserColl.add(testColl);
     this.key = key;
   };
-  createNewPlan = async(key, newEvent) => {
-    let userPlanCollection = this.usersRef.doc(key).collection("activity_plans").add(newEvent);
-  }
+  createNewPlan = async (key, newEvent) => {
+    //newEvent.reminderKey = await this.scheduleNotification(newEvent);
+    //newEvent.reportReminderKey = await this.scheduleReportNotification(newEvent);
+    // console.log("data modal",newEvent);
+    let userPlanCollection = await this.usersRef
+      .doc(key)
+      .collection("activity_plans")
+      .add(newEvent);
+  };
   getUserKey = () => {
     return this.key;
-  }
+  };
   getUsers = () => {
     return this.users;
   };
-  updatePlan = async(userKey, newEvent) => {
-    let newEventRef = this.usersRef.doc(userKey).collection("activity_plans").doc(newEvent.key);
+  updatePlan = async (userKey, newEvent) => {
+    let newEventRef = this.usersRef
+      .doc(userKey)
+      .collection("activity_plans")
+      .doc(newEvent.key);
     newEventRef.update(newEvent);
-  }
+  };
+  deleteReminders = async (newEvent) => {
+    await Notification.cancelScheduledNotificationAsync(newEvent.activityReminderKey);
+    await Notification.cancelScheduledNotificationAsync(
+      newEvent.reportReminderKey
+    );
+  };
 
   askPermission = async () => {
     const perms = await Notification.getPermissionsAsync();
@@ -114,18 +132,43 @@ class DataModel {
     }
     return granted;
   };
-  scheduleNotification = async () => {
-    await Notification.scheduleNotificationAsync({
+  scheduleNotification = async (newEvent) => {
+    //2021-04-16T10:37:00
+    //let trigger = new Date(Date.now() + 5 * 1000);
+    let startTime = newEvent.startTime;
+    let trigger = new Date(Date.parse(startTime) - 60 * 60 * 1000);
+    //let secTrigger = new Date(Date.parse(startTime) + 7 * 1000);
+    console.log("trigger",trigger);
+
+    let identifier = await Notification.scheduleNotificationAsync({
       content: {
-        title: "test",
-        body: "notification in 5s",
+        title: "Upcoming Physical Activity",
+        body: newEvent.title + " is about to happen in an hour",
         data: { data: "goes here" },
       },
-      trigger: {
-        seconds: 5,
-      },
+      trigger,
     });
+    console.log("identifier1", identifier);
+    return identifier;
   };
+
+  scheduleReportNotification = async (newEvent) => {
+    let reportStartTime = newEvent.start.slice(0, 11) + "21:00:00";
+    //console.log("reportStartTime", reportStartTime);
+    let trigger = new Date(Date.parse(reportStartTime));
+    //console.log("reportTrigger", reportTrigger);
+    let identifier = await Notification.scheduleNotificationAsync({
+      content: {
+        title: "Upcoming Physical Activity2",
+        body: " is about to happen in an hour",
+        data: { data: "goes here" },
+      },
+      trigger,
+    });
+    console.log("identifier2", identifier);
+    return identifier;
+  };
+  cancelNotification = async () => {};
   googleServiceInit = async (timeMin, timeMax) => {
     const { type, accessToken, user } = await Google.logInAsync(config);
     let userInfoResponse;
@@ -157,7 +200,7 @@ class DataModel {
       timeMax
     );
     let calendarEventListJSON = await calendarEventList.json();
-    return [calendarEventListJSON,calendarsID];
+    return [calendarEventListJSON, calendarsID];
     //console.log(JSON.stringify(calendarsListJSON))
   };
 
@@ -183,7 +226,9 @@ class DataModel {
       "https://www.googleapis.com/calendar/v3/calendars/" +
         calendarsID +
         "/events?" +
-        timeMax + "&" + timeMin,
+        timeMax +
+        "&" +
+        timeMin,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     return calendarsEventList;

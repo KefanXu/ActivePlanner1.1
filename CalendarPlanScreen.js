@@ -433,6 +433,13 @@ export class CalendarPlanScreen extends React.Component {
 
     newEvent.timeStamp = timeStamp;
     newEvent.isReported = false;
+    newEvent.activityReminderKey = await this.dataModel.scheduleNotification(
+      newEvent
+    );
+
+    newEvent.reportReminderKey = await this.dataModel.scheduleReportNotification(
+      newEvent
+    );
     await this.dataModel.createNewPlan(this.userKey, newEvent);
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
@@ -446,6 +453,7 @@ export class CalendarPlanScreen extends React.Component {
     this.setState({ isPlannedEventModalVis: false });
     this.eventToday.isDeleted = true;
     await this.dataModel.updatePlan(this.userKey, this.eventToday);
+    await this.dataModel.deleteReminders(this.eventToday);
     let monthNum = parseInt(this.eventToday.end.slice(5, 7));
     if (monthNum === this.state.date.getMonth() + 1) {
       let deleteIndex;
@@ -1211,10 +1219,12 @@ export class CalendarPlanScreen extends React.Component {
           </View> */}
           {calView}
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
-            this._panel.show();
+            //this._panel.show();
             //this.setState({ isReportModalVis: true });
+            this.dataModel.scheduleNotification();
+            this.dataModel.scheduleReportNotification();
           }}
           style={{
             width: "100%",
@@ -1226,8 +1236,8 @@ export class CalendarPlanScreen extends React.Component {
           <View style={{ opacity: 0.5 }}>
             <Ionicons name="add-circle" size={30} color="black" />
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </TouchableOpacity> */}
+        {/* <TouchableOpacity
           onPress={() => {
             this.setState({ isEventDetailModalVis: true });
           }}
@@ -1241,7 +1251,7 @@ export class CalendarPlanScreen extends React.Component {
           <View style={{ opacity: 0.5 }}>
             <Ionicons name="add-circle" size={30} color="black" />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* <TouchableOpacity
           onPress={() => {
             this.setState({ isDayReportModalVis: true });
@@ -1426,9 +1436,8 @@ export class CalendarPlanScreen extends React.Component {
                         }
                       }
                     }
-                    
 
-                    this.setState({activityPickerInitVal:"none"})
+                    // this.setState({activityPickerInitVal:"none"})
 
                     await this.setState({ eventsThisMonth: newEventList });
 
