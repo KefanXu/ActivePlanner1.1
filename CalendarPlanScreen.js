@@ -216,6 +216,11 @@ export class CalendarPlanScreen extends React.Component {
       slideUpDayNum: "",
       isPlannedEventModalVis: false,
       isWeatherVisOnPanel: "none",
+
+      eventFilteredList: false,
+      timeFilteredList: false,
+
+      activityPickerInitVal: "none",
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -1348,41 +1353,85 @@ export class CalendarPlanScreen extends React.Component {
                   }}
                   initValueTextStyle={{ color: "black" }}
                   data={data}
-                  initValue="None"
+                  initValue={this.state.activityPickerInitVal}
                   onChange={async (item) => {
                     this.selectedActivity = item.label;
                     this.isActivitySelected = true;
                     let newListByActivity = [];
                     let currentList = [];
-                    if (
-                      this.state.monthCalCurrentMonth ===
-                      this.state.date.getMonth()
-                    ) {
-                      currentList = this.combinedEventListThis;
-                    } else if (
-                      this.state.monthCalCurrentMonth ===
-                      this.state.date.getMonth() - 1
-                    ) {
-                      currentList = this.combinedEventListLast;
+                    if (!this.state.timeFilteredList) {
+                      if (
+                        this.state.monthCalCurrentMonth ===
+                        this.state.date.getMonth()
+                      ) {
+                        currentList = this.combinedEventListThis;
+                      } else if (
+                        this.state.monthCalCurrentMonth ===
+                        this.state.date.getMonth() - 1
+                      ) {
+                        currentList = this.combinedEventListLast;
+                      } else {
+                        currentList = this.combinedEventListNext;
+                      }
+                      this.setState({ eventFilteredList: true });
                     } else {
-                      currentList = this.combinedEventListNext;
+                      currentList = this.state.eventsThisMonth;
+                      this.setState({ eventFilteredList: false });
                     }
 
-                    //console.log("currentList",currentList);
+                    let eventListDates = [];
                     for (let event of currentList) {
-                      if (event.title) {
-                        if (event.title === item.label) {
-                          newListByActivity.push(event);
+                      let dateNum = String(event.start.slice(8, 10));
+                      if (!eventListDates.includes(dateNum)) {
+                        eventListDates.push(dateNum);
+                      }
+                    }
+
+                    let dayEventsList = [];
+                    for (let dateNum of eventListDates) {
+                      let dayEventObj = {
+                        dateNum: parseInt(dateNum),
+                        dayEvents: [],
+                        isFiltered: false,
+                      };
+                      dayEventsList.push(dayEventObj);
+                    }
+
+                    for (let date of dayEventsList) {
+                      for (let event of currentList) {
+                        let dateNum = parseInt(event.start.slice(8, 10));
+                        if (dateNum === date.dateNum) {
+                          let newEvent = event;
+                          date.dayEvents.push(newEvent);
                         }
                       }
                     }
-                    //console.log("newListByActivity", newListByActivity);
-                    //console.log("this.state.monthCalCurrentMonth",this.state.monthCalCurrentMonth);
-                    await this.setState({ eventsThisMonth: newListByActivity });
-                    //this.monthCalRef.current.processEvents();
-                    //this.updateView();
-                    //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
-                    //console.log("this.state.newListByActivity",this.state.newListByActivity);
+
+                    let newEventList = [];
+
+                    for (let date of dayEventsList) {
+                      for (let event of date.dayEvents) {
+                        if (event.title) {
+                          if (event.title === item.label) {
+                            date.isFiltered = true;
+                          }
+                        }
+                      }
+                    }
+
+                    for (let date of dayEventsList) {
+                      if (date.isFiltered) {
+                        for (let event of date.dayEvents) {
+                          newEventList.push(event);
+                        }
+                      }
+                    }
+                    
+
+                    this.setState({activityPickerInitVal:"none"})
+
+                    await this.setState({ eventsThisMonth: newEventList });
+
                     this.monthCalRef.current.processEvents();
                   }}
                 />
@@ -1459,10 +1508,35 @@ export class CalendarPlanScreen extends React.Component {
                   mode="default"
                   is24Hour={true}
                   display="default"
-                  onChange={(e, date) => {
+                  onChange={async (e, date) => {
                     //let setDate = moment(date);
-                    console.log(date.toString());
+                    let startHour = moment(date).hour();
                     this.setState({ date: date });
+                    let newList = [];
+
+                    if (startHour < 12) {
+                      for (let event of this.state.eventsThisMonth) {
+                        if (parseInt(event.start.slice(11, 13)) < 12) {
+                          newList.push(event);
+                        }
+                      }
+                    } else {
+                      for (let event of this.state.eventsThisMonth) {
+                        if (parseInt(event.start.slice(11, 13)) > 12) {
+                          newList.push(event);
+                        }
+                      }
+                    }
+                    if (this.state.eventFilteredList) {
+                      this.setState({ timeFilteredList: false });
+                    } else {
+                      this.setState({ timeFilteredList: true });
+                    }
+
+                    this.setState({ date: new Date() });
+                    await this.setState({ eventsThisMonth: newList });
+
+                    this.monthCalRef.current.processEvents();
                   }}
                   style={{
                     width: 100,
@@ -1498,7 +1572,7 @@ export class CalendarPlanScreen extends React.Component {
             <View
               style={{
                 flex: 0.4,
-                flexDirection:"row",
+                flexDirection: "row",
                 width: "90%",
                 borderRadius: 20,
                 justifyContent: "flex-start",
