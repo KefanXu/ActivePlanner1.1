@@ -28,6 +28,9 @@ import moment, { min } from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
+
+import ModalSelector from "react-native-modal-selector";
+
 // import AnimatedMultistep from "react-native-animated-multistep";
 // const reportOptions = [
 //   {
@@ -52,6 +55,21 @@ import SwitchSelector from "react-native-switch-selector";
 //   { name: "step 3", component: Step3 },
 //   { name: "step 4", component: Step4 },
 // ];
+
+let index = 0;
+const data = [
+  { key: index++, section: true, label: "Physical Activities" },
+  { key: index++, label: "Walking" },
+  { key: index++, label: "Jogging" },
+  // {
+  //   key: index++,
+  //   label: "Cranberries",
+  //   accessibilityLabel: "Tap here for cranberries",
+  // },
+  // // etc...
+  // // Can also add additional custom keys which are passed to the onChange callback
+  // { key: index++, label: "Vegetable", customKey: "Not a fruit" },
+];
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -1319,7 +1337,56 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   Activity Type
                 </Text>
-                <DropDownPicker
+                <ModalSelector
+                  style={{ backgroundColor: "white", borderWidth: 0 }}
+                  backdropPressToClose={true}
+                  overlayStyle={{
+                    flex: 1,
+                    padding: "5%",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(0,0,0,0)",
+                  }}
+                  initValueTextStyle={{ color: "black" }}
+                  data={data}
+                  initValue="None"
+                  onChange={async (item) => {
+                    this.selectedActivity = item.label;
+                    this.isActivitySelected = true;
+                    let newListByActivity = [];
+                    let currentList = [];
+                    if (
+                      this.state.monthCalCurrentMonth ===
+                      this.state.date.getMonth()
+                    ) {
+                      currentList = this.combinedEventListThis;
+                    } else if (
+                      this.state.monthCalCurrentMonth ===
+                      this.state.date.getMonth() - 1
+                    ) {
+                      currentList = this.combinedEventListLast;
+                    } else {
+                      currentList = this.combinedEventListNext;
+                    }
+
+                    //console.log("currentList",currentList);
+                    for (let event of currentList) {
+                      if (event.title) {
+                        if (event.title === item.label) {
+                          newListByActivity.push(event);
+                        }
+                      }
+                    }
+                    //console.log("newListByActivity", newListByActivity);
+                    //console.log("this.state.monthCalCurrentMonth",this.state.monthCalCurrentMonth);
+                    await this.setState({ eventsThisMonth: newListByActivity });
+                    //this.monthCalRef.current.processEvents();
+                    //this.updateView();
+                    //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
+                    //console.log("this.state.newListByActivity",this.state.newListByActivity);
+                    this.monthCalRef.current.processEvents();
+                  }}
+                />
+                {/* <DropDownPicker
                   items={[
                     {
                       label: "Walking",
@@ -1366,13 +1433,13 @@ export class CalendarPlanScreen extends React.Component {
                     //console.log("this.state.newListByActivity",this.state.newListByActivity);
                     this.monthCalRef.current.processEvents();
                   }}
-                />
+                /> */}
               </View>
               <View
                 style={{
                   flex: 0.25,
                   width: "100%",
-                  height:"100%",
+                  height: "100%",
                   justifyContent: "flex-start",
                   // backgroundColor:"blue"
                 }}
@@ -1409,9 +1476,8 @@ export class CalendarPlanScreen extends React.Component {
                 style={{
                   flex: 0.25,
                   width: "100%",
-                  height:"100%",
+                  height: "100%",
                   justifyContent: "flex-start",
-                  
                 }}
               >
                 <Text
@@ -1432,6 +1498,7 @@ export class CalendarPlanScreen extends React.Component {
             <View
               style={{
                 flex: 0.4,
+                flexDirection:"row",
                 width: "90%",
                 borderRadius: 20,
                 justifyContent: "flex-start",
@@ -1443,6 +1510,29 @@ export class CalendarPlanScreen extends React.Component {
                 title="Plan"
                 disabled={this.state.isPlanBtnDisable}
                 onPress={() => this.onPlanBtnPressed()}
+              ></Button>
+              <Button
+                title="Reset"
+                disabled={false}
+                onPress={async () => {
+                  let currentList = [];
+                  if (
+                    this.state.monthCalCurrentMonth ===
+                    this.state.date.getMonth()
+                  ) {
+                    currentList = this.combinedEventListThis;
+                  } else if (
+                    this.state.monthCalCurrentMonth ===
+                    this.state.date.getMonth() - 1
+                  ) {
+                    currentList = this.combinedEventListLast;
+                  } else {
+                    currentList = this.combinedEventListNext;
+                  }
+                  await this.setState({ eventsThisMonth: currentList });
+
+                  this.monthCalRef.current.processEvents();
+                }}
               ></Button>
             </View>
           </View>
