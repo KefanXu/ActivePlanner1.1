@@ -1309,6 +1309,7 @@ export class CalendarPlanScreen extends React.Component {
 
         <SlidingUpPanel
           draggableRange={{ top: 290, bottom: 100 }}
+          showBackdrop={false}
           ref={(c) => (this._panel = c)}
         >
           <View
@@ -1526,6 +1527,11 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "center",
                       backgroundColor: "rgba(0,0,0,0)",
                     }}
+                    optionContainerStyle={{backgroundColor:"white", borderRadius: 15}}
+                    optionTextStyle={{fontWeight:"bold"}}
+                    sectionTextStyle={{fontWeight:"bold"}}
+                    cancelStyle={{backgroundColor:"white", borderRadius: 15}}
+                    cancelTextStyle={{fontWeight:"bold"}}
                     data={data}
                     initValue={this.state.activityPickerInitVal}
                     onChange={async (item) => {

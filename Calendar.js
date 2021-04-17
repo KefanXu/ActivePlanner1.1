@@ -145,42 +145,11 @@ export class MonthCalendar extends React.Component {
   render() {
     var matrix = this.generateMatrix();
     var rows = [];
-    //let { width } = Dimensions.get("window");
     rows = matrix.map((row, rowIndex) => {
-      // let countKey = 0;
-      // var additionalView = row.map(() => {
-      //   return (
-      //     <View
-      //       style={[
-      //         { flex: 0.5, backgroundColor: "blue" },
-      //         { transform: [{ scale: 0.5 }] },
-      //       ]}
-      //     >
-      //       <Text>1</Text>
-      //       {/* <EventCalendar
-      //         eventTapped={console.log("tap")}
-      //         size = {1}
-      //         width={width/10}
-      //       /> */}
-      //       {/* <Calendar
-      //         events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
-      //         height={100}
-      //         mode="day"
-
-      //       /> */}
-      //     </View>
-      //   );
-      // });
       var rowItems = row.map((item, colIndex) => {
         //
         if (rowIndex === 0) {
           return (
-            // <Calendar
-            //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
-            //     height={5}
-            //     mode="day"
-
-            //   />
             <View
               style={{
                 flex: 1,
@@ -206,11 +175,9 @@ export class MonthCalendar extends React.Component {
                       ? "bold"
                       : "300",
                 }}
-                // onPress={() => this._onPress(item)}
               >
                 {item != -1 ? item : ""}
               </Text>
-              {/* <View><Text>1</Text></View> */}
             </View>
           );
         } else {
@@ -234,28 +201,9 @@ export class MonthCalendar extends React.Component {
               //console.log("flatEventList created");
             }
           }
-          // let iconNum = "";
-          // let findWeather = false;
-          // for (let dayWeather of this.props.weatherThisMonth) {
-          //   console.log("dayWeather",dayWeather);
 
-          //   if (item == dayWeather.date) {
-          //     findWeather = true;
-          //     iconNum = dayWeather.img;
-          //   }
-          //   if (!findWeather) {
-          //     iconNum = "unknown"
-          //   }
-          // }
           return (
-            // <Calendar
-            //     events={[{title:"test",start:new Date(2021,3,21,5,0),end: new Date(2021,3,21,6,0)}]}
-            //     height={5}
-            //     mode="day"
-
-            //   />
-
-            <View
+            <TouchableOpacity
               style={{
                 flex: 1,
                 textAlign: "center",
@@ -265,6 +213,8 @@ export class MonthCalendar extends React.Component {
                 alignContent: "space-between",
                 justifyContent: "space-between",
               }}
+              activeOpacity={1}
+              onPress={() => this.onPress(item)}
             >
               <View
                 style={{
@@ -281,7 +231,6 @@ export class MonthCalendar extends React.Component {
                     height: 18,
                     justifyContent: "flex-start",
                     alignContent: "flex-start",
-                    // Highlight header
 
                     backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
                     // Highlight Sundays
@@ -292,19 +241,14 @@ export class MonthCalendar extends React.Component {
                         ? "bold"
                         : "300",
                   }}
-                  onPress={() => this.onPress(item)}
                 >
                   {item != -1 ? item : ""}
                 </Text>
-
-                {/* <Text style={{ flex: 0.5, textAlign: "center", backgroundColor:"red" }}>{iconNum}</Text> */}
-                {/* <Image source={{uri: "http://openweathermap.org/img/wn/" + iconNum + ".png"}} style={{width:20, height:20}}></Image> */}
               </View>
               <View
                 style={{
                   flex: 1,
                   flexDirection: "column",
-                  // backgroundColor:"green",
                   height: "100%",
                   justifyContent: "flex-start",
                 }}
@@ -341,16 +285,22 @@ export class MonthCalendar extends React.Component {
                               <View
                                 style={{
                                   width: "100%",
+                                  height: 15,
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   backgroundColor: "red",
                                   borderRadius: 5,
                                   flex: 1,
                                 }}
                               >
                                 <Text
-                                  style={{ textAlign: "center", fontSize: 5 }}
+                                  style={{
+                                    textAlign: "center",
+                                    fontSize: 8,
+                                    fontWeight: "bold",
+                                  }}
                                 >
-                                  {/* {item.start} */}
-                                  event
+                                  {item.title ? item.title : "event"}
                                 </Text>
                               </View>
                             );
@@ -363,13 +313,21 @@ export class MonthCalendar extends React.Component {
                                     backgroundColor: "green",
                                     borderRadius: 5,
                                     flex: 1,
+                                    height: 15,
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                   }}
                                 >
                                   <Text
-                                    style={{ textAlign: "center", fontSize: 5 }}
+                                    style={{
+                                      textAlign: "center",
+                                      fontSize: 8,
+                                      fontWeight: "bold",
+                                    }}
                                   >
                                     {/* {item.start} */}
-                                    event
+
+                                    {item.title ? item.title : "event"}
                                   </Text>
                                 </View>
                               );
@@ -381,13 +339,20 @@ export class MonthCalendar extends React.Component {
                                     backgroundColor: "yellow",
                                     borderRadius: 5,
                                     flex: 1,
+                                    height: 15,
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                   }}
                                 >
                                   <Text
-                                    style={{ textAlign: "center", fontSize: 5 }}
+                                    style={{
+                                      textAlign: "center",
+                                      fontSize: 8,
+                                      fontWeight: "bold",
+                                    }}
                                   >
                                     {/* {item.start} */}
-                                    event
+                                    {item.title ? item.title : "event"}
                                   </Text>
                                 </View>
                               );
@@ -398,6 +363,9 @@ export class MonthCalendar extends React.Component {
                             <View
                               style={{
                                 width: "100%",
+                                height: 15,
+                                alignItems: "center",
+                                justifyContent: "center",
                                 backgroundColor: "white",
                                 borderWidth: 1,
                                 borderColor: "black",
@@ -406,10 +374,14 @@ export class MonthCalendar extends React.Component {
                               }}
                             >
                               <Text
-                                style={{ textAlign: "center", fontSize: 5 }}
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: 8,
+                                  fontWeight: "bold",
+                                }}
                               >
                                 {/* {item.start} */}
-                                event
+                                {item.title ? item.title : "event"}
                               </Text>
                             </View>
                           );
@@ -419,14 +391,17 @@ export class MonthCalendar extends React.Component {
                           <View
                             style={{
                               width: "100%",
+                              height: 10,
                               backgroundColor: "grey",
+                              alignItems: "center",
+                              justifyContent: "center",
                               borderRadius: 5,
                               flex: 1,
                             }}
                           >
                             <Text style={{ textAlign: "center", fontSize: 5 }}>
                               {/* {item.start} */}
-                              event
+                              {item.title ? item.title : ""}
                             </Text>
                           </View>
                         );
@@ -457,16 +432,23 @@ export class MonthCalendar extends React.Component {
                               <View
                                 style={{
                                   width: "100%",
-                                  // backgroundColor: "red",
+                                  backgroundColor: "red",
                                   borderRadius: 5,
                                   flex: 1,
+                                  height: 15,
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                 }}
                               >
                                 <Text
-                                  style={{ textAlign: "center", fontSize: 5 }}
+                                  style={{
+                                    textAlign: "center",
+                                    fontSize: 8,
+                                    fontWeight: "bold",
+                                  }}
                                 >
                                   {/* {item.start} */}
-                                  event
+                                  {item.title ? item.title : "event"}
                                 </Text>
                               </View>
                             );
@@ -477,15 +459,22 @@ export class MonthCalendar extends React.Component {
                                   style={{
                                     width: "100%",
                                     backgroundColor: "green",
+                                    height: 15,
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                     borderRadius: 5,
                                     flex: 1,
                                   }}
                                 >
                                   <Text
-                                    style={{ textAlign: "center", fontSize: 5 }}
+                                    style={{
+                                      textAlign: "center",
+                                      fontSize: 8,
+                                      fontWeight: "bold",
+                                    }}
                                   >
                                     {/* {item.start} */}
-                                    event
+                                    {item.title ? item.title : "event"}
                                   </Text>
                                 </View>
                               );
@@ -496,14 +485,21 @@ export class MonthCalendar extends React.Component {
                                     width: "100%",
                                     backgroundColor: "yellow",
                                     borderRadius: 5,
+                                    height: 15,
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                     flex: 1,
                                   }}
                                 >
                                   <Text
-                                    style={{ textAlign: "center", fontSize: 5 }}
+                                    style={{
+                                      textAlign: "center",
+                                      fontSize: 8,
+                                      fontWeight: "bold",
+                                    }}
                                   >
                                     {/* {item.start} */}
-                                    event
+                                    {item.title ? item.title : "event"}
                                   </Text>
                                 </View>
                               );
@@ -514,6 +510,9 @@ export class MonthCalendar extends React.Component {
                             <View
                               style={{
                                 width: "100%",
+                                height: 15,
+                                alignItems: "center",
+                                justifyContent: "center",
                                 backgroundColor: "white",
                                 borderWidth: 1,
                                 borderColor: "black",
@@ -522,10 +521,14 @@ export class MonthCalendar extends React.Component {
                               }}
                             >
                               <Text
-                                style={{ textAlign: "center", fontSize: 5 }}
+                                style={{
+                                  textAlign: "center",
+                                  fontSize: 8,
+                                  fontWeight: "bold",
+                                }}
                               >
                                 {/* {item.start} */}
-                                event
+                                {item.title ? item.title : "event"}
                               </Text>
                             </View>
                           );
@@ -537,12 +540,15 @@ export class MonthCalendar extends React.Component {
                               width: "100%",
                               backgroundColor: "grey",
                               borderRadius: 5,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: 10,
                               flex: 1,
                             }}
                           >
                             <Text style={{ textAlign: "center", fontSize: 5 }}>
                               {/* {item.start} */}
-                              event
+                              {item.title ? item.title : ""}
                             </Text>
                           </View>
                         );
@@ -551,7 +557,7 @@ export class MonthCalendar extends React.Component {
                   />
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         }
       });
