@@ -1001,7 +1001,7 @@ export class CalendarPlanScreen extends React.Component {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={{ flex: 0.9, width: "90%"}}>
+              <View style={{ flex: 0.9, width: "90%" }}>
                 <View
                   style={{
                     flex: 0.2,
@@ -1056,11 +1056,13 @@ export class CalendarPlanScreen extends React.Component {
                     </Text>
                   </View>
                 </View>
-                <View style={{ flex: 1,}}>
+                <View style={{ flex: 1 }}>
                   <Calendar
                     events={this.state.detailViewCalendar}
                     date={new Date(this.eventToday.start)}
-                    scrollOffsetMinutes={parseInt(this.eventToday.start.slice(11,13))*60}
+                    scrollOffsetMinutes={
+                      parseInt(this.eventToday.start.slice(11, 13)) * 60
+                    }
                     swipeEnabled={false}
                     height={90}
                     mode="day"
@@ -1306,13 +1308,14 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity> */}
 
         <SlidingUpPanel
-          draggableRange={{ top: 300, bottom: 100 }}
+          draggableRange={{ top: 290, bottom: 100 }}
           ref={(c) => (this._panel = c)}
         >
           <View
             style={{
               height: 300,
               justifyContent: "space-between",
+              flexDirection: "column",
               alignItems: "center",
               borderRadius: 40,
               backgroundColor: "#BDBDBD",
@@ -1321,27 +1324,74 @@ export class CalendarPlanScreen extends React.Component {
             <View
               style={{
                 flex: 0.4,
+                flexDirection: "column",
                 width: "90%",
                 borderRadius: 20,
-                justifyContent: "flex-start",
+                justifyContent: "space-between",
                 marginTop: 20,
-                backgroundColor: "#6E6E6E",
+                backgroundColor: "white",
+
               }}
             >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: "white",
-                  marginTop: 10,
-                  marginLeft: 10,
-                }}
-              >
-                {this.state.panelTop}
-              </Text>
               <View
                 style={{
-                  flex: 0.8,
+                  flex: 0.5,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "black",
+                    marginTop: 10,
+                    marginLeft: 10,
+                  }}
+                >
+                  {this.state.panelTop}
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "black",
+                    color: "white",
+                    width: 60,
+                    height: 30,
+                    borderRadius: 15,
+                    marginTop: 5,
+                    marginRight: 5,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  disabled={false}
+                  onPress={async () => {
+                    let currentList = [];
+                    if (
+                      this.state.monthCalCurrentMonth ===
+                      this.state.date.getMonth()
+                    ) {
+                      currentList = this.combinedEventListThis;
+                    } else if (
+                      this.state.monthCalCurrentMonth ===
+                      this.state.date.getMonth() - 1
+                    ) {
+                      currentList = this.combinedEventListLast;
+                    } else {
+                      currentList = this.combinedEventListNext;
+                    }
+                    await this.setState({ eventsThisMonth: currentList });
+
+                    this.monthCalRef.current.processEvents();
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                    Reset
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
                   margin: 10,
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -1371,248 +1421,256 @@ export class CalendarPlanScreen extends React.Component {
                 flex: 0.4,
                 width: "90%",
                 borderRadius: 20,
-                flexDirection: "row",
+                flexDirection: "column",
                 justifyContent: "space-between",
-                alignItems: "flex-start",
+                alignItems: "center",
                 marginTop: 20,
                 backgroundColor: "#6E6E6E",
               }}
             >
-              <View style={{ flex: 0.5, alignContent: "flex-start" }}>
-                <Text
-                  style={{
-                    margin: 5,
-                    fontWeight: "bold",
-                    fontSize: 12,
-                    color: "white",
-                  }}
-                >
-                  Activity Type
-                </Text>
-                <ModalSelector
-                  style={{ backgroundColor: "white", borderWidth: 0 }}
-                  backdropPressToClose={true}
-                  overlayStyle={{
-                    flex: 1,
-                    padding: "5%",
-                    justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0)",
-                  }}
-                  initValueTextStyle={{ color: "black" }}
-                  data={data}
-                  initValue={this.state.activityPickerInitVal}
-                  onChange={async (item) => {
-                    this.selectedActivity = item.label;
-                    this.isActivitySelected = true;
-                    let newListByActivity = [];
-                    let currentList = [];
-                    if (!this.state.timeFilteredList) {
-                      if (
-                        this.state.monthCalCurrentMonth ===
-                        this.state.date.getMonth()
-                      ) {
-                        currentList = this.combinedEventListThis;
-                      } else if (
-                        this.state.monthCalCurrentMonth ===
-                        this.state.date.getMonth() - 1
-                      ) {
-                        currentList = this.combinedEventListLast;
-                      } else {
-                        currentList = this.combinedEventListNext;
-                      }
-                      this.setState({ eventFilteredList: true });
-                    } else {
-                      currentList = this.state.eventsThisMonth;
-                      this.setState({ eventFilteredList: false });
-                    }
-
-                    let eventListDates = [];
-                    for (let event of currentList) {
-                      let dateNum = String(event.start.slice(8, 10));
-                      if (!eventListDates.includes(dateNum)) {
-                        eventListDates.push(dateNum);
-                      }
-                    }
-
-                    let dayEventsList = [];
-                    for (let dateNum of eventListDates) {
-                      let dayEventObj = {
-                        dateNum: parseInt(dateNum),
-                        dayEvents: [],
-                        isFiltered: false,
-                      };
-                      dayEventsList.push(dayEventObj);
-                    }
-
-                    for (let date of dayEventsList) {
-                      for (let event of currentList) {
-                        let dateNum = parseInt(event.start.slice(8, 10));
-                        if (dateNum === date.dateNum) {
-                          let newEvent = event;
-                          date.dayEvents.push(newEvent);
-                        }
-                      }
-                    }
-
-                    let newEventList = [];
-
-                    for (let date of dayEventsList) {
-                      for (let event of date.dayEvents) {
-                        if (event.title) {
-                          if (event.title === item.label) {
-                            date.isFiltered = true;
-                          }
-                        }
-                      }
-                    }
-
-                    for (let date of dayEventsList) {
-                      if (date.isFiltered) {
-                        for (let event of date.dayEvents) {
-                          newEventList.push(event);
-                        }
-                      }
-                    }
-
-                    // this.setState({activityPickerInitVal:"none"})
-
-                    await this.setState({ eventsThisMonth: newEventList });
-
-                    this.monthCalRef.current.processEvents();
-                  }}
-                />
-                {/* <DropDownPicker
-                  items={[
-                    {
-                      label: "Walking",
-                      value: "walking",
-                      //icon: () => <Icon name="flag" size={18} color="#900" />,
-                      //hidden: true,
-                    },
-                    {
-                      label: "Jogging",
-                      value: "Jogging",
-                      //icon: () => <Icon name="flag" size={18} color="#900" />,
-                    },
-                  ]}
-                  defaultValue={"walking"}
-                  containerStyle={{ height: 40 }}
-                  style={{
-                    backgroundColor: "#fafafa",
-                    width: "100%",
-                    margin: 5,
-                  }}
-                  itemStyle={{
-                    justifyContent: "flex-start",
-                  }}
-                  dropDownStyle={{ backgroundColor: "#fafafa" }}
-                  onChangeItem={async (item) => {
-                    this.selectedActivity = item.label;
-                    this.isActivitySelected = true;
-                    let newListByActivity = [];
-                    let currentList = this.state.eventsThisMonth;
-                    //console.log("currentList",currentList);
-                    for (let event of currentList) {
-                      if (event.title) {
-                        if (event.title === item.label) {
-                          newListByActivity.push(event);
-                        }
-                      }
-                    }
-                    console.log("newListByActivity", newListByActivity);
-
-                    await this.setState({ eventsThisMonth: newListByActivity });
-                    //this.monthCalRef.current.processEvents();
-                    //this.updateView();
-                    //console.log("this.state.eventsThisMonth",this.state.eventsThisMonth);
-                    //console.log("this.state.newListByActivity",this.state.newListByActivity);
-                    this.monthCalRef.current.processEvents();
-                  }}
-                /> */}
+              <View
+                style={{
+                  flex: 0.5,
+                  flexDirection: "row",
+                  width: "95%",
+                  height: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingLeft: 10,
+                  paddingRight: 10,
+                }}
+              >
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Text
+                    style={{
+                      margin: 5,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      fontSize: 14,
+                      color: "white",
+                    }}
+                  >
+                    Activity
+                  </Text>
+                </View>
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Text
+                    style={{
+                      margin: 5,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      fontSize: 14,
+                      color: "white",
+                    }}
+                  >
+                    Start
+                  </Text>
+                </View>
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Text
+                    style={{
+                      margin: 5,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      fontSize: 14,
+                      color: "white",
+                    }}
+                  >
+                    End
+                  </Text>
+                </View>
               </View>
               <View
                 style={{
-                  flex: 0.25,
-                  width: "100%",
-                  height: "100%",
-                  justifyContent: "flex-start",
+                  flex: 0.5,
+                  flexDirection: "row",
+                  width: "95%",
+                  height: "90%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingLeft: 10,
+                  paddingRight: 10,
+                  marginBottom: 10,
+
+                  backgroundColor: "white",
+                  borderRadius: 15,
                   // backgroundColor:"blue"
                 }}
               >
-                <Text
+                <View
                   style={{
-                    margin: 5,
-                    fontWeight: "bold",
-                    fontSize: 12,
-                    color: "white",
-                  }}
-                >
-                  Start
-                </Text>
-                <DateTimePicker
-                  value={this.state.date}
-                  mode="default"
-                  is24Hour={true}
-                  display="default"
-                  onChange={async (e, date) => {
-                    //let setDate = moment(date);
-                    let startHour = moment(date).hour();
-                    this.setState({ date: date });
-                    let newList = [];
-
-                    if (startHour < 12) {
-                      for (let event of this.state.eventsThisMonth) {
-                        if (parseInt(event.start.slice(11, 13)) < 12) {
-                          newList.push(event);
-                        }
-                      }
-                    } else {
-                      for (let event of this.state.eventsThisMonth) {
-                        if (parseInt(event.start.slice(11, 13)) > 12) {
-                          newList.push(event);
-                        }
-                      }
-                    }
-                    if (this.state.eventFilteredList) {
-                      this.setState({ timeFilteredList: false });
-                    } else {
-                      this.setState({ timeFilteredList: true });
-                    }
-
-                    this.setState({ date: new Date() });
-                    await this.setState({ eventsThisMonth: newList });
-
-                    this.monthCalRef.current.processEvents();
-                  }}
-                  style={{
-                    width: 100,
-                    alignContent: "center",
+                    flex: 1,
                     justifyContent: "center",
-                    flexWrap: "wrap",
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  flex: 0.25,
-                  width: "100%",
-                  height: "100%",
-                  justifyContent: "flex-start",
-                }}
-              >
-                <Text
-                  style={{
-                    margin: 5,
-                    fontWeight: "bold",
-                    fontSize: 12,
-                    color: "white",
+                    alignItems: "center",
                   }}
                 >
-                  End
-                </Text>
-                <Text style={{ fontWeight: "bold", fontSize: 18 }}>
-                  {moment(this.state.date).add(30, "minutes").format("hh:mm")}
-                </Text>
+                  <ModalSelector
+                    style={{ borderWidth: 0 }}
+                    touchableStyle={{ color: "white" }}
+                    optionContainerStyle={{ borderWidth: 0 }}
+                    selectStyle={{ borderWidth: 0 }}
+                    selectTextStyle={{
+                      textAlign: "left",
+                      color: "blue",
+                      fontWeight: "bold",
+                    }}
+                    initValueTextStyle={{
+                      textAlign: "left",
+                      color: "blue",
+                      fontWeight: "bold",
+                    }}
+                    backdropPressToClose={true}
+                    overlayStyle={{
+                      flex: 1,
+                      padding: "5%",
+                      justifyContent: "center",
+                      backgroundColor: "rgba(0,0,0,0)",
+                    }}
+                    data={data}
+                    initValue={this.state.activityPickerInitVal}
+                    onChange={async (item) => {
+                      this.selectedActivity = item.label;
+                      this.isActivitySelected = true;
+                      let newListByActivity = [];
+                      let currentList = [];
+                      if (!this.state.timeFilteredList) {
+                        if (
+                          this.state.monthCalCurrentMonth ===
+                          this.state.date.getMonth()
+                        ) {
+                          currentList = this.combinedEventListThis;
+                        } else if (
+                          this.state.monthCalCurrentMonth ===
+                          this.state.date.getMonth() - 1
+                        ) {
+                          currentList = this.combinedEventListLast;
+                        } else {
+                          currentList = this.combinedEventListNext;
+                        }
+                        this.setState({ eventFilteredList: true });
+                      } else {
+                        currentList = this.state.eventsThisMonth;
+                        this.setState({ eventFilteredList: false });
+                      }
+
+                      let eventListDates = [];
+                      for (let event of currentList) {
+                        let dateNum = String(event.start.slice(8, 10));
+                        if (!eventListDates.includes(dateNum)) {
+                          eventListDates.push(dateNum);
+                        }
+                      }
+
+                      let dayEventsList = [];
+                      for (let dateNum of eventListDates) {
+                        let dayEventObj = {
+                          dateNum: parseInt(dateNum),
+                          dayEvents: [],
+                          isFiltered: false,
+                        };
+                        dayEventsList.push(dayEventObj);
+                      }
+
+                      for (let date of dayEventsList) {
+                        for (let event of currentList) {
+                          let dateNum = parseInt(event.start.slice(8, 10));
+                          if (dateNum === date.dateNum) {
+                            let newEvent = event;
+                            date.dayEvents.push(newEvent);
+                          }
+                        }
+                      }
+
+                      let newEventList = [];
+
+                      for (let date of dayEventsList) {
+                        for (let event of date.dayEvents) {
+                          if (event.title) {
+                            if (event.title === item.label) {
+                              date.isFiltered = true;
+                            }
+                          }
+                        }
+                      }
+
+                      for (let date of dayEventsList) {
+                        if (date.isFiltered) {
+                          for (let event of date.dayEvents) {
+                            newEventList.push(event);
+                          }
+                        }
+                      }
+
+                      // this.setState({activityPickerInitVal:"none"})
+
+                      await this.setState({ eventsThisMonth: newEventList });
+
+                      this.monthCalRef.current.processEvents();
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <DateTimePicker
+                    value={this.state.date}
+                    mode="default"
+                    is24Hour={true}
+                    display="default"
+                    onChange={async (e, date) => {
+                      //let setDate = moment(date);
+                      let startHour = moment(date).hour();
+                      this.setState({ date: date });
+                      let newList = [];
+
+                      if (startHour < 12) {
+                        for (let event of this.state.eventsThisMonth) {
+                          if (parseInt(event.start.slice(11, 13)) < 12) {
+                            newList.push(event);
+                          }
+                        }
+                      } else {
+                        for (let event of this.state.eventsThisMonth) {
+                          if (parseInt(event.start.slice(11, 13)) > 12) {
+                            newList.push(event);
+                          }
+                        }
+                      }
+                      if (this.state.eventFilteredList) {
+                        this.setState({ timeFilteredList: false });
+                      } else {
+                        this.setState({ timeFilteredList: true });
+                      }
+
+                      this.setState({ date: new Date() });
+                      await this.setState({ eventsThisMonth: newList });
+
+                      this.monthCalRef.current.processEvents();
+                    }}
+                    style={{
+                      width: "100%",
+                      alignSelf: "center",
+                      flexWrap: "wrap",
+                      position: "absolute",
+                      left: "6%",
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+                    {moment(this.state.date).add(30, "minutes").format("hh:mm")}
+                  </Text>
+                </View>
               </View>
             </View>
             <View
@@ -1621,39 +1679,25 @@ export class CalendarPlanScreen extends React.Component {
                 flexDirection: "row",
                 width: "90%",
                 borderRadius: 20,
-                justifyContent: "flex-start",
+                justifyContent: "flex-end",
                 marginTop: 20,
-                backgroundColor: "#6E6E6E",
               }}
             >
-              <Button
-                title="Plan"
+              <TouchableOpacity
                 disabled={this.state.isPlanBtnDisable}
                 onPress={() => this.onPlanBtnPressed()}
-              ></Button>
-              <Button
-                title="Reset"
-                disabled={false}
-                onPress={async () => {
-                  let currentList = [];
-                  if (
-                    this.state.monthCalCurrentMonth ===
-                    this.state.date.getMonth()
-                  ) {
-                    currentList = this.combinedEventListThis;
-                  } else if (
-                    this.state.monthCalCurrentMonth ===
-                    this.state.date.getMonth() - 1
-                  ) {
-                    currentList = this.combinedEventListLast;
-                  } else {
-                    currentList = this.combinedEventListNext;
-                  }
-                  await this.setState({ eventsThisMonth: currentList });
-
-                  this.monthCalRef.current.processEvents();
+                style={{
+                  backgroundColor: "black",
+                  color: "white",
+                  width: 100,
+                  height: 50,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-              ></Button>
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>Plan</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </SlidingUpPanel>
