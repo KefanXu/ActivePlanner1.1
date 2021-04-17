@@ -221,6 +221,8 @@ export class CalendarPlanScreen extends React.Component {
       timeFilteredList: false,
 
       activityPickerInitVal: "none",
+
+      detailViewCalendar: [],
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -360,9 +362,19 @@ export class CalendarPlanScreen extends React.Component {
         }
         if (this.eventToday.isReported) {
           //show event detail
-          //console.log("this.eventToday.isReported",this.eventToday.isReported);
+
           this.setState({ detailViewTop: month + " " + item });
           this.setState({ isEventDetailModalVis: true });
+          //console.log("this.state.thisMonthEvents",this.state.eventsThisMonth);
+          let detailViewCalendar = [];
+          for (let event of this.state.eventsThisMonth) {
+            if (
+              event.start.slice(0, 10) === this.eventToday.start.slice(0, 10)
+            ) {
+              detailViewCalendar.push(event);
+            }
+          }
+          this.setState({ detailViewCalendar: detailViewCalendar });
         } else {
           if (
             monthNum <= this.state.date.getMonth() &&
@@ -375,7 +387,7 @@ export class CalendarPlanScreen extends React.Component {
             this.setState({ isPlannedEventModalVis: true });
           }
         }
-      } else if (planDetailList.length != 1){
+      } else if (planDetailList.length != 1) {
         for (let event of planDetailList) {
           if (event.isDeleted === false) {
             this.eventToday = event;
@@ -678,6 +690,8 @@ export class CalendarPlanScreen extends React.Component {
           onPress={this.dataModel.scheduleNotification}
         ></Button>
         </View> */}
+
+        {/* //report modal */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -936,6 +950,7 @@ export class CalendarPlanScreen extends React.Component {
             </View>
           </View>
         </Modal>
+        {/* //Detailed View Modal */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -967,7 +982,7 @@ export class CalendarPlanScreen extends React.Component {
             >
               <View
                 style={{
-                  flex: 0.05,
+                  flex: 0.06,
                   width: "100%",
                   flexDirection: "row",
                   // backgroundColor:"red",
@@ -986,7 +1001,7 @@ export class CalendarPlanScreen extends React.Component {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={{ flex: 0.9, width: "90%" }}>
+              <View style={{ flex: 0.9, width: "90%"}}>
                 <View
                   style={{
                     flex: 0.2,
@@ -1040,6 +1055,16 @@ export class CalendarPlanScreen extends React.Component {
                       {this.state.detailViewTemp}°C
                     </Text>
                   </View>
+                </View>
+                <View style={{ flex: 1,}}>
+                  <Calendar
+                    events={this.state.detailViewCalendar}
+                    date={new Date(this.eventToday.start)}
+                    scrollOffsetMinutes={parseInt(this.eventToday.start.slice(11,13))*60}
+                    swipeEnabled={false}
+                    height={90}
+                    mode="day"
+                  />
                 </View>
               </View>
             </View>
