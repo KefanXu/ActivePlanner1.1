@@ -37,7 +37,7 @@ export class MonthCalendar extends React.Component {
       "November",
       "December",
     ];
-    this.weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    this.weekDays = ["S", "M", "T", "W", "T", "F", "S"];
     this.nDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     //this.thisMonthEvents = this.props.thisMonthEvents;
@@ -154,24 +154,29 @@ export class MonthCalendar extends React.Component {
               style={{
                 flex: 1,
                 textAlign: "center",
-                height: 18,
+                height: rowIndex == 0 ? 20 : 18,
                 flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
                 alignContent: "space-between",
+                //backgroundColor: rowIndex == 0 ? "" : "#fff",
+                borderRadius: rowIndex == 0 ? 15 : 0,
+                margin: rowIndex == 0 ? 17 : 0,
               }}
             >
               <Text
                 style={{
                   flex: 1,
                   textAlign: "center",
-                  height: 18,
+                  height: rowIndex == 0 ? 25 : 18,
                   // Highlight header
-                  backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
 
                   // Highlight Sundays
                   color: colIndex == 0 ? "#a00" : "#000",
                   // Highlight current date
                   fontWeight:
-                    item == this.props.monthCalCurrDate.getDate()
+                    item == this.props.monthCalCurrDate.getDate() ||
+                    rowIndex == 0
                       ? "bold"
                       : "300",
                 }}
@@ -201,9 +206,22 @@ export class MonthCalendar extends React.Component {
               //console.log("flatEventList created");
             }
           }
+          let iconNum = "";
+          let findWeather = false;
+          for (let dayWeather of this.props.weatherThisMonth) {
+            console.log("dayWeather", dayWeather);
+
+            if (item == dayWeather.date) {
+              findWeather = true;
+              iconNum = dayWeather.img;
+            }
+            if (!findWeather) {
+              iconNum = "unknown";
+            }
+          }
 
           return (
-            <TouchableOpacity
+            <View
               style={{
                 flex: 1,
                 textAlign: "center",
@@ -213,16 +231,22 @@ export class MonthCalendar extends React.Component {
                 alignContent: "space-between",
                 justifyContent: "space-between",
               }}
-              activeOpacity={1}
-              onPress={() => this.onPress(item)}
             >
-              <View
+              <TouchableOpacity
                 style={{
                   flex: 0.2,
                   height: 18,
+                  width: "95%",
                   flexDirection: "row",
-                  backgroundColor: "white",
+                  backgroundColor: item != -1 ? "white" : "",
+                  borderRadius: 15,
+                  marginTop: 2,
+
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
+                activeOpacity={0.1}
+                onPress={() => this.onPress(item)}
               >
                 <Text
                   style={{
@@ -232,7 +256,7 @@ export class MonthCalendar extends React.Component {
                     justifyContent: "flex-start",
                     alignContent: "flex-start",
 
-                    backgroundColor: rowIndex == 0 ? "#ddd" : "#fff",
+                    backgroundColor: rowIndex == 0 ? "#ddd" : "",
                     // Highlight Sundays
                     color: colIndex == 0 ? "#a00" : "#000",
                     // Highlight current date
@@ -244,7 +268,13 @@ export class MonthCalendar extends React.Component {
                 >
                   {item != -1 ? item : ""}
                 </Text>
-              </View>
+                <Image
+                  source={{
+                    uri: "http://openweathermap.org/img/wn/" + iconNum + ".png",
+                  }}
+                  style={{ width: 20, height: 20 }}
+                ></Image>
+              </TouchableOpacity>
               <View
                 style={{
                   flex: 1,
@@ -557,7 +587,7 @@ export class MonthCalendar extends React.Component {
                   />
                 </View>
               </View>
-            </TouchableOpacity>
+            </View>
           );
         }
       });
@@ -603,11 +633,12 @@ export class MonthCalendar extends React.Component {
           style={{
             //backgroundColor: "blue",
             fontWeight: "bold",
-            fontSize: 18,
-            textAlign: "center",
+            fontSize: 30,
+            margin: 20,
+            textAlign: "left",
           }}
         >
-          {this.months[this.props.monthCalCurrDate.getMonth()]}
+          {this.months[this.props.monthCalCurrDate.getMonth()] + " "}
           {this.props.monthCalCurrDate.getFullYear()}
         </Text>
         {rows}

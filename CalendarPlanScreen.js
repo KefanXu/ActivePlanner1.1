@@ -26,6 +26,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import moment, { min } from "moment";
 
 import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from '@expo/vector-icons'; 
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
 
@@ -293,7 +294,7 @@ export class CalendarPlanScreen extends React.Component {
       }
     }
     //console.log("planDetailList[0]",planDetailList[0]);
-    console.log("planDetailList", planDetailList);
+    //console.log("planDetailList", planDetailList);
     if (monthNum === this.state.date.getMonth()) {
       if (item > this.state.date.getDate()) {
         if (planDetailList.length === 0) {
@@ -376,13 +377,17 @@ export class CalendarPlanScreen extends React.Component {
           }
           this.setState({ detailViewCalendar: detailViewCalendar });
         } else {
-          if (
-            monthNum <= this.state.date.getMonth() &&
-            item <= this.state.date.getDate()
-          ) {
+          if (monthNum < this.state.date.getMonth()) {
             this.setState({ isReportModalVis: true });
-          } else {
+          } else if (monthNum === this.state.date.getMonth()) {
+            if (item <= this.state.date.getDate()) {
+              this.setState({ isReportModalVis: true });
+            } else {
+              this.eventToday = planDetailList[0];
+              this.setState({ isPlannedEventModalVis: true });
+            }
             //show planned info
+          } else {
             this.eventToday = planDetailList[0];
             this.setState({ isPlannedEventModalVis: true });
           }
@@ -391,7 +396,15 @@ export class CalendarPlanScreen extends React.Component {
         for (let event of planDetailList) {
           if (event.isDeleted === false) {
             this.eventToday = event;
-            this.setState({ isPlannedEventModalVis: true });
+            if (monthNum < this.state.date.getMonth()) {
+              this.setState({ isReportModalVis: true });
+            } else if (monthNum === this.state.date.getMonth()) {
+              if (item <= this.state.date.getDate()) {
+                this.setState({ isReportModalVis: true });
+              } else {
+                this.setState({ isPlannedEventModalVis: true });
+              }
+            }
           }
         }
       }
@@ -545,7 +558,7 @@ export class CalendarPlanScreen extends React.Component {
             }
           />
           <TouchableOpacity
-            style={{ flex: 1, position: "absolute", top: 0 }}
+            style={{ flex: 1, position: "absolute", top: 25, right: 90,  justifyContent:"center", alignItems:"center"}}
             disabled={!this.state.isMonthPreBtnAble}
             onPress={async () => {
               let currMonth = this.state.date.getMonth();
@@ -580,10 +593,11 @@ export class CalendarPlanScreen extends React.Component {
               }
             }}
           >
-            <Text>Previous</Text>
+            {/* <Text style={{fontWeight:"bold", fontSize:8}}>Previous</Text> */}
+            <AntDesign name="leftcircle" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ flex: 1, position: "absolute", top: 0, right: 0 }}
+            style={{ flex: 1, position: "absolute", top: 25, right: 30, justifyContent:"center", alignItems:"center" }}
             disabled={!this.state.isMonthNextBtnAble}
             onPress={async () => {
               //console.log("condition1",this.state.monthCalCurrentMonth);
@@ -617,7 +631,8 @@ export class CalendarPlanScreen extends React.Component {
               }
             }}
           >
-            <Text>Next</Text>
+            {/* <Text>Next</Text> */}
+            <AntDesign name="rightcircle" size={24} color="black" />
           </TouchableOpacity>
         </View>
       );
@@ -1216,7 +1231,7 @@ export class CalendarPlanScreen extends React.Component {
           </View>
         </Modal>
         <View>
-          <SegmentedControl
+          {/* <SegmentedControl
             values={["Month", "Week"]}
             selectedIndex={this.state.indexView}
             onChange={(event) => {
@@ -1230,10 +1245,11 @@ export class CalendarPlanScreen extends React.Component {
                 this.setState({ isMonthCalVis: true });
               }
             }}
-          />
+          /> */}
         </View>
         <View
           style={{
+            marginTop: 20,
             flexDirection: "column",
             backgroundColor: "",
             justifyContent: "flex-start",
@@ -1308,7 +1324,7 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity> */}
 
         <SlidingUpPanel
-          draggableRange={{ top: 290, bottom: 100 }}
+          draggableRange={{ top: 250, bottom: 100 }}
           showBackdrop={false}
           ref={(c) => (this._panel = c)}
         >
@@ -1331,7 +1347,6 @@ export class CalendarPlanScreen extends React.Component {
                 justifyContent: "space-between",
                 marginTop: 20,
                 backgroundColor: "white",
-
               }}
             >
               <View
@@ -1527,11 +1542,14 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "center",
                       backgroundColor: "rgba(0,0,0,0)",
                     }}
-                    optionContainerStyle={{backgroundColor:"white", borderRadius: 15}}
-                    optionTextStyle={{fontWeight:"bold"}}
-                    sectionTextStyle={{fontWeight:"bold"}}
-                    cancelStyle={{backgroundColor:"white", borderRadius: 15}}
-                    cancelTextStyle={{fontWeight:"bold"}}
+                    optionContainerStyle={{
+                      backgroundColor: "white",
+                      borderRadius: 15,
+                    }}
+                    optionTextStyle={{ fontWeight: "bold" }}
+                    sectionTextStyle={{ fontWeight: "bold" }}
+                    cancelStyle={{ backgroundColor: "white", borderRadius: 15 }}
+                    cancelTextStyle={{ fontWeight: "bold" }}
                     data={data}
                     initValue={this.state.activityPickerInitVal}
                     onChange={async (item) => {
