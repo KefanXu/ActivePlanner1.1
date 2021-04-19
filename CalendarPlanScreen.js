@@ -1370,7 +1370,7 @@ export class CalendarPlanScreen extends React.Component {
                 <TouchableOpacity
                   style={{
                     backgroundColor: "black",
-                    color: "white",
+                    // color: "white",
                     width: 60,
                     height: 30,
                     borderRadius: 15,
@@ -1522,7 +1522,7 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   <ModalSelector
                     style={{ borderWidth: 0 }}
-                    touchableStyle={{ color: "white" }}
+                    // touchableStyle={{ color: "white" }}
                     optionContainerStyle={{ borderWidth: 0 }}
                     selectStyle={{ borderWidth: 0 }}
                     selectTextStyle={{

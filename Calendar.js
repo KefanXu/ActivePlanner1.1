@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   TextInput,
   Text,
@@ -207,6 +208,7 @@ export class MonthCalendar extends React.Component {
             }
           }
           let iconNum = "";
+
           let findWeather = false;
           for (let dayWeather of this.props.weatherThisMonth) {
             console.log("dayWeather", dayWeather);
@@ -256,7 +258,7 @@ export class MonthCalendar extends React.Component {
                     justifyContent: "flex-start",
                     alignContent: "flex-start",
 
-                    backgroundColor: rowIndex == 0 ? "#ddd" : "",
+                    //backgroundColor: rowIndex == 0 ? "#ddd" : "",
                     // Highlight Sundays
                     color: colIndex == 0 ? "#a00" : "#000",
                     // Highlight current date
