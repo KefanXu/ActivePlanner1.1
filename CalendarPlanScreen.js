@@ -26,7 +26,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import moment, { min } from "moment";
 
 import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from '@expo/vector-icons'; 
+import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
 
@@ -547,7 +547,11 @@ export class CalendarPlanScreen extends React.Component {
       console.log("this.state.isMonthCalVis", this.state.isMonthCalVis);
 
       calView = (
-        <View>
+        <ScrollView 
+          style={{ height:"100%", flex: 1 }}
+          contentContainerStyle={{height: "200%", paddingBottom:0, justifyContent:"space-between"}}>
+          <View style={{flex:1}}>
+          <View>
           <MonthCalendar
             ref={this.monthCalRef}
             thisMonthEvents={this.state.eventsThisMonth}
@@ -557,8 +561,38 @@ export class CalendarPlanScreen extends React.Component {
               this.onPress(item, monthNum, month)
             }
           />
+          </View>
+          <View style={{flex:1}}>
+          <MonthCalendar
+            ref={this.monthCalRef}
+            thisMonthEvents={this.state.eventsThisMonth}
+            monthCalCurrDate={this.state.monthCalCurrDate}
+            weatherThisMonth={this.state.weatherThisMonth}
+            onPress={(item, monthNum, month) =>
+              this.onPress(item, monthNum, month)
+            }
+          />
+          </View>
+          <View style={{flex:1}}>
+          <MonthCalendar
+            ref={this.monthCalRef}
+            thisMonthEvents={this.state.eventsThisMonth}
+            monthCalCurrDate={this.state.monthCalCurrDate}
+            weatherThisMonth={this.state.weatherThisMonth}
+            onPress={(item, monthNum, month) =>
+              this.onPress(item, monthNum, month)
+            }
+          />
+          </View>
           <TouchableOpacity
-            style={{ flex: 1, position: "absolute", top: 25, right: 90,  justifyContent:"center", alignItems:"center"}}
+            style={{
+              flex: 1,
+              position: "absolute",
+              top: 25,
+              right: 90,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
             disabled={!this.state.isMonthPreBtnAble}
             onPress={async () => {
               let currMonth = this.state.date.getMonth();
@@ -597,7 +631,14 @@ export class CalendarPlanScreen extends React.Component {
             <AntDesign name="leftcircle" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ flex: 1, position: "absolute", top: 25, right: 30, justifyContent:"center", alignItems:"center" }}
+            style={{
+              flex: 1,
+              position: "absolute",
+              top: 25,
+              right: 30,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
             disabled={!this.state.isMonthNextBtnAble}
             onPress={async () => {
               //console.log("condition1",this.state.monthCalCurrentMonth);
@@ -634,59 +675,61 @@ export class CalendarPlanScreen extends React.Component {
             {/* <Text>Next</Text> */}
             <AntDesign name="rightcircle" size={24} color="black" />
           </TouchableOpacity>
-        </View>
+          </View>
+        </ScrollView>
       );
-    } else {
-      console.log("render week cal");
-      //console.log("this state", this.state.eventsThisMonth);
-      calView = (
-        <View
-          style={
-            ({ backgroundColor: "red", justifyContent: "flex-start" },
-            [{ transform: [{ scaleY: 1 }] }])
-          }
-        >
-          <Calendar
-            // events={[{ title: "test", start: new Date(), end: new Date() }]}
-            refs={this.weekCalRef}
-            contentContainerStyle={{ justifyContent: "flex-start" }}
-            events={this.state.fullEventList}
-            eventCellStyle={(event) => {
-              if (event.color) {
-                return { backgroundColor: event.color, borderWidth: 2 };
-              } else {
-                return { backgroundColor: "grey" };
-              }
-            }}
-            height={750}
-            scrollOffsetMinutes={480}
-            showTime={false}
-            mode="week"
-            showTime={true}
-            swipeEnabled={true}
-            onPressCell={() => alert("cell pressed")}
-            onPressDateHeader={(date) => {
-              let selectedDate = parseInt(date.toString().slice(8, 10));
-              //console.log(selectedDate);
-              this.setState({ selectedDate: selectedDate });
+} 
+//else {
+    //   console.log("render week cal");
+    //   //console.log("this state", this.state.eventsThisMonth);
+    //   calView = (
+    //     <View
+    //       style={
+    //         ({ backgroundColor: "red", justifyContent: "flex-start" },
+    //         [{ transform: [{ scaleY: 1 }] }])
+    //       }
+    //     >
+    //       <Calendar
+    //         // events={[{ title: "test", start: new Date(), end: new Date() }]}
+    //         refs={this.weekCalRef}
+    //         contentContainerStyle={{ justifyContent: "flex-start" }}
+    //         events={this.state.fullEventList}
+    //         eventCellStyle={(event) => {
+    //           if (event.color) {
+    //             return { backgroundColor: event.color, borderWidth: 2 };
+    //           } else {
+    //             return { backgroundColor: "grey" };
+    //           }
+    //         }}
+    //         height={750}
+    //         scrollOffsetMinutes={480}
+    //         showTime={false}
+    //         mode="week"
+    //         showTime={true}
+    //         swipeEnabled={true}
+    //         onPressCell={() => alert("cell pressed")}
+    //         onPressDateHeader={(date) => {
+    //           let selectedDate = parseInt(date.toString().slice(8, 10));
+    //           //console.log(selectedDate);
+    //           this.setState({ selectedDate: selectedDate });
 
-              let monthNum = moment(date).month();
-              this.setState({ selectedMonth: monthNum });
-              let month = this.months[monthNum];
+    //           let monthNum = moment(date).month();
+    //           this.setState({ selectedMonth: monthNum });
+    //           let month = this.months[monthNum];
 
-              this.setState({
-                panelTop: "plan for " + month + " " + selectedDate,
-              });
-              this._panel.show();
+    //           this.setState({
+    //             panelTop: "plan for " + month + " " + selectedDate,
+    //           });
+    //           this._panel.show();
 
-              this.setState({ isPlanBtnDisable: false });
-              this.setState({ isFromWeekView: true });
-            }}
-            onPressEvent={() => alert("event pressed")}
-          />
-        </View>
-      );
-    }
+    //           this.setState({ isPlanBtnDisable: false });
+    //           this.setState({ isFromWeekView: true });
+    //         }}
+    //         onPressEvent={() => alert("event pressed")}
+    //       />
+    //     </View>
+    //   );
+    // }
     return (
       <View
         style={{
@@ -1253,6 +1296,8 @@ export class CalendarPlanScreen extends React.Component {
             flexDirection: "column",
             backgroundColor: "",
             justifyContent: "flex-start",
+            flex:1,
+            height:"100%"
           }}
         >
           {/* <View style={[{alignItems:"flex-start", justifyContent:"flex-start", marginTop:0},{ transform: [{ scale: 0.5 }] }]}>
