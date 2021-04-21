@@ -207,20 +207,20 @@ export class MonthCalendar extends React.Component {
               //console.log("flatEventList created");
             }
           }
-          let iconNum = "";
+          // let iconNum = "";
 
-          let findWeather = false;
-          for (let dayWeather of this.props.weatherThisMonth) {
-            console.log("dayWeather", dayWeather);
+          // let findWeather = false;
+          // for (let dayWeather of this.props.weatherThisMonth) {
+          //   console.log("dayWeather", dayWeather);
 
-            if (item == dayWeather.date) {
-              findWeather = true;
-              iconNum = dayWeather.img;
-            }
-            if (!findWeather) {
-              iconNum = "unknown";
-            }
-          }
+          //   if (item == dayWeather.date) {
+          //     findWeather = true;
+          //     iconNum = dayWeather.img;
+          //   }
+          //   if (!findWeather) {
+          //     iconNum = "unknown";
+          //   }
+          // }
 
           return (
             <View
@@ -270,12 +270,12 @@ export class MonthCalendar extends React.Component {
                 >
                   {item != -1 ? item : ""}
                 </Text>
-                <Image
+                {/* <Image
                   source={{
                     uri: "http://openweathermap.org/img/wn/" + iconNum + ".png",
                   }}
                   style={{ width: 20, height: 20 }}
-                ></Image>
+                ></Image> */}
               </TouchableOpacity>
               <View
                 style={{
