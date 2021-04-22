@@ -528,7 +528,7 @@ export class CalendarPlanScreen extends React.Component {
     await this.dataModel.createNewPlan(this.userKey, newEvent);
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
-
+    this.setState({ panelTop: newEvent.title + " planned at " + newEvent.start.slice(11,16) + " on " + month + "/" + item});
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -1455,8 +1455,8 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                   >
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                      Planned: {this.eventToday.title},{" "}
-                      {this.state.detailViewTop}
+                      Planned: {this.eventToday.title} at {this.eventToday.start.slice(11,16)}
+                      {/* {this.state.detailViewTop} */}
                     </Text>
                     <View>
                       {/* <Button title="Report" style={{backgroundColor:"black"}}></Button> */}
@@ -1664,7 +1664,7 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <Text
                   style={{
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: "bold",
                     color: "black",
                     marginTop: 10,

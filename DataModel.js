@@ -135,7 +135,7 @@ class DataModel {
   scheduleNotification = async (newEvent) => {
     //2021-04-16T10:37:00
     //let trigger = new Date(Date.now() + 5 * 1000);
-    let startTime = newEvent.startTime;
+    let startTime = newEvent.start;
     let trigger = new Date(Date.parse(startTime) - 60 * 60 * 1000);
     //let secTrigger = new Date(Date.parse(startTime) + 7 * 1000);
     console.log("trigger",trigger);
