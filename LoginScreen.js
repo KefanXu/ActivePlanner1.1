@@ -14,6 +14,7 @@ import { loginStyles } from "./Styles";
 import { getDataModel } from "./DataModel";
 import moment, { min } from "moment";
 import * as Location from "expo-location";
+import AnimatedLoader from "react-native-animated-loader";
 
 const WEATHER_API_KEY = "38e37d6792982c51e50d914fd160ae89";
 
@@ -24,6 +25,8 @@ export class LoginScreen extends React.Component {
       displayNameInput: "",
       passwordInput: "",
       //imageURI: "http://openweathermap.org/img/w/unknown.png",
+      isLoaderVis: false,
+      loaderText:"",
     };
   }
   componentDidMount = () => {
@@ -108,7 +111,9 @@ export class LoginScreen extends React.Component {
       historicalWeatherItem.date = new Date(
         weatherHistoryJSON.list[0].dt * 1000
       );
-      historicalWeatherItem.temp = parseInt(weatherHistoryJSON.list[0].main.temp - 273);
+      historicalWeatherItem.temp = parseInt(
+        weatherHistoryJSON.list[0].main.temp - 273
+      );
       fullHistoryWeatherList.push(historicalWeatherItem);
     }
     //console.log(fullHistoryWeatherList);
@@ -118,7 +123,7 @@ export class LoginScreen extends React.Component {
         date: weather.date.getDate(),
         img: weather.icon,
         temp: weather.temp,
-        text: weather.main
+        text: weather.main,
       };
       if (weather.date.getMonth() === today.getMonth()) {
         if (weather.date.getDate() != today.getDate()) {
@@ -137,10 +142,9 @@ export class LoginScreen extends React.Component {
       img: weatherJson.weather[0].icon,
       temp: weatherJson.main.feels_like,
       text: weatherJson.weather[0].main,
-    }
+    };
     thisMonthWeather.push(weatherNow);
 
-    
     // let imageURI =
     //   "http://openweathermap.org/img/w/" + weatherJson.weather[0].icon + ".png";
     // this.setState({ imageURI: imageURI });
@@ -172,10 +176,10 @@ export class LoginScreen extends React.Component {
         nextMonthWeather.push(weatherImgList);
       }
     }
-    console.log("lastMonthWeather",lastMonthWeather);
-    console.log("thisMonthWeather",thisMonthWeather);
-    console.log("nextMonthWeather",nextMonthWeather);
-    return [lastMonthWeather,thisMonthWeather,nextMonthWeather];
+    console.log("lastMonthWeather", lastMonthWeather);
+    console.log("thisMonthWeather", thisMonthWeather);
+    console.log("nextMonthWeather", nextMonthWeather);
+    return [lastMonthWeather, thisMonthWeather, nextMonthWeather];
   };
 
   getLocation = async () => {
@@ -199,6 +203,7 @@ export class LoginScreen extends React.Component {
   };
   onGoogleSignIn = async () => {
     console.log("Google Sign In");
+    
     let userList = this.dataModel.getUsers();
     let [timeMin, timeMax] = this.processDate();
     //console.log(timeMin, timeMax);
@@ -235,18 +240,26 @@ export class LoginScreen extends React.Component {
     await this.dataModel.loadUserPlans(key);
     let userPlans = this.dataModel.getUserPlans();
 
+    this.setState({isLoaderVis:true});
+    this.setState({loaderText: "fetching weather data..."})
+
     let userInfo = {
       key: key,
       userPlans: userPlans,
     };
     //console.log("userInfo",userInfo);
     // console.log("userPlans",userPlans);
-    let [lastMonthWeather,thisMonthWeather,nextMonthWeather] = await this.fetchWeatherInfo(userPlans);
+    let [
+      lastMonthWeather,
+      thisMonthWeather,
+      nextMonthWeather,
+    ] = await this.fetchWeatherInfo(userPlans);
 
-    console.log("lastMonthWeather", lastMonthWeather);
-    console.log("thisMonthWeather", thisMonthWeather);
-    
-    console.log("nextMonthWeather", nextMonthWeather);
+    // console.log("lastMonthWeather", lastMonthWeather);
+    // console.log("thisMonthWeather", thisMonthWeather);
+
+    // console.log("nextMonthWeather", nextMonthWeather);
+    this.setState({isLoaderVis:false});
     this.props.navigation.navigate("Home Screen", {
       userEmail: calendarsID,
       userInfo: userInfo,
@@ -256,7 +269,7 @@ export class LoginScreen extends React.Component {
       fullEventList: fullEventList,
       lastMonthWeather: lastMonthWeather,
       thisMonthWeather: thisMonthWeather,
-      nextMonthWeather:nextMonthWeather,
+      nextMonthWeather: nextMonthWeather,
     });
   };
 
@@ -357,7 +370,16 @@ export class LoginScreen extends React.Component {
             />
           </View>
         </View> */}
-        <View style={loginStyles.buttonArea}>
+        <View
+          style={{
+            flex: 0.2,
+            width: "60%",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            
+          }}
+        >
           {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.onLogin()}
@@ -394,6 +416,17 @@ export class LoginScreen extends React.Component {
           >
             <Text style={loginStyles.buttonFont}>Test date</Text>
           </TouchableOpacity> */}
+        </View>
+        <View style={{ flex: 0.3 }}>
+          <AnimatedLoader
+            visible={this.state.isLoaderVis}
+            overlayColor="rgba(255,255,255,0.75)"
+            source={require("./assets/loader.json")}
+            animationStyle={{ width: 100, height: 100 }}
+            speed={1}
+          >
+            <Text style={{fontWeight:"bold"}}>{this.state.loaderText}</Text>
+          </AnimatedLoader>
         </View>
       </View>
     );
