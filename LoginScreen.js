@@ -23,7 +23,7 @@ export class LoginScreen extends React.Component {
     this.state = {
       displayNameInput: "",
       passwordInput: "",
-      imageURI: "http://openweathermap.org/img/w/unknown.png",
+      //imageURI: "http://openweathermap.org/img/w/unknown.png",
     };
   }
   componentDidMount = () => {
@@ -118,6 +118,7 @@ export class LoginScreen extends React.Component {
         date: weather.date.getDate(),
         img: weather.icon,
         temp: weather.temp,
+        text: weather.main
       };
       if (weather.date.getMonth() === today.getMonth()) {
         if (weather.date.getDate() != today.getDate()) {
@@ -135,11 +136,14 @@ export class LoginScreen extends React.Component {
       date: today.getDate(),
       img: weatherJson.weather[0].icon,
       temp: weatherJson.main.feels_like,
+      text: weatherJson.weather[0].main,
     }
     thisMonthWeather.push(weatherNow);
-    let imageURI =
-      "http://openweathermap.org/img/w/" + weatherJson.weather[0].icon + ".png";
-    this.setState({ imageURI: imageURI });
+
+    
+    // let imageURI =
+    //   "http://openweathermap.org/img/w/" + weatherJson.weather[0].icon + ".png";
+    // this.setState({ imageURI: imageURI });
 
     let weatherForecastList = [];
     let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&units=metric&appid=${WEATHER_API_KEY}`;
@@ -158,6 +162,7 @@ export class LoginScreen extends React.Component {
         date: weather.date.getDate(),
         img: weather.icon,
         temp: weather.temp,
+        text: weather.main,
       };
       if (weather.date.getMonth() === today.getMonth()) {
         if (weather.date.getDate() != today.getDate()) {
@@ -167,9 +172,9 @@ export class LoginScreen extends React.Component {
         nextMonthWeather.push(weatherImgList);
       }
     }
-    //console.log("lastMonthWeather",lastMonthWeather);
-    //console.log("thisMonthWeather",thisMonthWeather);
-    //console.log("nextMonthWeather",nextMonthWeather);
+    console.log("lastMonthWeather",lastMonthWeather);
+    console.log("thisMonthWeather",thisMonthWeather);
+    console.log("nextMonthWeather",nextMonthWeather);
     return [lastMonthWeather,thisMonthWeather,nextMonthWeather];
   };
 

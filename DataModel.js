@@ -131,7 +131,7 @@ class DataModel {
       granted = newPerms.granted;
     }
     return granted;
-    
+
   };
   scheduleNotification = async (newEvent) => {
     //2021-04-16T10:37:00
@@ -160,8 +160,8 @@ class DataModel {
     //console.log("reportTrigger", reportTrigger);
     let identifier = await Notification.scheduleNotificationAsync({
       content: {
-        title: "Upcoming Physical Activity2",
-        body: " is about to happen in an hour",
+        title: "Take some time to report your activity",
+        body: "What is your experience with " + newEvent.title,
         data: { data: "goes here" },
       },
       trigger,

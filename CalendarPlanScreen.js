@@ -219,6 +219,7 @@ export class CalendarPlanScreen extends React.Component {
 
       detailViewTemp: "",
       detailViewIcon: "",
+      weatherText:"",
 
       detailViewTop: "",
 
@@ -289,6 +290,7 @@ export class CalendarPlanScreen extends React.Component {
               if (weather.date === currDate) {
                 await this.setState({ detailViewTemp: weather.temp });
                 await this.setState({ detailViewIcon: weather.img });
+                await this.setState({weatherText: weather.text})
               }
             }
           }
@@ -362,6 +364,7 @@ export class CalendarPlanScreen extends React.Component {
         if (weather.date === item) {
           this.setState({ detailViewTemp: weather.temp });
           this.setState({ detailViewIcon: weather.img });
+          this.setState({weatherText: weather.text});
         }
       }
       //console.log(targetDate);
@@ -394,6 +397,7 @@ export class CalendarPlanScreen extends React.Component {
           if (weather.date === currDate) {
             this.setState({ detailViewTemp: weather.temp });
             this.setState({ detailViewIcon: weather.img });
+            this.setState({weatherText: weather.text});
           }
         }
         if (this.eventToday.isReported) {
@@ -412,6 +416,7 @@ export class CalendarPlanScreen extends React.Component {
             if (weather.date === currDate) {
               this.setState({ detailViewTemp: weather.temp });
               this.setState({ detailViewIcon: weather.img });
+              this.setState({weatherText: weather.text});
             }
           }
 
@@ -472,6 +477,7 @@ export class CalendarPlanScreen extends React.Component {
               if (weather.date === currDate) {
                 this.setState({ detailViewTemp: weather.temp });
                 this.setState({ detailViewIcon: weather.img });
+                this.setState({weatherText: weather.text})
               }
             }
 
@@ -1044,6 +1050,7 @@ export class CalendarPlanScreen extends React.Component {
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                     {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                   </Text>
+                  <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
                   <Image
                     source={{
                       uri:
@@ -1053,6 +1060,8 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                     style={{ width: 60, height: 60 }}
                   ></Image>
+                  <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                  </View>
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                     {this.state.detailViewTemp}°C
                   </Text>
@@ -1452,6 +1461,7 @@ export class CalendarPlanScreen extends React.Component {
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                     </Text>
+                    <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
                     <Image
                       source={{
                         uri:
@@ -1461,6 +1471,8 @@ export class CalendarPlanScreen extends React.Component {
                       }}
                       style={{ width: 60, height: 60 }}
                     ></Image>
+                    <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                    </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {this.state.detailViewTemp}°C
                     </Text>
@@ -1610,6 +1622,7 @@ export class CalendarPlanScreen extends React.Component {
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                     </Text>
+                    <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
                     <Image
                       source={{
                         uri:
@@ -1619,6 +1632,8 @@ export class CalendarPlanScreen extends React.Component {
                       }}
                       style={{ width: 60, height: 60 }}
                     ></Image>
+                    <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                    </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {this.state.detailViewTemp}°C
                     </Text>
@@ -1828,6 +1843,7 @@ export class CalendarPlanScreen extends React.Component {
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                   {this.state.slideUpDayNum}
                 </Text>
+                <View style={{flexDirection:"row", justifyContent:"center", alignItems:"center"}}>
                 <Image
                   source={{
                     uri:
@@ -1837,6 +1853,8 @@ export class CalendarPlanScreen extends React.Component {
                   }}
                   style={{ width: 60, height: 60 }}
                 ></Image>
+                <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                </View>
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                   {this.state.detailViewTemp}°C
                 </Text>
