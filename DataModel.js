@@ -131,6 +131,7 @@ class DataModel {
       granted = newPerms.granted;
     }
     return granted;
+    
   };
   scheduleNotification = async (newEvent) => {
     //2021-04-16T10:37:00

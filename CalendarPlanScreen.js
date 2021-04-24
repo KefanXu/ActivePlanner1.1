@@ -205,7 +205,7 @@ export class CalendarPlanScreen extends React.Component {
       nextBtnState: "next",
       submitBtnState: true,
       reason: "",
-      feeling: "",
+      feeling: "Neutral",
       otherActivity: "",
 
       monthCalCurrDate: new Date(),
@@ -528,7 +528,16 @@ export class CalendarPlanScreen extends React.Component {
     await this.dataModel.createNewPlan(this.userKey, newEvent);
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
-    this.setState({ panelTop: newEvent.title + " planned at " + newEvent.start.slice(11,16) + " on " + month + "/" + item});
+    this.setState({
+      panelTop:
+        newEvent.title +
+        " planned at " +
+        newEvent.start.slice(11, 16) +
+        " on " +
+        month +
+        "/" +
+        item,
+    });
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -903,7 +912,7 @@ export class CalendarPlanScreen extends React.Component {
           >
             <View
               style={{
-                flex: 0.5,
+                flex: 0.8,
                 width: "95%",
                 backgroundColor: "white",
 
@@ -972,15 +981,6 @@ export class CalendarPlanScreen extends React.Component {
                     alignItems: "center",
                   }}
                 >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                      marginTop: "20%",
-                    }}
-                  >
-                    Question 1/2
-                  </Text>
                   <Text
                     style={{
                       fontWeight: "bold",
@@ -1204,6 +1204,12 @@ export class CalendarPlanScreen extends React.Component {
                     if (this.state.nextBtnState === "submit") {
                       this.setState({ isReportModalVis: false });
                       this.setState({ nextBtnState: "next" });
+
+                      this.setState({ isThirdNoStepVis: "none" });
+                      this.setState({ isThirdYesStepVis: "none" });
+
+                      this.setState({ isFirstStepVis: "flex" });
+
                       let eventToUpdate = this.eventToday;
                       eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;
                       eventToUpdate.isReported = true;
@@ -1222,6 +1228,7 @@ export class CalendarPlanScreen extends React.Component {
                       await this.setState({ eventsThisMonth: eventList });
                       await this.dataModel.loadUserPlans(this.userKey);
                       this.userPlans = this.dataModel.getUserPlans();
+                      this.setState({ feeling: "Neutral" });
                       this.updateView();
                     } else if (this.state.nextBtnState === "next") {
                       this.setState({ isBackBtnVis: false });
@@ -1455,7 +1462,8 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                   >
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                      Planned: {this.eventToday.title} at {this.eventToday.start.slice(11,16)}
+                      Planned: {this.eventToday.title} at{" "}
+                      {this.eventToday.start.slice(11, 16)}
                       {/* {this.state.detailViewTop} */}
                     </Text>
                     <View>
@@ -1999,7 +2007,9 @@ export class CalendarPlanScreen extends React.Component {
                   }}
                 >
                   <Text style={{ fontWeight: "bold", fontSize: 18 }}>
-                    {moment(this.state.date).add(30, "minutes").format("hh:mm")}
+                    {moment(this.state.datePickerDate)
+                      .add(30, "minutes")
+                      .format("hh:mm")}
                   </Text>
                 </View>
               </View>
