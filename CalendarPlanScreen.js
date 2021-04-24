@@ -266,8 +266,9 @@ export class CalendarPlanScreen extends React.Component {
   //   }
   //   // return eventToday;
   // };
-  reportPopUp = (userPlanList) => {
+  reportPopUp = async (userPlanList) => {
     let currentDate = moment(new Date()).format().slice(0, 10);
+    let weatherList = [];
     //console.log("userPlanList", userPlanList);
     for (let event of userPlanList) {
       if (event.end && !event.isDeleted) {
@@ -277,6 +278,19 @@ export class CalendarPlanScreen extends React.Component {
           if (!event.isReported) {
             this.isReportModalVis = true;
             this.eventToday = event;
+
+            //let currMonthNum = new Date(this.eventToday.start);
+            let  currDate = (new Date(this.eventToday.start)).getDate();
+            weatherList = this.thisMonthWeather;
+
+            console.log("currDate",currDate);
+
+            for (let weather of weatherList) {
+              if (weather.date === currDate) {
+                await this.setState({ detailViewTemp: weather.temp });
+                await this.setState({ detailViewIcon: weather.img });
+              }
+            }
           }
         }
       }
@@ -389,6 +403,18 @@ export class CalendarPlanScreen extends React.Component {
           this.setState({ isEventDetailModalVis: true });
           //console.log("this.state.thisMonthEvents",this.state.eventsThisMonth);
         } else {
+          if (currMonthNum === this.state.date.getMonth() + 1) {
+            weatherList = this.thisMonthWeather;
+          } else {
+            weatherList = this.lastMonthWeather;
+          }
+          for (let weather of weatherList) {
+            if (weather.date === currDate) {
+              this.setState({ detailViewTemp: weather.temp });
+              this.setState({ detailViewIcon: weather.img });
+            }
+          }
+
           if (monthNum < this.state.date.getMonth()) {
             this.setState({ isReportModalVis: true });
           } else if (monthNum === this.state.date.getMonth()) {
@@ -435,6 +461,19 @@ export class CalendarPlanScreen extends React.Component {
               }
             }
             this.setState({ detailViewTop: month + " " + item });
+
+            //             let weatherList = [];
+            if (currMonthNum === this.state.date.getMonth() + 1) {
+              weatherList = this.thisMonthWeather;
+            } else {
+              weatherList = this.lastMonthWeather;
+            }
+            for (let weather of weatherList) {
+              if (weather.date === currDate) {
+                this.setState({ detailViewTemp: weather.temp });
+                this.setState({ detailViewIcon: weather.img });
+              }
+            }
 
             if (monthNum < this.state.date.getMonth()) {
               if (!this.eventToday.isReported) {
@@ -966,6 +1005,61 @@ export class CalendarPlanScreen extends React.Component {
               </View>
               <View
                 style={{
+                  flex: 0.2,
+                  width: "80%",
+                  backgroundColor: "#BDBDBD",
+                  borderRadius: 15,
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom:20
+                }}
+              >
+                <View
+                  style={{
+                    flex: 0.3,
+                    width: "90%",
+                    marginTop: 10,
+                    marginLeft: 10,
+                    marginBottom: 0,
+                  }}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    Records on {this.eventToday.title} on{" "}
+                    {this.eventToday.start.slice(5, 10)}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 0.7,
+                    width: "90%",
+                    marginTop: 0,
+                    marginLeft: 10,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexDirection: "row",
+                    // backgroundColor: "red",
+                  }}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    {WEEKDAY[new Date(this.eventToday.end).getDay()]}
+                  </Text>
+                  <Image
+                    source={{
+                      uri:
+                        "http://openweathermap.org/img/wn/" +
+                        this.state.detailViewIcon +
+                        ".png",
+                    }}
+                    style={{ width: 60, height: 60 }}
+                  ></Image>
+                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    {this.state.detailViewTemp}°C
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
                   flex: 1,
                   width: "80%",
                   //backgroundColor: "red",
@@ -987,7 +1081,9 @@ export class CalendarPlanScreen extends React.Component {
                       marginBottom: "10%",
                     }}
                   >
-                    Did you {this.eventToday.title} at {this.eventToday.start}
+                    Did you {this.eventToday.title} on{" "}
+                    {this.eventToday.start.slice(5, 10)} at{" "}
+                    {this.eventToday.start.slice(11, 16)}
                   </Text>
                   <SwitchSelector
                     options={[
