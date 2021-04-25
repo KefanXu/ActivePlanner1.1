@@ -118,7 +118,7 @@ export class CalendarPlanScreen extends React.Component {
     this.combinedEventListLast = this.eventsLastMonth;
     this.combinedEventListNext = this.eventsNextMonth;
     this.combineEventListFull = this.fullEventList;
-
+    //console.log("this.combineEventListFull",this.combineEventListFull);
     this.lastMonthWeather = this.props.route.params.lastMonthWeather;
     this.thisMonthWeather = this.props.route.params.thisMonthWeather;
     this.nextMonthWeather = this.props.route.params.nextMonthWeather;
@@ -216,10 +216,11 @@ export class CalendarPlanScreen extends React.Component {
       weatherThisMonth: this.thisMonthWeather,
 
       isEventDetailModalVis: false,
+      isNormalModalVis: false,
 
       detailViewTemp: "",
       detailViewIcon: "",
-      weatherText:"",
+      weatherText: "",
 
       detailViewTop: "",
 
@@ -233,40 +234,12 @@ export class CalendarPlanScreen extends React.Component {
       activityPickerInitVal: "none",
 
       detailViewCalendar: [],
+      normalViewModalStartDate: new Date(),
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
   }
 
-  // onNext = () => {
-  //   console.log("Next");
-  // };
-
-  // /* define the method to be called when you go on back step */
-
-  // onBack = () => {
-  //   console.log("Back");
-  // };
-
-  // /* define the method to be called when the wizard is finished */
-
-  // finish = (finalState) => {
-  //   console.log(finalState);
-  // };
-  // getEventToday = () => {
-  //   let userPlanList = this.userPlanList;
-  //   let eventToday;
-  //   let currentDate = moment(new Date()).format().slice(0, 10);
-  //   for (let event of userPlanList) {
-  //     if (event.end) {
-  //       let eventDate = event.end.slice(0, 10);
-  //       if (currentDate === eventDate) {
-  //         console.log(event);
-  //       }
-  //     }
-  //   }
-  //   // return eventToday;
-  // };
   reportPopUp = async (userPlanList) => {
     let currentDate = moment(new Date()).format().slice(0, 10);
     let weatherList = [];
@@ -281,16 +254,16 @@ export class CalendarPlanScreen extends React.Component {
             this.eventToday = event;
 
             //let currMonthNum = new Date(this.eventToday.start);
-            let  currDate = (new Date(this.eventToday.start)).getDate();
+            let currDate = new Date(this.eventToday.start).getDate();
             weatherList = this.thisMonthWeather;
 
-            console.log("currDate",currDate);
+            console.log("currDate", currDate);
 
             for (let weather of weatherList) {
               if (weather.date === currDate) {
                 await this.setState({ detailViewTemp: weather.temp });
                 await this.setState({ detailViewIcon: weather.img });
-                await this.setState({weatherText: weather.text})
+                await this.setState({ weatherText: weather.text });
               }
             }
           }
@@ -307,7 +280,7 @@ export class CalendarPlanScreen extends React.Component {
     //this.reportPopUp(this.userPlans);
     let planDetailList = [];
     for (let plan of this.userPlans) {
-      if (plan.end) {
+      if (plan.end && !plan.isDeleted) {
         let plannedMonth = parseInt(plan.end.slice(5, 7));
         let plannedDate = parseInt(plan.end.slice(8, 10));
         if (monthNum + 1 == plannedMonth && item == plannedDate) {
@@ -322,6 +295,80 @@ export class CalendarPlanScreen extends React.Component {
         }
       }
     }
+    let todayDate = new Date();
+    let normalWeatherList = [];
+    let normalEventList = [];
+    if (!isPlanOnThatDay) {
+      //let noPlanDate = todayDate.getFullYear + "-" +
+      if (monthNum < todayDate.getMonth()) {
+        //console.log("no plans");
+
+        normalWeatherList = this.lastMonthWeather;
+
+        for (let weather of normalWeatherList) {
+          if (weather.date === item) {
+            this.setState({ detailViewTemp: weather.temp });
+            this.setState({ detailViewIcon: weather.img });
+            this.setState({ weatherText: weather.text });
+          }
+        }
+
+        for (let event of this.combineEventListFull) {
+          let eventDate = new Date(event.start);
+          if (
+            eventDate.getMonth() === monthNum &&
+            eventDate.getDate() === item
+          ) {
+            normalEventList.push(event);
+          }
+        }
+        this.setState({ detailViewCalendar: normalEventList });
+        let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+        this.setState({ normalViewModalStartDate: normalDate });
+        let normalWeekday = normalDate.getDay();
+        this.setState({ normalWeekday: normalWeekday });
+
+        this.setState({ isNormalModalVis: true });
+
+        return;
+      } else if (
+        monthNum === todayDate.getMonth() &&
+        item < todayDate.getDate()
+      ) {
+        //console.log("no plans");
+
+        normalWeatherList = this.thisMonthWeather;
+        for (let weather of normalWeatherList) {
+          if (weather.date === item) {
+            this.setState({ detailViewTemp: weather.temp });
+            this.setState({ detailViewIcon: weather.img });
+            this.setState({ weatherText: weather.text });
+          }
+        }
+
+        for (let event of this.combineEventListFull) {
+          let eventDate = new Date(event.start);
+          if (
+            eventDate.getMonth() === monthNum &&
+            eventDate.getDate() === item
+          ) {
+            normalEventList.push(event);
+          }
+        }
+        //console.log("normalEventList", normalEventList);
+        this.setState({ detailViewCalendar: normalEventList });
+        let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+        this.setState({ normalViewModalStartDate: normalDate });
+
+        let normalWeekday = normalDate.getDay();
+        this.setState({ normalWeekday: normalWeekday });
+
+        this.setState({ isNormalModalVis: true });
+
+        return;
+      }
+    }
+
     //console.log("planDetailList[0]",planDetailList[0]);
     //console.log("planDetailList", planDetailList);
     if (monthNum === this.state.date.getMonth()) {
@@ -364,7 +411,7 @@ export class CalendarPlanScreen extends React.Component {
         if (weather.date === item) {
           this.setState({ detailViewTemp: weather.temp });
           this.setState({ detailViewIcon: weather.img });
-          this.setState({weatherText: weather.text});
+          this.setState({ weatherText: weather.text });
         }
       }
       //console.log(targetDate);
@@ -376,7 +423,7 @@ export class CalendarPlanScreen extends React.Component {
     } else {
       if (!planDetailList[0].isDeleted && planDetailList.length === 1) {
         this.eventToday = planDetailList[0];
-        console.log("this.eventToday", this.eventToday);
+        //console.log("this.eventToday", this.eventToday);
         let detailViewCalendar = [];
         for (let event of this.state.eventsThisMonth) {
           if (event.start.slice(0, 10) === this.eventToday.start.slice(0, 10)) {
@@ -397,7 +444,7 @@ export class CalendarPlanScreen extends React.Component {
           if (weather.date === currDate) {
             this.setState({ detailViewTemp: weather.temp });
             this.setState({ detailViewIcon: weather.img });
-            this.setState({weatherText: weather.text});
+            this.setState({ weatherText: weather.text });
           }
         }
         if (this.eventToday.isReported) {
@@ -416,7 +463,7 @@ export class CalendarPlanScreen extends React.Component {
             if (weather.date === currDate) {
               this.setState({ detailViewTemp: weather.temp });
               this.setState({ detailViewIcon: weather.img });
-              this.setState({weatherText: weather.text});
+              this.setState({ weatherText: weather.text });
             }
           }
 
@@ -463,11 +510,11 @@ export class CalendarPlanScreen extends React.Component {
               if (weather.date === currDate) {
                 this.setState({ detailViewTemp: weather.temp });
                 this.setState({ detailViewIcon: weather.img });
+                this.setState({ weatherText: weather.text });
               }
             }
             this.setState({ detailViewTop: month + " " + item });
 
-            //             let weatherList = [];
             if (currMonthNum === this.state.date.getMonth() + 1) {
               weatherList = this.thisMonthWeather;
             } else {
@@ -477,7 +524,7 @@ export class CalendarPlanScreen extends React.Component {
               if (weather.date === currDate) {
                 this.setState({ detailViewTemp: weather.temp });
                 this.setState({ detailViewIcon: weather.img });
-                this.setState({weatherText: weather.text})
+                this.setState({ weatherText: weather.text });
               }
             }
 
@@ -1018,7 +1065,7 @@ export class CalendarPlanScreen extends React.Component {
                   flexDirection: "column",
                   justifyContent: "center",
                   alignItems: "center",
-                  marginBottom:20
+                  marginBottom: 20,
                 }}
               >
                 <View
@@ -1050,17 +1097,25 @@ export class CalendarPlanScreen extends React.Component {
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                     {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                   </Text>
-                  <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
-                  <Image
-                    source={{
-                      uri:
-                        "http://openweathermap.org/img/wn/" +
-                        this.state.detailViewIcon +
-                        ".png",
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                    style={{ width: 60, height: 60 }}
-                  ></Image>
-                  <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          "http://openweathermap.org/img/wn/" +
+                          this.state.detailViewIcon +
+                          ".png",
+                      }}
+                      style={{ width: 60, height: 60 }}
+                    ></Image>
+                    <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                      {this.state.weatherText}
+                    </Text>
                   </View>
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                     {this.state.detailViewTemp}°C
@@ -1369,6 +1424,121 @@ export class CalendarPlanScreen extends React.Component {
             </View>
           </View>
         </Modal>
+        {/* //no planned event modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.isNormalModalVis}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed");
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <View
+              style={{
+                flex: 0.9,
+                width: "95%",
+                backgroundColor: "white",
+                borderWidth: 2,
+                borderColor: "black",
+                flexDirection: "column",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                borderRadius: 15,
+              }}
+            >
+              <View
+                style={{
+                  flex: 0.06,
+                  width: "100%",
+                  flexDirection: "row",
+                  // backgroundColor:"red",
+
+                  justifyContent: "flex-end",
+                  alignItems: "flex-start",
+                }}
+              >
+                <View>
+                  <TouchableOpacity
+                    onPress={() => this.setState({ isNormalModalVis: false })}
+                  >
+                    <MaterialIcons name="cancel" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{ flex: 0.9, width: "90%" }}>
+                <View
+                  style={{
+                    flex: 0.1,
+                    width: "100%",
+                    backgroundColor: "#BDBDBD",
+                    borderRadius: 15,
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 0.7,
+                      width: "90%",
+                      marginTop: 0,
+                      marginLeft: 10,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexDirection: "row",
+                      // backgroundColor: "red",
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                      {WEEKDAY[this.state.normalWeekday]}
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            "http://openweathermap.org/img/wn/" +
+                            this.state.detailViewIcon +
+                            ".png",
+                        }}
+                        style={{ width: 60, height: 60 }}
+                      ></Image>
+                      <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                        {this.state.weatherText}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                      {this.state.detailViewTemp}°C
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Calendar
+                    events={this.state.detailViewCalendar}
+                    date={this.state.normalViewModalStartDate}
+                    scrollOffsetMinutes={480}
+                    swipeEnabled={false}
+                    height={90}
+                    mode="day"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
         {/* //Detailed View Modal */}
         <Modal
           animationType="slide"
@@ -1461,17 +1631,25 @@ export class CalendarPlanScreen extends React.Component {
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                     </Text>
-                    <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
-                    <Image
-                      source={{
-                        uri:
-                          "http://openweathermap.org/img/wn/" +
-                          this.state.detailViewIcon +
-                          ".png",
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                      style={{ width: 60, height: 60 }}
-                    ></Image>
-                    <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            "http://openweathermap.org/img/wn/" +
+                            this.state.detailViewIcon +
+                            ".png",
+                        }}
+                        style={{ width: 60, height: 60 }}
+                      ></Image>
+                      <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                        {this.state.weatherText}
+                      </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {this.state.detailViewTemp}°C
@@ -1622,17 +1800,25 @@ export class CalendarPlanScreen extends React.Component {
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {WEEKDAY[new Date(this.eventToday.end).getDay()]}
                     </Text>
-                    <View style={{flexDirection:"row", alignItems:"center", justifyContent:"center"}}>
-                    <Image
-                      source={{
-                        uri:
-                          "http://openweathermap.org/img/wn/" +
-                          this.state.detailViewIcon +
-                          ".png",
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                      style={{ width: 60, height: 60 }}
-                    ></Image>
-                    <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            "http://openweathermap.org/img/wn/" +
+                            this.state.detailViewIcon +
+                            ".png",
+                        }}
+                        style={{ width: 60, height: 60 }}
+                      ></Image>
+                      <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                        {this.state.weatherText}
+                      </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                       {this.state.detailViewTemp}°C
@@ -1843,17 +2029,25 @@ export class CalendarPlanScreen extends React.Component {
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                   {this.state.slideUpDayNum}
                 </Text>
-                <View style={{flexDirection:"row", justifyContent:"center", alignItems:"center"}}>
-                <Image
-                  source={{
-                    uri:
-                      "http://openweathermap.org/img/wn/" +
-                      this.state.detailViewIcon +
-                      ".png",
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                  style={{ width: 60, height: 60 }}
-                ></Image>
-                <Text style={{fontSize:14, fontWeight:"bold"}}>{this.state.weatherText}</Text>
+                >
+                  <Image
+                    source={{
+                      uri:
+                        "http://openweathermap.org/img/wn/" +
+                        this.state.detailViewIcon +
+                        ".png",
+                    }}
+                    style={{ width: 60, height: 60 }}
+                  ></Image>
+                  <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                    {this.state.weatherText}
+                  </Text>
                 </View>
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                   {this.state.detailViewTemp}°C

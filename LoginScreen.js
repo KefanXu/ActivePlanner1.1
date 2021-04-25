@@ -425,7 +425,7 @@ export class LoginScreen extends React.Component {
             animationStyle={{ width: 100, height: 100 }}
             speed={1}
           >
-            <Text style={{fontWeight:"bold"}}>{this.state.loaderText}</Text>
+            <Text style={{fontWeight:"bold", textAlign:"center"}}>{this.state.loaderText}</Text>
           </AnimatedLoader>
         </View>
       </View>

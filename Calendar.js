@@ -232,6 +232,7 @@ export class MonthCalendar extends React.Component {
                 flexDirection: "column",
                 alignContent: "space-between",
                 justifyContent: "space-between",
+                
               }}
             >
               <TouchableOpacity
@@ -240,13 +241,13 @@ export class MonthCalendar extends React.Component {
                   height: 18,
                   width: "95%",
                   flexDirection: "row",
-                  backgroundColor: item != -1 ? "white" : "",
+                  backgroundColor: item != -1 ? "white" : "rgba(0,0,0,0)",
                   borderRadius: 15,
                   marginTop: 2,
-
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                disabled={item === -1 ? true : false}
                 activeOpacity={0.1}
                 onPress={() => this.onPress(item)}
               >
@@ -268,7 +269,7 @@ export class MonthCalendar extends React.Component {
                         : "300",
                   }}
                 >
-                  {item != -1 ? item : ""}
+                  {item != -1 ? item : null}
                 </Text>
                 {/* <Image
                   source={{
