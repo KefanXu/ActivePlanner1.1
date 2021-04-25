@@ -91,7 +91,8 @@ export class MonthCalendar extends React.Component {
           let newEvent = Object.assign({}, event);
           newEvent.id = event.end + event.start;
           newEvent.identifier = "default";
-          if (parseInt(newEvent.start.slice(11, 13)) < 12) {
+          let eventDate = new Date(newEvent.start);
+          if (eventDate.getHours() < 12) {
             date.morningEvents.push(newEvent);
           } else {
             date.afternoonEvents.push(newEvent);

@@ -217,6 +217,7 @@ export class CalendarPlanScreen extends React.Component {
 
       isEventDetailModalVis: false,
       isNormalModalVis: false,
+      isPlanAbleModalVis: false,
 
       detailViewTemp: "",
       detailViewIcon: "",
@@ -235,6 +236,8 @@ export class CalendarPlanScreen extends React.Component {
 
       detailViewCalendar: [],
       normalViewModalStartDate: new Date(),
+      isViewEventsDisable: true,
+      tempList: [],
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -399,9 +402,24 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ panelTop: "plan for " + month + " " + item });
       this._panel.show();
 
+      let planAbleEventList = [];
+
+      for (let event of this.combineEventListFull) {
+        let eventDate = new Date(event.start);
+        if (eventDate.getMonth() === monthNum && eventDate.getDate() === item) {
+          planAbleEventList.push(event);
+        }
+      }
+
+      this.setState({ detailViewCalendar: planAbleEventList });
+
+      let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+      this.setState({ normalViewModalStartDate: normalDate });
+
       let targetDate = new Date(this.state.date.getFullYear(), monthNum, item);
       this.setState({ slideUpDayNum: WEEKDAY[targetDate.getDay()] });
       let slideUpWeatherList = [];
+
       if (monthNum === this.state.date.getMonth()) {
         slideUpWeatherList = this.thisMonthWeather;
       } else {
@@ -420,6 +438,7 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ selectedMonth: monthNum });
       this.setState({ isPlanBtnDisable: false });
       this.setState({ isWeatherVisOnPanel: "flex" });
+      this.setState({ isViewEventsDisable: false });
     } else {
       if (!planDetailList[0].isDeleted && planDetailList.length === 1) {
         this.eventToday = planDetailList[0];
@@ -431,7 +450,7 @@ export class CalendarPlanScreen extends React.Component {
           }
         }
         this.setState({ detailViewCalendar: detailViewCalendar });
-        console.log("detailViewCalendar", detailViewCalendar);
+        //console.log("detailViewCalendar", detailViewCalendar);
         let currMonthNum = parseInt(this.eventToday.end.slice(5, 7));
         let currDate = parseInt(this.eventToday.end.slice(8, 10));
         let weatherList = [];
@@ -571,8 +590,8 @@ export class CalendarPlanScreen extends React.Component {
     }
     let year = new Date().getFullYear();
 
-    let startMinutes = moment(this.state.date).format("HH:mm:ss");
-    let endMinutes = moment(this.state.date)
+    let startMinutes = moment(this.state.datePickerDate).format("HH:mm:ss");
+    let endMinutes = moment(this.state.datePickerDate)
       .add(30, "minutes")
       .format("HH:mm:ss");
     let date = year + "-" + monthNum + "-" + dateNum + "T";
@@ -623,13 +642,19 @@ export class CalendarPlanScreen extends React.Component {
     this.setState({
       panelTop:
         newEvent.title +
+        " planned"
+    });
+    Alert.alert(
+      "Activity Planned",
+      newEvent.title +
         " planned at " +
         newEvent.start.slice(11, 16) +
         " on " +
         month +
         "/" +
         item,
-    });
+      [{ text: "OK", onPress: () => this.setState({activityPickerInitVal:"none"}) }]
+    )
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -661,6 +686,8 @@ export class CalendarPlanScreen extends React.Component {
       this.combinedEventListNext.splice(deleteIndex, 1);
       await this.setState({ eventsThisMonth: this.combinedEventListNext });
     }
+    await this.dataModel.loadUserPlans(this.userKey);
+    this.userPlans = this.dataModel.getUserPlans();
     this.updateView();
   };
   updateView = () => {
@@ -675,6 +702,25 @@ export class CalendarPlanScreen extends React.Component {
       this.setState({ isMonthCalVis: true });
       this.setState({ indexView: "Week" });
     }
+  };
+
+  resetCalendarView = async () => {
+    this.setState({ eventFilteredList: false });
+    this.setState({ timeFilteredList: false });
+    let currentList = [];
+    if (this.state.monthCalCurrentMonth === this.state.date.getMonth()) {
+      currentList = this.combinedEventListThis;
+    } else if (
+      this.state.monthCalCurrentMonth ===
+      this.state.date.getMonth() - 1
+    ) {
+      currentList = this.combinedEventListLast;
+    } else {
+      currentList = this.combinedEventListNext;
+    }
+    await this.setState({ eventsThisMonth: currentList });
+
+    this.monthCalRef.current.processEvents();
   };
 
   render() {
@@ -1033,7 +1079,17 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <View>
                   <TouchableOpacity
-                    onPress={() => this.setState({ isReportModalVis: false })}
+                    onPress={() => {
+                      this.setState({ isReportModalVis: false });
+                      this.setState({ feeling: "Neutral" });
+                      this.setState({ isActivityCompleted: false });
+                      this.setState({ isThirtyMin: false });
+                      this.setState({ isFirstStepVis: "flex" });
+                      this.setState({ isSecondYesStepVis: "none" });
+                      this.setState({ isThirdYesStepVis: "none" });
+                      this.setState({ isSecondNoStepVis: "none" });
+                      this.setState({ isThirdNoStepVis: "none" });
+                    }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
                   </TouchableOpacity>
@@ -1389,6 +1445,8 @@ export class CalendarPlanScreen extends React.Component {
                       await this.dataModel.loadUserPlans(this.userKey);
                       this.userPlans = this.dataModel.getUserPlans();
                       this.setState({ feeling: "Neutral" });
+                      this.setState({ isActivityCompleted: false });
+                      this.setState({ isThirtyMin: false });
                       this.updateView();
                     } else if (this.state.nextBtnState === "next") {
                       this.setState({ isBackBtnVis: false });
@@ -1420,6 +1478,70 @@ export class CalendarPlanScreen extends React.Component {
                     }
                   }}
                 ></Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.isPlanAbleModalVis}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed");
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <View
+              style={{
+                flex: 0.9,
+                width: "95%",
+                backgroundColor: "white",
+                borderWidth: 2,
+                borderColor: "black",
+                flexDirection: "column",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                borderRadius: 15,
+              }}
+            >
+              <View
+                style={{
+                  flex: 0.06,
+                  width: "100%",
+                  flexDirection: "row",
+                  // backgroundColor:"red",
+
+                  justifyContent: "flex-end",
+                  alignItems: "flex-start",
+                }}
+              >
+                <View>
+                  <TouchableOpacity
+                    onPress={() => this.setState({ isPlanAbleModalVis: false })}
+                  >
+                    <MaterialIcons name="cancel" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{ flex: 0.9, width: "90%" }}>
+                <View style={{ flex: 1 }}>
+                  <Calendar
+                    events={this.state.detailViewCalendar}
+                    date={this.state.normalViewModalStartDate}
+                    scrollOffsetMinutes={480}
+                    swipeEnabled={false}
+                    height={90}
+                    mode="day"
+                  />
+                </View>
               </View>
             </View>
           </View>
@@ -1978,43 +2100,50 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   {this.state.panelTop}
                 </Text>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "black",
-                    // color: "white",
-                    width: 60,
-                    height: 30,
-                    borderRadius: 15,
-                    marginTop: 5,
-                    marginRight: 5,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  disabled={false}
-                  onPress={async () => {
-                    let currentList = [];
-                    if (
-                      this.state.monthCalCurrentMonth ===
-                      this.state.date.getMonth()
-                    ) {
-                      currentList = this.combinedEventListThis;
-                    } else if (
-                      this.state.monthCalCurrentMonth ===
-                      this.state.date.getMonth() - 1
-                    ) {
-                      currentList = this.combinedEventListLast;
-                    } else {
-                      currentList = this.combinedEventListNext;
-                    }
-                    await this.setState({ eventsThisMonth: currentList });
-
-                    this.monthCalRef.current.processEvents();
-                  }}
-                >
-                  <Text style={{ color: "white", fontWeight: "bold" }}>
-                    Reset
-                  </Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: "row" }}>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "black",
+                      // color: "white",
+                      width: 60,
+                      height: 30,
+                      borderRadius: 15,
+                      marginTop: 5,
+                      marginRight: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    disabled={false}
+                    onPress={async () => {
+                      await this.resetCalendarView();
+                    }}
+                  >
+                    <Text style={{ color: "white", fontWeight: "bold" }}>
+                      Reset
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "black",
+                      // color: "white",
+                      width: 90,
+                      height: 30,
+                      borderRadius: 15,
+                      marginTop: 5,
+                      marginRight: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    disabled={this.state.isViewEventsDisable}
+                    onPress={async () => {
+                      this.setState({ isPlanAbleModalVis: true });
+                    }}
+                  >
+                    <Text style={{ color: "white", fontWeight: "bold" }}>
+                      View event
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
               <View
                 style={{
@@ -2180,6 +2309,7 @@ export class CalendarPlanScreen extends React.Component {
                       let newListByActivity = [];
                       let currentList = [];
                       if (!this.state.timeFilteredList) {
+                        await this.resetCalendarView();
                         if (
                           this.state.monthCalCurrentMonth ===
                           this.state.date.getMonth()
@@ -2193,11 +2323,23 @@ export class CalendarPlanScreen extends React.Component {
                         } else {
                           currentList = this.combinedEventListNext;
                         }
-                        this.setState({ eventFilteredList: true });
+                        await this.setState({ eventFilteredList: true });
+                        await this.setState({ timeFilteredList: false });
                       } else {
                         currentList = this.state.eventsThisMonth;
-                        this.setState({ eventFilteredList: false });
+                        //let tempList = currentList;
+                        await this.setState({ eventFilteredList: false });
+                        await this.setState({ timeFilteredList: false });
                       }
+
+                      console.log(
+                        "this.state.eventFilteredList",
+                        this.state.eventFilteredList
+                      );
+                      console.log(
+                        "this.state.timeFilteredList",
+                        this.state.timeFilteredList
+                      );
 
                       let eventListDates = [];
                       for (let event of currentList) {
@@ -2247,7 +2389,7 @@ export class CalendarPlanScreen extends React.Component {
                         }
                       }
 
-                      // this.setState({activityPickerInitVal:"none"})
+                      //this.setState({tempList:tempList})
 
                       await this.setState({ eventsThisMonth: newEventList });
 
@@ -2274,6 +2416,30 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ datePickerDate: date });
                       let newList = [];
 
+                      if (this.state.eventFilteredList) {
+                        if (!this.state.timeFilteredList) {
+                          await this.resetCalendarView();
+                          await this.setState({ timeFilteredList: true });
+                          await this.setState({ eventFilteredList: false });
+                        } else {
+                          await this.setState({ timeFilteredList: true });
+                          await this.setState({ eventFilteredList: true });
+                        }
+                      } else {
+                        await this.resetCalendarView();
+                        await this.setState({ timeFilteredList: true });
+                        await this.setState({ eventFilteredList: false });
+                      }
+                      console.log(
+                        "this.state.eventFilteredList",
+                        this.state.eventFilteredList
+                      );
+                      console.log(
+                        "this.state.timeFilteredList",
+                        this.state.timeFilteredList
+                      );
+                      this.setState({ date: new Date() });
+
                       if (startHour < 12) {
                         for (let event of this.state.eventsThisMonth) {
                           if (parseInt(event.start.slice(11, 13)) < 12) {
@@ -2287,13 +2453,6 @@ export class CalendarPlanScreen extends React.Component {
                           }
                         }
                       }
-                      if (this.state.eventFilteredList) {
-                        this.setState({ timeFilteredList: false });
-                      } else {
-                        this.setState({ timeFilteredList: true });
-                      }
-
-                      this.setState({ date: new Date() });
                       await this.setState({ eventsThisMonth: newList });
 
                       this.monthCalRef.current.processEvents();
