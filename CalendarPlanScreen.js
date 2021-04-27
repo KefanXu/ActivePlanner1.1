@@ -167,7 +167,8 @@ export class CalendarPlanScreen extends React.Component {
         //let plannedEvent = Object.assign({}, event);
       }
     }
-
+    this.detailViewCalendar = [];
+    this.normalViewModalStartDate = new Date();
     this.reportPopUp(this.userPlans);
     this.state = {
       isMonthCalVis: true,
@@ -234,8 +235,8 @@ export class CalendarPlanScreen extends React.Component {
 
       activityPickerInitVal: "none",
 
-      detailViewCalendar: [],
-      normalViewModalStartDate: new Date(),
+      detailViewCalendar: this.detailViewCalendar,
+      normalViewModalStartDate: this.normalViewModalStartDate,
       isViewEventsDisable: true,
       tempList: [],
     };
@@ -255,6 +256,19 @@ export class CalendarPlanScreen extends React.Component {
           if (!event.isReported) {
             this.isReportModalVis = true;
             this.eventToday = event;
+
+            let detailViewCalendar = [];
+            for (let event of this.combinedEventListThis) {
+              if (
+                event.start.slice(0, 10) === this.eventToday.start.slice(0, 10)
+              ) {
+                detailViewCalendar.push(event);
+              }
+            }
+            this.detailViewCalendar = detailViewCalendar;
+
+            //let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+            this.normalViewModalStartDate = currentDate;
 
             //let currMonthNum = new Date(this.eventToday.start);
             let currDate = new Date(this.eventToday.start).getDate();
@@ -487,9 +501,17 @@ export class CalendarPlanScreen extends React.Component {
           }
 
           if (monthNum < this.state.date.getMonth()) {
+            let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+            this.setState({ normalViewModalStartDate: normalDate });
             this.setState({ isReportModalVis: true });
           } else if (monthNum === this.state.date.getMonth()) {
             if (item <= this.state.date.getDate()) {
+              let normalDate = new Date(
+                todayDate.getFullYear(),
+                monthNum,
+                item
+              );
+              this.setState({ normalViewModalStartDate: normalDate });
               this.setState({ isReportModalVis: true });
             } else {
               this.eventToday = planDetailList[0];
@@ -549,6 +571,12 @@ export class CalendarPlanScreen extends React.Component {
 
             if (monthNum < this.state.date.getMonth()) {
               if (!this.eventToday.isReported) {
+                let normalDate = new Date(
+                  todayDate.getFullYear(),
+                  monthNum,
+                  item
+                );
+                this.setState({ normalViewModalStartDate: normalDate });
                 this.setState({ isReportModalVis: true });
               } else {
                 this.setState({ isEventDetailModalVis: true });
@@ -556,6 +584,12 @@ export class CalendarPlanScreen extends React.Component {
             } else if (monthNum === this.state.date.getMonth()) {
               if (item <= this.state.date.getDate()) {
                 if (!this.eventToday.isReported) {
+                  let normalDate = new Date(
+                    todayDate.getFullYear(),
+                    monthNum,
+                    item
+                  );
+                  this.setState({ normalViewModalStartDate: normalDate });
                   this.setState({ isReportModalVis: true });
                 } else {
                   this.setState({ isEventDetailModalVis: true });
@@ -847,7 +881,7 @@ export class CalendarPlanScreen extends React.Component {
         </View>
       );
     }
-    console.log("render");
+    //console.log("render");
     // console.log(this.state.newListByActivity);
     // let newListByActivity;
     // if (this.state.newListByActivity.length !== 0) {
@@ -1057,10 +1091,9 @@ export class CalendarPlanScreen extends React.Component {
           >
             <View
               style={{
-                flex: 0.8,
+                flex: 0.9,
                 width: "95%",
                 backgroundColor: "white",
-
                 borderWidth: 2,
                 borderColor: "black",
                 flexDirection: "column",
@@ -1069,16 +1102,9 @@ export class CalendarPlanScreen extends React.Component {
                 borderRadius: 15,
               }}
             >
-              {/* <SectionList
-                sections={reportOptions}
-                renderItem={({ item }) => {
-                  let color = item.color;
-                  return <Text style={{ color: color }}>{item.text}</Text>;
-                }}
-              /> */}
               <View
                 style={{
-                  flex: 0.1,
+                  flex: 0.05,
                   width: "100%",
                   flexDirection: "row",
                   justifyContent: "flex-end",
@@ -1096,6 +1122,7 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isThirdYesStepVis: "none" });
                       this.setState({ isSecondNoStepVis: "none" });
                       this.setState({ isThirdNoStepVis: "none" });
+                      this.setState({ nextBtnState: "none" });
                     }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
@@ -1104,10 +1131,10 @@ export class CalendarPlanScreen extends React.Component {
               </View>
               <View
                 style={{
-                  flex: 0.25,
+                  flex: 0.15,
                   width: "80%",
                   marginTop: 0,
-                  //backgroundColor: "blue",
+                  //backgroundColor:"red"
                 }}
               >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
@@ -1119,9 +1146,219 @@ export class CalendarPlanScreen extends React.Component {
                   The following questions only take seconds to complete
                 </Text>
               </View>
+
               <View
                 style={{
                   flex: 0.2,
+                  width: "80%",
+                  //backgroundColor: "red",
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    display: this.state.isFirstStepVis,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    Did you {this.eventToday.title} on{" "}
+                    {this.eventToday.start.slice(5, 10)}
+                  </Text>
+                  <SwitchSelector
+                    options={[
+                      { label: "No", value: false },
+                      { label: "Yes", value: true },
+                    ]}
+                    initial={0}
+                    buttonMargin={5}
+                    borderWidth={2}
+                    borderColor="black"
+                    buttonColor="black"
+                    onPress={(value) =>
+                      // console.log(`Call onPress with value: ${value}`)
+                      {
+                        this.setState({ isActivityCompleted: value });
+                      }
+                    }
+                  />
+                </View>
+                <View
+                  style={{
+                    display: this.state.isSecondYesStepVis,
+                    justifyContent: "flex-start",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    Did you {this.eventToday.title} for 30 min at{" "}
+                    {this.eventToday.start.slice(11, 16)}
+                  </Text>
+                  <SwitchSelector
+                    options={[
+                      { label: "No", value: false },
+                      { label: "Yes", value: true },
+                    ]}
+                    initial={0}
+                    buttonMargin={5}
+                    borderWidth={2}
+                    borderColor="black"
+                    buttonColor="black"
+                    onPress={(value) =>
+                      // console.log(`Call onPress with value: ${value}`)
+                      {
+                        this.setState({ isThirtyMin: value });
+                      }
+                    }
+                  />
+                </View>
+                <View
+                  style={{
+                    display: this.state.isThirdYesStepVis,
+                    justifyContent: "flex-start",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    How satisfied are you with today's activity?
+                  </Text>
+                  <SwitchSelector
+                    options={[
+                      { label: "😕 Negative", value: "Negative" },
+                      { label: "😑 Neutral", value: "Neutral" },
+                      { label: "🙂 Positive", value: "Positive" },
+                    ]}
+                    initial={1}
+                    buttonMargin={1}
+                    borderWidth={2}
+                    borderColor="black"
+                    buttonColor="black"
+                    onPress={(value) =>
+                      // console.log(`Call onPress with value: ${value}`)
+                      {
+                        this.setState({ feeling: value });
+                      }
+                    }
+                  />
+                </View>
+                <View
+                  style={{
+                    display: this.state.isSecondNoStepVis,
+                    justifyContent: "flex-start",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    Tell us the reason why you didn't {this.eventToday.title} as
+                    planned
+                  </Text>
+                  <View
+                    style={{
+                      flex: 0.8,
+
+                      marginTop: 10,
+                      width: "100%",
+                      borderWidth: 2,
+                      borderRadius: 30,
+                      borderColor: "#6E6E6E",
+                    }}
+                  >
+                    <TextInput
+                      // secureTextEntry={true}
+                      style={{
+                        flex: 1,
+                        marginLeft: 20,
+                        marginRight: 20,
+                        fontSize: 20,
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={this.state.reason}
+                      onChangeText={(text) => {
+                        this.setState({ reason: text });
+                      }}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    display: this.state.isThirdNoStepVis,
+                    justifyContent: "flex-start",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "10%",
+                    }}
+                  >
+                    Did you do any other activities (if yes, what activity and
+                    when)?
+                  </Text>
+                  <View
+                    style={{
+                      flex: 0.8,
+
+                      marginTop: 10,
+                      width: "100%",
+                      borderWidth: 2,
+                      borderRadius: 30,
+                      borderColor: "#6E6E6E",
+                    }}
+                  >
+                    <TextInput
+                      // secureTextEntry={true}
+                      style={{
+                        flex: 1,
+                        marginLeft: 20,
+                        marginRight: 20,
+                        fontSize: 20,
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={this.state.otherActivity}
+                      onChangeText={(text) => {
+                        this.setState({ otherActivity: text });
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.15,
                   width: "80%",
                   backgroundColor: "#BDBDBD",
                   borderRadius: 15,
@@ -1185,203 +1422,18 @@ export class CalendarPlanScreen extends React.Component {
                   </Text>
                 </View>
               </View>
-              <View
-                style={{
-                  flex: 1,
-                  width: "80%",
-                  //backgroundColor: "red",
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    display: this.state.isFirstStepVis,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                    }}
-                  >
-                    Did you {this.eventToday.title} on{" "}
-                    {this.eventToday.start.slice(5, 10)} at{" "}
-                    {this.eventToday.start.slice(11, 16)}
-                  </Text>
-                  <SwitchSelector
-                    options={[
-                      { label: "No", value: false },
-                      { label: "Yes", value: true },
-                    ]}
-                    initial={0}
-                    buttonMargin={5}
-                    borderWidth={2}
-                    borderColor="black"
-                    buttonColor="black"
-                    onPress={(value) =>
-                      // console.log(`Call onPress with value: ${value}`)
-                      {
-                        this.setState({ isActivityCompleted: value });
-                      }
+              <View style={{ flex: 0.5, width: "80%" }}>
+                <View style={{ flex: 1 }}>
+                  <Calendar
+                    events={this.state.detailViewCalendar}
+                    date={this.state.normalViewModalStartDate}
+                    scrollOffsetMinutes={
+                      parseInt(this.eventToday.start.slice(11, 13)) * 60
                     }
+                    swipeEnabled={false}
+                    height={90}
+                    mode="day"
                   />
-                </View>
-                <View
-                  style={{
-                    display: this.state.isSecondYesStepVis,
-                    width: "100%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                      marginTop: "20%",
-                    }}
-                  >
-                    Did you {this.eventToday.title} for 30 min
-                  </Text>
-                  <SwitchSelector
-                    options={[
-                      { label: "No", value: false },
-                      { label: "Yes", value: true },
-                    ]}
-                    initial={0}
-                    buttonMargin={5}
-                    borderWidth={2}
-                    borderColor="black"
-                    buttonColor="black"
-                    onPress={(value) =>
-                      // console.log(`Call onPress with value: ${value}`)
-                      {
-                        this.setState({ isThirtyMin: value });
-                      }
-                    }
-                  />
-                </View>
-                <View
-                  style={{
-                    display: this.state.isThirdYesStepVis,
-                    width: "100%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                      marginTop: "20%",
-                    }}
-                  >
-                    How satisfied are you with today's activity?
-                  </Text>
-                  <SwitchSelector
-                    options={[
-                      { label: "😕 Negative", value: "Negative" },
-                      { label: "😑 Neutral", value: "Neutral" },
-                      { label: "🙂 Positive", value: "Positive" },
-                    ]}
-                    initial={1}
-                    buttonMargin={1}
-                    borderWidth={2}
-                    borderColor="black"
-                    buttonColor="black"
-                    onPress={(value) =>
-                      // console.log(`Call onPress with value: ${value}`)
-                      {
-                        this.setState({ feeling: value });
-                      }
-                    }
-                  />
-                </View>
-                <View
-                  style={{
-                    display: this.state.isSecondNoStepVis,
-                    width: "100%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                      marginTop: "20%",
-                    }}
-                  >
-                    Tell us the reason why you didn't {this.eventToday.title} as planned
-                  </Text>
-                  <View
-                    style={{
-                      flex: 0.15,
-
-                      marginTop: 10,
-                      width: "100%",
-                      borderWidth: 2,
-                      borderRadius: 30,
-                      borderColor: "#6E6E6E",
-                    }}
-                  >
-                    <TextInput
-                      // secureTextEntry={true}
-                      style={{
-                        flex: 1,
-                        marginLeft: 20,
-                        marginRight: 20,
-                        fontSize: 20,
-                      }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      value={this.state.reason}
-                      onChangeText={(text) => {
-                        this.setState({ reason: text });
-                      }}
-                    />
-                  </View>
-                </View>
-                <View
-                  style={{
-                    display: this.state.isThirdNoStepVis,
-                    width: "100%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                      marginTop: "20%",
-                    }}
-                  >
-                    Did you do any other activities (if yes, what activity and when)?
-                  </Text>
-                  <View
-                    style={{
-                      flex: 0.15,
-
-                      marginTop: 10,
-                      width: "100%",
-                      borderWidth: 2,
-                      borderRadius: 30,
-                      borderColor: "#6E6E6E",
-                    }}
-                  >
-                    <TextInput
-                      // secureTextEntry={true}
-                      style={{
-                        flex: 1,
-                        marginLeft: 20,
-                        marginRight: 20,
-                        fontSize: 20,
-                      }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      value={this.state.otherActivity}
-                      onChangeText={(text) => {
-                        this.setState({ otherActivity: text });
-                      }}
-                    />
-                  </View>
                 </View>
               </View>
               <View style={{ flexDirection: "row" }}>
