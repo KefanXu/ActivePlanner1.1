@@ -75,8 +75,59 @@ class DataModel {
       this.plans.push(plan);
     });
   };
+  isWeatherNotExist = async (key) => {
+    let weatherCollectionSnapshot = await this.usersRef
+      .doc(key)
+      .collection("weather_records")
+      .limit(1)
+      .get();
+
+    return weatherCollectionSnapshot.empty;
+  };
+  updateWeatherInfo = async (key, fullWeatherList) => {
+    let weatherList = await this.usersRef
+      .doc(key)
+      .collection("weather_records");
+    for (let weather of fullWeatherList) {
+      await weatherList.add(weather);
+    }
+  };
+  getWeatherInfo = async (key) => {
+    let weatherQuerySnap = await this.usersRef
+      .doc(key)
+      .collection("weather_records")
+      .get();
+    let lastMonthWeather = [];
+    let thisMonthWeather = [];
+    let nextMonthWeather = [];
+    let todayDate = new Date();
+    weatherQuerySnap.forEach((qDocSnap) => {
+      let data = qDocSnap.data();
+      if (data.month === todayDate.getMonth()) {
+        thisMonthWeather.push(data);
+      } else if (data.month === todayDate.getMonth() - 1) {
+        lastMonthWeather.push(data);
+      } else if (data.month === todayDate.getMonth() + 1) {
+        nextMonthWeather.push(data);
+      }
+      // console.log("getWeatherInfo",data);
+    });
+    return [lastMonthWeather, thisMonthWeather, nextMonthWeather];
+  };
+
   getUserPlans = () => {
     return this.plans;
+  };
+
+  notificationTest = async () => {
+    await Notification.scheduleNotificationAsync({
+      content: {
+        title: "You've got mail! 📬",
+        body: "Here is the notification body",
+        data: { data: "goes here" },
+      },
+      trigger: { seconds: 2 },
+    });
   };
 
   createNewUser = async (username) => {
@@ -116,7 +167,9 @@ class DataModel {
     newEventRef.update(newEvent);
   };
   deleteReminders = async (newEvent) => {
-    await Notification.cancelScheduledNotificationAsync(newEvent.activityReminderKey);
+    await Notification.cancelScheduledNotificationAsync(
+      newEvent.activityReminderKey
+    );
     await Notification.cancelScheduledNotificationAsync(
       newEvent.reportReminderKey
     );
@@ -131,7 +184,6 @@ class DataModel {
       granted = newPerms.granted;
     }
     return granted;
-
   };
   scheduleNotification = async (newEvent) => {
     //2021-04-16T10:37:00
@@ -139,7 +191,7 @@ class DataModel {
     let startTime = newEvent.start;
     let trigger = new Date(Date.parse(startTime) - 60 * 60 * 1000);
     //let secTrigger = new Date(Date.parse(startTime) + 7 * 1000);
-    console.log("trigger",trigger);
+    console.log("trigger", trigger);
 
     let identifier = await Notification.scheduleNotificationAsync({
       content: {

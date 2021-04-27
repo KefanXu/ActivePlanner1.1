@@ -640,9 +640,7 @@ export class CalendarPlanScreen extends React.Component {
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
     this.setState({
-      panelTop:
-        newEvent.title +
-        " planned"
+      panelTop: newEvent.title + " planned",
     });
     Alert.alert(
       "Activity Planned",
@@ -653,8 +651,13 @@ export class CalendarPlanScreen extends React.Component {
         month +
         "/" +
         item,
-      [{ text: "OK", onPress: () => this.setState({activityPickerInitVal:"none"}) }]
-    )
+      [
+        {
+          text: "OK",
+          onPress: () => this.setState({ activityPickerInitVal: "none" }),
+        },
+      ]
+    );
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -832,6 +835,10 @@ export class CalendarPlanScreen extends React.Component {
             at
             <Text style={{ color: "#9AFE2E" }}>
               {" " + this.eventToday.start.slice(11, 16)}
+            </Text>{" "}
+            because
+            <Text style={{ color: "#A9E2F3" }}>
+              {" " + this.eventToday.reason}
             </Text>{" "}
             {"\n"}
             {"\n"}I feel{" "}
@@ -1303,7 +1310,7 @@ export class CalendarPlanScreen extends React.Component {
                       marginTop: "20%",
                     }}
                   >
-                    Give us a reason
+                    Tell us the reason why you didn't {this.eventToday.title} as planned
                   </Text>
                   <View
                     style={{
@@ -1346,7 +1353,7 @@ export class CalendarPlanScreen extends React.Component {
                       marginTop: "20%",
                     }}
                   >
-                    Did you do any other activities?
+                    Did you do any other activities (if yes, what activity and when)?
                   </Text>
                   <View
                     style={{

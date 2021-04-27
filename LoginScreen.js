@@ -26,7 +26,7 @@ export class LoginScreen extends React.Component {
       passwordInput: "",
       //imageURI: "http://openweathermap.org/img/w/unknown.png",
       isLoaderVis: false,
-      loaderText:"",
+      loaderText: "",
     };
   }
   componentDidMount = () => {
@@ -176,9 +176,9 @@ export class LoginScreen extends React.Component {
         nextMonthWeather.push(weatherImgList);
       }
     }
-    console.log("lastMonthWeather", lastMonthWeather);
-    console.log("thisMonthWeather", thisMonthWeather);
-    console.log("nextMonthWeather", nextMonthWeather);
+    //console.log("lastMonthWeather", lastMonthWeather);
+    //console.log("thisMonthWeather", thisMonthWeather);
+    //console.log("nextMonthWeather", nextMonthWeather);
     return [lastMonthWeather, thisMonthWeather, nextMonthWeather];
   };
 
@@ -203,7 +203,7 @@ export class LoginScreen extends React.Component {
   };
   onGoogleSignIn = async () => {
     console.log("Google Sign In");
-    
+
     let userList = this.dataModel.getUsers();
     let [timeMin, timeMax] = this.processDate();
     //console.log(timeMin, timeMax);
@@ -240,26 +240,56 @@ export class LoginScreen extends React.Component {
     await this.dataModel.loadUserPlans(key);
     let userPlans = this.dataModel.getUserPlans();
 
-    this.setState({isLoaderVis:true});
-    this.setState({loaderText: "fetching weather data..."})
+    this.setState({ isLoaderVis: true });
+    this.setState({ loaderText: "fetching weather data..." });
 
     let userInfo = {
       key: key,
       userPlans: userPlans,
     };
+
+    let lastMonthWeather;
+    let thisMonthWeather;
+    let nextMonthWeather;
     //console.log("userInfo",userInfo);
     // console.log("userPlans",userPlans);
-    let [
-      lastMonthWeather,
-      thisMonthWeather,
-      nextMonthWeather,
-    ] = await this.fetchWeatherInfo(userPlans);
+    let isWeatherNotExist = await this.dataModel.isWeatherNotExist(key);
+    console.log("weatherCollectionSnapshot.empty",isWeatherNotExist);
+    if (isWeatherNotExist) {
+      [
+        lastMonthWeather,
+        thisMonthWeather,
+        nextMonthWeather,
+      ] = await this.fetchWeatherInfo(userPlans);
+      //console.log("lastMonthWeather", lastMonthWeather);
+      let weatherFullList = [];
+      let todayDate = new Date();
+      for (let weather of lastMonthWeather) {
+        let newWeather = Object.assign({}, weather);
+        newWeather.month = todayDate.getMonth() - 1;
+        weatherFullList.push(newWeather);
+      }
+      for (let weather of thisMonthWeather) {
+        let newWeather = Object.assign({}, weather);
+        newWeather.month = todayDate.getMonth();
+        weatherFullList.push(newWeather);
+      }
+      for (let weather of nextMonthWeather) {
+        let newWeather = Object.assign({}, weather);
+        newWeather.month = todayDate.getMonth() + 1;
+        weatherFullList.push(newWeather);
+      }
+      await this.dataModel.updateWeatherInfo(key, weatherFullList);
+    } else {
+      [lastMonthWeather, thisMonthWeather, nextMonthWeather] = await this.dataModel.getWeatherInfo(key);
+
+    }
 
     // console.log("lastMonthWeather", lastMonthWeather);
     // console.log("thisMonthWeather", thisMonthWeather);
 
     // console.log("nextMonthWeather", nextMonthWeather);
-    this.setState({isLoaderVis:false});
+    this.setState({ isLoaderVis: false });
     this.props.navigation.navigate("Home Screen", {
       userEmail: calendarsID,
       userInfo: userInfo,
@@ -377,7 +407,6 @@ export class LoginScreen extends React.Component {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            
           }}
         >
           {/* <TouchableOpacity
@@ -397,6 +426,14 @@ export class LoginScreen extends React.Component {
             onPress={() => this.onGoogleSignIn()}
           >
             <Text style={loginStyles.buttonFont}>Sign In with Google</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={loginStyles.buttonStyle}
+            onPress={async () => {
+              this.dataModel.notificationTest()
+            }}
+          >
+            <Text style={loginStyles.buttonFont}>test</Text>
           </TouchableOpacity>
           {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
@@ -425,7 +462,9 @@ export class LoginScreen extends React.Component {
             animationStyle={{ width: 100, height: 100 }}
             speed={1}
           >
-            <Text style={{fontWeight:"bold", textAlign:"center"}}>{this.state.loaderText}</Text>
+            <Text style={{ fontWeight: "bold", textAlign: "center" }}>
+              {this.state.loaderText}
+            </Text>
           </AnimatedLoader>
         </View>
       </View>
