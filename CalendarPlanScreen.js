@@ -32,44 +32,16 @@ import SwitchSelector from "react-native-switch-selector";
 
 import ModalSelector from "react-native-modal-selector";
 
-// import AnimatedMultistep from "react-native-animated-multistep";
-// const reportOptions = [
-//   {
-//     title: "Options",
-//     data: [
-//       { key: 1, text: "a", color: "red" },
-//       { key: 2, text: "b", color: "blue" },
-//       { key: 3, text: "c", color: "red" },
-//       { key: 4, text: "d", color: "blue" },
-//     ],
-//   },
-// ];
-
-// import Step1 from "./steps/step1";
-// import Step2 from "./steps/step2";
-// import Step3 from "./steps/step3";
-// import Step4 from "./steps/step4";
-
-// const allSteps = [
-//   { name: "step 1", component: Step1 },
-//   { name: "step 2", component: Step2 },
-//   { name: "step 3", component: Step3 },
-//   { name: "step 4", component: Step4 },
-// ];
 
 let index = 0;
 const data = [
   { key: index++, section: true, label: "Physical Activities" },
   { key: index++, label: "Walking" },
   { key: index++, label: "Jogging" },
-  // {
-  //   key: index++,
-  //   label: "Cranberries",
-  //   accessibilityLabel: "Tap here for cranberries",
-  // },
-  // // etc...
-  // // Can also add additional custom keys which are passed to the onChange callback
-  // { key: index++, label: "Vegetable", customKey: "Not a fruit" },
+  { key: index++, label: "Dancing" },
+  { key: index++, label: "Gardening" },
+  { key: index++, label: "Biking" },
+  { key: index++, label: "Jumping Rope" },
 ];
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -251,9 +223,9 @@ export class CalendarPlanScreen extends React.Component {
     for (let event of userPlanList) {
       if (event.end && !event.isDeleted) {
         let eventDate = event.end.slice(0, 10);
-        //console.log(eventDate);
+        console.log("reportPopUp",event);
         if (currentDate === eventDate) {
-          if (!event.isReported) {
+          if (event.isReported == false) {
             this.isReportModalVis = true;
             this.eventToday = event;
 
@@ -774,7 +746,7 @@ export class CalendarPlanScreen extends React.Component {
       colorCode = "#FFBF00";
     } else if (feeling === "Neutral") {
       feelingEmoji = "😑 Neutral";
-      colorCode = "#D8D8D8";
+      colorCode = "#F2F2F2";
     }
     if (this.eventToday.isActivityCompleted && this.eventToday.isThirtyMin) {
       planDetailView = (
@@ -1122,7 +1094,7 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isThirdYesStepVis: "none" });
                       this.setState({ isSecondNoStepVis: "none" });
                       this.setState({ isThirdNoStepVis: "none" });
-                      this.setState({ nextBtnState: "none" });
+                      this.setState({ nextBtnState: "next" });
                     }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
@@ -1300,6 +1272,7 @@ export class CalendarPlanScreen extends React.Component {
                         marginRight: 20,
                         fontSize: 20,
                       }}
+                      maxLength = {35}
                       autoCapitalize="none"
                       autoCorrect={false}
                       value={this.state.reason}
@@ -1480,10 +1453,14 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isReportModalVis: false });
                       this.setState({ nextBtnState: "next" });
 
+                      this.setState({ feeling: "Neutral" });
+                      this.setState({ isActivityCompleted: false });
+                      this.setState({ isThirtyMin: false });
+                      this.setState({ isFirstStepVis: "flex" });
+                      this.setState({ isSecondYesStepVis: "none" });
+                      this.setState({ isSecondNoStepVis: "none" });
                       this.setState({ isThirdNoStepVis: "none" });
                       this.setState({ isThirdYesStepVis: "none" });
-
-                      this.setState({ isFirstStepVis: "flex" });
 
                       let eventToUpdate = this.eventToday;
                       eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;

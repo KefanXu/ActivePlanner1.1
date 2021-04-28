@@ -38,6 +38,7 @@ export class LoginScreen extends React.Component {
   };
   onFocus = () => {
     this.dataModel.asyncInit();
+    this.dataModel = getDataModel();
   };
 
   // onLogin = () => {
