@@ -9,6 +9,8 @@ import * as Google from "expo-google-app-auth";
 const config = {
   // clientId:
   //   "858218224278-2rdlmrgknnj1m8m7hourt0r59iuiiagm.apps.googleusercontent.com",
+  iosStandaloneAppClientId:
+    "858218224278-5k545fdqrtnhevp0lefpl7ht1ebf3gap.apps.googleusercontent.com",
   iosClientId:
     "858218224278-nsuhfmntn6alt59c74sl312i5od457dm.apps.googleusercontent.com",
   scopes: [
@@ -113,6 +115,72 @@ class DataModel {
       // console.log("getWeatherInfo",data);
     });
     return [lastMonthWeather, thisMonthWeather, nextMonthWeather];
+  };
+
+  isUserDefineActivitiesExist = async (key) => {
+    let userDefineActivities = await this.usersRef
+      .doc(key)
+      .collection("my_activities")
+      .limit(1)
+      .get();
+
+    return userDefineActivities.empty;
+  };
+  createUserActivities = async (key) => {
+    let userActivityList = {
+      activityList: [
+        "Walking",
+        "Jogging",
+        "Gardening",
+        "Biking",
+        "Jumping Rope",
+      ],
+    };
+    let activityList = await this.usersRef.doc(key).collection("my_activities");
+    // for (let activity of userActivityList) {
+    //   await activityList.add(activity);
+    // }
+    await activityList.add(userActivityList);
+  };
+  updateUserActivities = async (key, activity) => {
+    console.log("key", key);
+    console.log("activity", activity);
+    let activityQuerySnap = await this.usersRef
+      .doc(key)
+      .collection("my_activities")
+      .get();
+    let docKey;
+    let userActivityList = [];
+    activityQuerySnap.forEach((qDocSnap) => {
+      docKey = qDocSnap.id;
+      let data = qDocSnap.data();
+      userActivityList.push(data);
+    });
+    userActivityList[0].activityList.push(activity);
+    let updatedList = {
+      activityList: userActivityList[0].activityList,
+    };
+    console.log("updatedList", updatedList);
+    console.log("docKey", docKey);
+    await this.usersRef
+      .doc(key)
+      .collection("my_activities")
+      .doc(docKey)
+      .update(updatedList);
+  };
+  getUserActivities = async (key) => {
+    let activityQuerySnap = await this.usersRef
+      .doc(key)
+      .collection("my_activities")
+      .get();
+    let userActivityList = [];
+
+    activityQuerySnap.forEach((qDocSnap) => {
+      let data = qDocSnap.data();
+
+      userActivityList.push(data);
+    });
+    return userActivityList;
   };
 
   getUserPlans = () => {

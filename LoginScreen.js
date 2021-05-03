@@ -238,6 +238,14 @@ export class LoginScreen extends React.Component {
     // console.log(nextMonthList);
 
     // console.log("user key:",key);
+
+    let userDefineActivitiesNotExist = await this.dataModel.isUserDefineActivitiesExist(
+      key
+    );
+    if (userDefineActivitiesNotExist) {
+      await this.dataModel.createUserActivities(key);
+    }
+    let userActivityList = await this.dataModel.getUserActivities(key);
     await this.dataModel.loadUserPlans(key);
     let userPlans = this.dataModel.getUserPlans();
 
@@ -255,7 +263,7 @@ export class LoginScreen extends React.Component {
     //console.log("userInfo",userInfo);
     // console.log("userPlans",userPlans);
     let isWeatherNotExist = await this.dataModel.isWeatherNotExist(key);
-    console.log("weatherCollectionSnapshot.empty",isWeatherNotExist);
+    console.log("weatherCollectionSnapshot.empty", isWeatherNotExist);
     if (isWeatherNotExist) {
       [
         lastMonthWeather,
@@ -282,8 +290,11 @@ export class LoginScreen extends React.Component {
       }
       await this.dataModel.updateWeatherInfo(key, weatherFullList);
     } else {
-      [lastMonthWeather, thisMonthWeather, nextMonthWeather] = await this.dataModel.getWeatherInfo(key);
-
+      [
+        lastMonthWeather,
+        thisMonthWeather,
+        nextMonthWeather,
+      ] = await this.dataModel.getWeatherInfo(key);
     }
 
     // console.log("lastMonthWeather", lastMonthWeather);
@@ -301,6 +312,7 @@ export class LoginScreen extends React.Component {
       lastMonthWeather: lastMonthWeather,
       thisMonthWeather: thisMonthWeather,
       nextMonthWeather: nextMonthWeather,
+      userActivityList: userActivityList[0].activityList,
     });
   };
 
@@ -428,14 +440,23 @@ export class LoginScreen extends React.Component {
           >
             <Text style={loginStyles.buttonFont}>Sign In with Google</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={async () => {
-              this.dataModel.notificationTest()
+              Alert.alert(
+                "test button clicked",
+                [
+                  {
+                    text: "OK",
+                    onPress: () =>
+                      {},
+                  },
+                ]
+              );
             }}
           >
             <Text style={loginStyles.buttonFont}>test</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {/* <TouchableOpacity
             style={loginStyles.buttonStyle}
             onPress={() => this.fetchWeatherInfo()}

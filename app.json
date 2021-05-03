@@ -19,7 +19,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "edu.umich.si.inteco.physicify",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.0",
+      "config":{
+        "googleSignIn":{
+          "reservedClientId":"com.googleusercontent.apps.858218224278-5k545fdqrtnhevp0lefpl7ht1ebf3gap"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {

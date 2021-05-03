@@ -222,6 +222,84 @@ export class MonthCalendar extends React.Component {
           //     iconNum = "unknown";
           //   }
           // }
+          let iconNum = "";
+          let iconEmoji = "";
+
+          let findWeather = false;
+          for (let dayWeather of this.props.weatherThisMonth) {
+            //console.log("dayWeather", dayWeather);
+
+            if (item == dayWeather.date) {
+              findWeather = true;
+              iconNum = dayWeather.img;
+            }
+            if (!findWeather) {
+              iconNum = "unknown";
+            }
+          }
+
+          switch (iconNum) {
+            case "01d":
+              iconEmoji = "☀️";
+              break;
+            case "01n":
+              iconEmoji = "🌙";
+              break;
+            case "02d":
+              iconEmoji = "🌥";
+              break;
+            case "02n":
+              iconEmoji = "🌥";
+              break;
+            case "03d":
+              iconEmoji = "⛅️";
+              break;
+            case "03n":
+              iconEmoji = "⛅️";
+              break;
+            case "04d":
+              iconEmoji = "☁️";
+              break;
+            case "04n":
+              iconEmoji = "☁️";
+              break;
+            case "09d":
+              iconEmoji = "🌧";
+              break;
+            case "09n":
+              iconEmoji = "🌧";
+              break;
+            case "10d":
+              iconEmoji = "🌧";
+              break;
+            case "10n":
+              iconEmoji = "🌧";
+              break;
+            case "11d":
+              iconEmoji = "⛈";
+              break;
+            case "11n":
+              iconEmoji = "⛈";
+              break;
+            case "13d":
+              iconEmoji = "❄️";
+              break;
+            case "13n":
+              iconEmoji = "❄️";
+              break;
+            case "50d":
+              iconEmoji = "💨";
+              break;
+            case "50n":
+              iconEmoji = "💨";
+              break;
+            case "arrow":
+              iconEmoji = "";
+              break;
+            case "unknown":
+              iconEmoji = "";
+              break;
+          }
 
           return (
             <View
@@ -233,7 +311,6 @@ export class MonthCalendar extends React.Component {
                 flexDirection: "column",
                 alignContent: "space-between",
                 justifyContent: "space-between",
-                
               }}
             >
               <TouchableOpacity
@@ -252,26 +329,42 @@ export class MonthCalendar extends React.Component {
                 activeOpacity={0.1}
                 onPress={() => this.onPress(item)}
               >
-                <Text
+                <View
                   style={{
-                    flex: 0.5,
-                    textAlign: "center",
-                    height: 18,
-                    justifyContent: "flex-start",
-                    alignContent: "flex-start",
-
-                    //backgroundColor: rowIndex == 0 ? "#ddd" : "",
-                    // Highlight Sundays
-                    color: colIndex == 0 ? "#a00" : "#000",
-                    // Highlight current date
-                    fontWeight:
-                      item == this.props.monthCalCurrDate.getDate()
-                        ? "bold"
-                        : "300",
+                    flex: 1,
+                    height: "100%",
+                    width: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection:"row"
                   }}
                 >
-                  {item != -1 ? item : null}
-                </Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                      textAlign: "center",
+                      alignSelf:"center",
+                      height: "100%",
+                      justifyContent: "center",
+                      alignContent: "center",
+                      fontSize: 11.5,
+
+                      marginTop: "9%",
+
+                      //backgroundColor: rowIndex == 0 ? "#ddd" : "",
+                      // Highlight Sundays
+                      color: colIndex == 0 ? "#a00" : "#000",
+                      // Highlight current date
+                      fontWeight:
+                        item == this.props.monthCalCurrDate.getDate()
+                          ? "bold"
+                          : "300",
+                    }}
+                  >
+                    {item != -1 ? item + iconEmoji : null}
+                  </Text>
+                </View>
+
                 {/* <Image
                   source={{
                     uri: "http://openweathermap.org/img/wn/" + iconNum + ".png",
@@ -311,7 +404,16 @@ export class MonthCalendar extends React.Component {
                     data={flatEventListMorning}
                     renderItem={({ item }) => {
                       //console.log("render flat",item);
-
+                      let feelingEmoji = "";
+                      if (item.feeling) {
+                        if (item.feeling === "Positive") {
+                          feelingEmoji = "🙂";
+                        } else if (item.feeling === "Negative") {
+                          feelingEmoji = "😕";
+                        } else {
+                          feelingEmoji = "😑";
+                        }
+                      }
                       if (item.isPlanned) {
                         if (item.isReported) {
                           if (!item.isActivityCompleted) {
@@ -334,7 +436,9 @@ export class MonthCalendar extends React.Component {
                                     fontWeight: "bold",
                                   }}
                                 >
-                                  {item.title ? item.title : "event"}
+                                  {item.title
+                                    ? item.title + feelingEmoji
+                                    : "event"}
                                 </Text>
                               </View>
                             );
@@ -361,7 +465,9 @@ export class MonthCalendar extends React.Component {
                                   >
                                     {/* {item.start} */}
 
-                                    {item.title ? item.title : "event"}
+                                    {item.title
+                                      ? item.title + feelingEmoji
+                                      : "event"}
                                   </Text>
                                 </View>
                               );
@@ -386,7 +492,9 @@ export class MonthCalendar extends React.Component {
                                     }}
                                   >
                                     {/* {item.start} */}
-                                    {item.title ? item.title : "event"}
+                                    {item.title
+                                      ? item.title + feelingEmoji
+                                      : "event"}
                                   </Text>
                                 </View>
                               );
@@ -415,7 +523,9 @@ export class MonthCalendar extends React.Component {
                                 }}
                               >
                                 {/* {item.start} */}
-                                {item.title ? item.title : "event"}
+                                {item.title
+                                  ? item.title + feelingEmoji
+                                  : "event"}
                               </Text>
                             </View>
                           );
@@ -435,7 +545,7 @@ export class MonthCalendar extends React.Component {
                           >
                             <Text style={{ textAlign: "center", fontSize: 5 }}>
                               {/* {item.start} */}
-                              {item.title ? item.title : ""}
+                              {item.title ? item.title + feelingEmoji : ""}
                             </Text>
                           </View>
                         );
@@ -458,6 +568,16 @@ export class MonthCalendar extends React.Component {
                     data={flatEventListAfternoon}
                     renderItem={({ item }) => {
                       //console.log("render flat",item);
+                      let feelingEmoji = "";
+                      if (item.feeling) {
+                        if (item.feeling === "Positive") {
+                          feelingEmoji = "🙂";
+                        } else if (item.feeling === "Negative") {
+                          feelingEmoji = "😕";
+                        } else {
+                          feelingEmoji = "😑";
+                        }
+                      }
 
                       if (item.isPlanned) {
                         if (item.isReported) {
@@ -482,7 +602,9 @@ export class MonthCalendar extends React.Component {
                                   }}
                                 >
                                   {/* {item.start} */}
-                                  {item.title ? item.title : "event"}
+                                  {item.title
+                                    ? item.title + feelingEmoji
+                                    : "event"}
                                 </Text>
                               </View>
                             );
@@ -508,7 +630,9 @@ export class MonthCalendar extends React.Component {
                                     }}
                                   >
                                     {/* {item.start} */}
-                                    {item.title ? item.title : "event"}
+                                    {item.title
+                                      ? item.title + feelingEmoji
+                                      : "event"}
                                   </Text>
                                 </View>
                               );
@@ -533,7 +657,9 @@ export class MonthCalendar extends React.Component {
                                     }}
                                   >
                                     {/* {item.start} */}
-                                    {item.title ? item.title : "event"}
+                                    {item.title
+                                      ? item.title + feelingEmoji
+                                      : "event"}
                                   </Text>
                                 </View>
                               );
@@ -562,7 +688,9 @@ export class MonthCalendar extends React.Component {
                                 }}
                               >
                                 {/* {item.start} */}
-                                {item.title ? item.title : "event"}
+                                {item.title
+                                  ? item.title + feelingEmoji
+                                  : "event"}
                               </Text>
                             </View>
                           );
@@ -582,7 +710,7 @@ export class MonthCalendar extends React.Component {
                           >
                             <Text style={{ textAlign: "center", fontSize: 5 }}>
                               {/* {item.start} */}
-                              {item.title ? item.title : ""}
+                              {item.title ? item.title + feelingEmoji : ""}
                             </Text>
                           </View>
                         );
