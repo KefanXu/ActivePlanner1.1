@@ -229,6 +229,8 @@ export class CalendarPlanScreen extends React.Component {
 
       activityData: this.activityData,
       userDefinedActivityText: "",
+
+      noEventDayReportDate: new Date(),
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -242,12 +244,15 @@ export class CalendarPlanScreen extends React.Component {
     for (let event of userPlanList) {
       if (event.end && !event.isDeleted) {
         let eventDate = event.end.slice(0, 10);
+        if (eventDate === currentDate) {
+          isNoEventToday = false;
+        }
+
         //console.log("reportPopUp",event);
         if (currentDate === eventDate) {
-          if (event.isReported == false) {
+          if (event.isReported == false && event.title) {
             this.isReportModalVis = true;
             this.eventToday = event;
-            isNoEventToday = false;
 
             let detailViewCalendar = [];
             for (let event of this.combinedEventListThis) {
@@ -292,7 +297,7 @@ export class CalendarPlanScreen extends React.Component {
     //this.reportPopUp(this.userPlans);
     let planDetailList = [];
     for (let plan of this.userPlans) {
-      if (plan.end && !plan.isDeleted) {
+      if (plan.end && !plan.isDeleted && plan.title) {
         let plannedMonth = parseInt(plan.end.slice(5, 7));
         let plannedDate = parseInt(plan.end.slice(8, 10));
         if (monthNum + 1 == plannedMonth && item == plannedDate) {
@@ -334,19 +339,43 @@ export class CalendarPlanScreen extends React.Component {
             normalEventList.push(event);
           }
         }
-        this.setState({ detailViewCalendar: normalEventList });
-        let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
-        this.setState({ normalViewModalStartDate: normalDate });
-        let normalWeekday = normalDate.getDay();
-        this.setState({ normalWeekday: normalWeekday });
+        let isDailyReported = false;
+        let currentDate = moment(
+          new Date(todayDate.getFullYear(), monthNum, item)
+        )
+          .format()
+          .slice(0, 10);
+        for (let record of this.userPlans) {
+          if (record.end && record.isDailyReport) {
+            let eventDate = record.end.slice(0, 10);
+            if (eventDate === currentDate) {
+              this.eventToday = record;
+              isDailyReported = true;
+            }
+          }
+        }
+        if (isDailyReported) {
+          this.setState({ detailViewCalendar: normalEventList });
+          let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+          this.setState({ normalViewModalStartDate: normalDate });
+          let normalWeekday = normalDate.getDay();
+          this.setState({ normalWeekday: normalWeekday });
 
-        this.setState({ isNormalModalVis: true });
+          this.setState({ isNormalModalVis: true });
 
-        return;
-      } else if (
-        monthNum === todayDate.getMonth() &&
-        item < todayDate.getDate()
-      ) {
+          return;
+        } else {
+          this.setState({
+            noEventDayReportDate: new Date(
+              todayDate.getFullYear(),
+              monthNum,
+              item
+            ),
+          });
+          this.setState({ isNoEventDayReportModalVis: true });
+          return;
+        }
+      } else if (monthNum === todayDate.getMonth()) {
         //console.log("no plans");
 
         normalWeatherList = this.thisMonthWeather;
@@ -367,17 +396,80 @@ export class CalendarPlanScreen extends React.Component {
             normalEventList.push(event);
           }
         }
-        //console.log("normalEventList", normalEventList);
-        this.setState({ detailViewCalendar: normalEventList });
-        let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
-        this.setState({ normalViewModalStartDate: normalDate });
+        if (item < todayDate.getDate()) {
+          //console.log("item < todayDate.getDate()");
+          let isDailyReported = false;
+          //this.eventToday = {};
+          let currentDate = moment(
+            new Date(todayDate.getFullYear(), monthNum, item)
+          )
+            .format()
+            .slice(0, 10);
+          for (let record of this.userPlans) {
+            if (record.end && record.isDailyReport) {
+              let eventDate = record.end.slice(0, 10);
+              if (eventDate === currentDate) {
+                this.eventToday = record;
+                isDailyReported = true;
+              }
+            }
+          }
+          if (isDailyReported) {
+            //console.log("normalEventList", normalEventList);
+            this.setState({ detailViewCalendar: normalEventList });
+            let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+            this.setState({ normalViewModalStartDate: normalDate });
 
-        let normalWeekday = normalDate.getDay();
-        this.setState({ normalWeekday: normalWeekday });
+            let normalWeekday = normalDate.getDay();
+            this.setState({ normalWeekday: normalWeekday });
 
-        this.setState({ isNormalModalVis: true });
+            this.setState({ isNormalModalVis: true });
 
-        return;
+            return;
+          } else {
+            this.setState({
+              noEventDayReportDate: new Date(
+                todayDate.getFullYear(),
+                monthNum,
+                item
+              ),
+            });
+
+            this.setState({ isNoEventDayReportModalVis: true });
+            return;
+          }
+        } else if (item === todayDate.getDate()) {
+          let isDailyReported = false;
+          let currentDate = moment(new Date()).format().slice(0, 10);
+          for (let record of this.userPlans) {
+            if (record.end && record.isDailyReport) {
+              let eventDate = record.end.slice(0, 10);
+              if (eventDate === currentDate) {
+                this.eventToday = record;
+                isDailyReported = true;
+              }
+            }
+          }
+          if (isDailyReported) {
+            // Alert.alert("You already reported", "Activity Type Missing", [
+            //   { text: "OK", onPress: () => console.log("OK Pressed") },
+            // ]);
+
+            this.setState({ detailViewCalendar: normalEventList });
+            let normalDate = new Date();
+            this.setState({ normalViewModalStartDate: normalDate });
+            let normalWeekday = normalDate.getDay();
+            this.setState({ normalWeekday: normalWeekday });
+            this.setState({ isNormalModalVis: true });
+            return;
+          } else {
+            //set date here
+            this.setState({ noEventDayReportDate: new Date() });
+
+            this.setState({ isNoEventDayReportModalVis: true });
+            return;
+          }
+        }
       }
     }
 
@@ -755,6 +847,43 @@ export class CalendarPlanScreen extends React.Component {
     this.monthCalRef.current.processEvents();
   };
 
+  NoEventSecView = (props) => {
+    let userFeeling = props.userFeeling;
+    // console.log(props);
+    // console.log(userFeeling);
+    let feelingIcon = "";
+    let activityText = "";
+    let conText = "";
+    if (!userFeeling) {
+    } else {
+      if (userFeeling.title) {
+      } else {
+        conText = "and I feel";
+        if (userFeeling.feeling) {
+          // return <Text>{userFeeling.feeling}</Text>;
+          if (userFeeling.feeling === "Positive") {
+            feelingIcon = "🙂" + " Positive";
+          } else if (userFeeling.feeling === "Negative") {
+            feelingIcon = "😕" + " Negative";
+          } else if (userFeeling.feeling === "Neutral") {
+            feelingIcon = "😑" + "Neutral";
+          }
+        }
+        if (userFeeling.isExerciseToday) {
+          activityText = "I did " + userFeeling.otherActivity;
+        } else {
+          activityText = "I didn't do any physical exercise today.";
+        }
+      }
+    }
+
+    return (
+      <Text>
+        {activityText} {conText} {feelingIcon}
+      </Text>
+    );
+  };
+
   render() {
     let calView;
     let planDetailView;
@@ -1067,7 +1196,7 @@ export class CalendarPlanScreen extends React.Component {
         ></Button>
         </View> */}
 
-        {/* // No event day report */}
+        {/* // Plan report */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -1082,11 +1211,12 @@ export class CalendarPlanScreen extends React.Component {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
+              //backgroundColor:"red",
             }}
           >
             <View
               style={{
-                flex: 0.9,
+                flex: 0.6,
                 width: "95%",
                 backgroundColor: "white",
                 borderWidth: 2,
@@ -1118,6 +1248,7 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isSecondNoStepVis: "none" });
                       this.setState({ isThirdNoStepVis: "none" });
                       this.setState({ nextBtnState: "next" });
+                      this.setState({ otherActivity: "" });
                     }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
@@ -1126,7 +1257,7 @@ export class CalendarPlanScreen extends React.Component {
               </View>
               <View
                 style={{
-                  flex: 0.15,
+                  flex: 0.2,
                   width: "80%",
                   marginTop: 0,
                   //backgroundColor:"red"
@@ -1144,11 +1275,11 @@ export class CalendarPlanScreen extends React.Component {
 
               <View
                 style={{
-                  flex: 0.2,
+                  flex: 0.8,
                   width: "80%",
                   //backgroundColor: "red",
                   flexDirection: "row",
-                  alignItems: "flex-start",
+                  alignItems: "center",
                   justifyContent: "center",
                 }}
               >
@@ -1506,6 +1637,7 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ feeling: "Neutral" });
                       this.setState({ isActivityCompleted: false });
                       this.setState({ isThirtyMin: false });
+                      this.setState({ otherActivity: "" });
                       this.updateView();
                     } else if (this.state.nextBtnState === "next") {
                       this.setState({ isBackBtnVis: false });
@@ -1542,7 +1674,7 @@ export class CalendarPlanScreen extends React.Component {
           </View>
         </Modal>
 
-        {/* //report modal */}
+        {/* // No event day report */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -1557,6 +1689,7 @@ export class CalendarPlanScreen extends React.Component {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
+              //backgroundColor:"red"
             }}
           >
             <View
@@ -1593,6 +1726,7 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isSecondNoStepVis: "none" });
                       this.setState({ isThirdNoStepVis: "none" });
                       this.setState({ nextBtnState: "next" });
+                      this.setState({ otherActivity: "" });
                     }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
@@ -1608,7 +1742,10 @@ export class CalendarPlanScreen extends React.Component {
                 }}
               >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-                  Tell us your day!
+                  Tell us your day!{" "}
+                  {moment(this.state.noEventDayReportDate)
+                    .format()
+                    .slice(0, 10)}
                 </Text>
                 <Text
                   style={{ fontSize: 14, fontWeight: "bold", marginTop: 5 }}
@@ -1676,26 +1813,36 @@ export class CalendarPlanScreen extends React.Component {
                       marginBottom: "10%",
                     }}
                   >
-                    Did you {this.eventToday.title} for 30 min at{" "}
-                    {this.eventToday.start.slice(11, 16)}
+                    Did you do any other activities (if yes, what activity and
+                    when)?
                   </Text>
-                  <SwitchSelector
-                    options={[
-                      { label: "No", value: false },
-                      { label: "Yes", value: true },
-                    ]}
-                    initial={0}
-                    buttonMargin={5}
-                    borderWidth={2}
-                    borderColor="black"
-                    buttonColor="black"
-                    onPress={(value) =>
-                      // console.log(`Call onPress with value: ${value}`)
-                      {
-                        this.setState({ isThirtyMin: value });
-                      }
-                    }
-                  />
+                  <View
+                    style={{
+                      flex: 0.1,
+
+                      marginTop: 10,
+                      width: "100%",
+                      borderWidth: 2,
+                      borderRadius: 30,
+                      borderColor: "#6E6E6E",
+                    }}
+                  >
+                    <TextInput
+                      // secureTextEntry={true}
+                      style={{
+                        flex: 0.5,
+                        marginLeft: 20,
+                        marginRight: 20,
+                        fontSize: 20,
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={this.state.otherActivity}
+                      onChangeText={(text) => {
+                        this.setState({ otherActivity: text });
+                      }}
+                    />
+                  </View>
                 </View>
                 <View
                   style={{
@@ -1780,133 +1927,7 @@ export class CalendarPlanScreen extends React.Component {
                     />
                   </View>
                 </View>
-                <View
-                  style={{
-                    display: this.state.isThirdNoStepVis,
-                    justifyContent: "flex-start",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    width: "100%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "10%",
-                    }}
-                  >
-                    Did you do any other activities (if yes, what activity and
-                    when)?
-                  </Text>
-                  <View
-                    style={{
-                      flex: 0.8,
-
-                      marginTop: 10,
-                      width: "100%",
-                      borderWidth: 2,
-                      borderRadius: 30,
-                      borderColor: "#6E6E6E",
-                    }}
-                  >
-                    <TextInput
-                      // secureTextEntry={true}
-                      style={{
-                        flex: 1,
-                        marginLeft: 20,
-                        marginRight: 20,
-                        fontSize: 20,
-                      }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      value={this.state.otherActivity}
-                      onChangeText={(text) => {
-                        this.setState({ otherActivity: text });
-                      }}
-                    />
-                  </View>
-                </View>
               </View>
-              {/* <View
-                style={{
-                  flex: 0.15,
-                  width: "80%",
-                  backgroundColor: "#BDBDBD",
-                  borderRadius: 15,
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 20,
-                }}
-              >
-                <View
-                  style={{
-                    flex: 0.3,
-                    width: "90%",
-                    marginTop: 10,
-                    marginLeft: 10,
-                    marginBottom: 0,
-                  }}
-                >
-                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                    Records on {this.eventToday.title} on{" "}
-                    {this.eventToday.start.slice(5, 10)}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flex: 0.7,
-                    width: "90%",
-                    marginTop: 0,
-                    marginLeft: 10,
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexDirection: "row",
-                    // backgroundColor: "red",
-                  }}
-                >
-                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {WEEKDAY[new Date(this.eventToday.end).getDay()]}
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Image
-                      source={{
-                        uri:
-                          "http://openweathermap.org/img/wn/" +
-                          this.state.detailViewIcon +
-                          ".png",
-                      }}
-                      style={{ width: 60, height: 60 }}
-                    ></Image>
-                    <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                      {this.state.weatherText}
-                    </Text>
-                  </View>
-                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {this.state.detailViewTemp}°C
-                  </Text>
-                </View>
-              </View> */}
-              {/* <View style={{ flex: 0.5, width: "80%" }}>
-                <View style={{ flex: 1 }}>
-                  <Calendar
-                    events={this.state.detailViewCalendar}
-                    date={this.state.normalViewModalStartDate}
-                    scrollOffsetMinutes={
-                      parseInt(this.eventToday.start.slice(11, 13)) * 60
-                    }
-                    swipeEnabled={false}
-                    height={90}
-                    mode="day"
-                  />
-                </View>
-              </View> */}
               <View style={{ flexDirection: "row" }}>
                 <Button
                   title="Back"
@@ -1922,9 +1943,9 @@ export class CalendarPlanScreen extends React.Component {
                       } else {
                         this.setState({ isBackBtnVis: false });
                         this.setState({ isThirdYesStepVis: "none" });
-                        this.setState({ isThirdNoStepVis: "flex" });
+                        this.setState({ isFirstStepVis: "flex" });
                         this.setState({ btnName: "Next" });
-                        this.setState({ nextBtnState: "next3no" });
+                        this.setState({ nextBtnState: "next" });
                       }
                     } else if (this.state.nextBtnState === "next2") {
                       this.setState({ nextBtnState: "next" });
@@ -1948,7 +1969,7 @@ export class CalendarPlanScreen extends React.Component {
                   title={this.state.btnName}
                   onPress={async () => {
                     if (this.state.nextBtnState === "submit") {
-                      this.setState({ isReportModalVis: false });
+                      this.setState({ isNoEventDayReportModalVis: false });
                       this.setState({ nextBtnState: "next" });
 
                       this.setState({ feeling: "Neutral" });
@@ -1960,40 +1981,67 @@ export class CalendarPlanScreen extends React.Component {
                       this.setState({ isThirdNoStepVis: "none" });
                       this.setState({ isThirdYesStepVis: "none" });
 
-                      let eventToUpdate = this.eventToday;
-                      eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;
-                      eventToUpdate.isReported = true;
+                      let dailyReport = {};
+                      dailyReport.isDailyReport = true;
+                      dailyReport.isExerciseToday = this.state.isActivityCompleted;
+                      if (this.state.isActivityCompleted) {
+                        dailyReport.otherActivity = this.state.otherActivity;
+                      } else {
+                        dailyReport.otherActivity = "none";
+                      }
+                      dailyReport.feeling = this.state.feeling;
 
-                      eventToUpdate.isThirtyMin = this.state.isThirtyMin;
-                      eventToUpdate.reason = this.state.reason;
-                      eventToUpdate.otherActivity = this.state.otherActivity;
-                      eventToUpdate.feeling = this.state.feeling;
+                      dailyReport.end = moment(this.state.noEventDayReportDate)
+                        .format()
+                        .slice(0, 19);
+                      dailyReport.start = dailyReport.end;
 
-                      await this.dataModel.updatePlan(
+                      let timeStamp = moment(new Date()).format();
+                      dailyReport.timeStamp = timeStamp;
+                      await this.dataModel.createNewPlan(
                         this.userKey,
-                        eventToUpdate
+                        dailyReport
                       );
-                      let eventList = this.state.eventsThisMonth;
 
-                      await this.setState({ eventsThisMonth: eventList });
+                      // let eventToUpdate = this.eventToday;
+                      // eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;
+                      // eventToUpdate.isReported = true;
+
+                      // eventToUpdate.isThirtyMin = this.state.isThirtyMin;
+                      // eventToUpdate.reason = this.state.reason;
+                      // eventToUpdate.otherActivity = this.state.otherActivity;
+                      // eventToUpdate.feeling = this.state.feeling;
+
+                      // await this.dataModel.updatePlan(
+                      //   this.userKey,
+                      //   eventToUpdate
+                      // );
+
+                      // let eventList = this.state.eventsThisMonth;
+                      // eventList.push(dailyReport);
+
+                      // await this.setState({ eventsThisMonth: eventList });
+
                       await this.dataModel.loadUserPlans(this.userKey);
                       this.userPlans = this.dataModel.getUserPlans();
                       this.setState({ feeling: "Neutral" });
                       this.setState({ isActivityCompleted: false });
                       this.setState({ isThirtyMin: false });
+                      this.setState({ otherActivity: "" });
                       this.updateView();
                     } else if (this.state.nextBtnState === "next") {
                       this.setState({ isBackBtnVis: false });
                       this.setState({ isFirstStepVis: "none" });
                       this.setState({ nextBtnState: "next2" });
                       if (this.state.isActivityCompleted) {
-                        this.setState({ submitBtnState: true });
+                        //this.setState({ submitBtnState: true });
                         this.setState({ isSecondYesStepVis: "flex" });
                         //this.setState({ isButtonFirstStage: false });
                       } else {
-                        this.setState({ nextBtnState: "next2no" });
-                        this.setState({ submitBtnState: false });
-                        this.setState({ isSecondNoStepVis: "flex" });
+                        this.setState({ nextBtnState: "submit" });
+                        this.setState({ btnName: "Submit" });
+                        //this.setState({ submitBtnState: false });
+                        this.setState({ isThirdYesStepVis: "flex" });
                       }
                     } else if (
                       this.state.nextBtnState === "next2" ||
@@ -2123,7 +2171,10 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <View>
                   <TouchableOpacity
-                    onPress={() => this.setState({ isNormalModalVis: false })}
+                    onPress={() => {
+                      this.setState({ isNormalModalVis: false });
+                      // this.eventToday = {};
+                    }}
                   >
                     <MaterialIcons name="cancel" size={24} color="black" />
                   </TouchableOpacity>
@@ -2180,6 +2231,20 @@ export class CalendarPlanScreen extends React.Component {
                       {this.state.detailViewTemp}°C
                     </Text>
                   </View>
+                </View>
+                <View
+                  style={{
+                    flex: 0.1,
+                    marginTop: 10,
+                    width: "100%",
+                    backgroundColor: "#BDBDBD",
+                    borderRadius: 15,
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <this.NoEventSecView userFeeling={this.eventToday} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Calendar
