@@ -321,14 +321,15 @@ export class CalendarPlanScreen extends React.Component {
         //console.log("no plans");
 
         normalWeatherList = this.lastMonthWeather;
+        this.setWeatherByDate(item, normalWeatherList);
 
-        for (let weather of normalWeatherList) {
-          if (weather.date === item) {
-            this.setState({ detailViewTemp: weather.temp });
-            this.setState({ detailViewIcon: weather.img });
-            this.setState({ weatherText: weather.text });
-          }
-        }
+        // for (let weather of normalWeatherList) {
+        //   if (weather.date === item) {
+        //     this.setState({ detailViewTemp: weather.temp });
+        //     this.setState({ detailViewIcon: weather.img });
+        //     this.setState({ weatherText: weather.text });
+        //   }
+        // }
 
         for (let event of this.combineEventListFull) {
           let eventDate = new Date(event.start);
@@ -339,29 +340,32 @@ export class CalendarPlanScreen extends React.Component {
             normalEventList.push(event);
           }
         }
-        let isDailyReported = false;
-        let currentDate = moment(
-          new Date(todayDate.getFullYear(), monthNum, item)
-        )
-          .format()
-          .slice(0, 10);
-        for (let record of this.userPlans) {
-          if (record.end && record.isDailyReport) {
-            let eventDate = record.end.slice(0, 10);
-            if (eventDate === currentDate) {
-              this.eventToday = record;
-              isDailyReported = true;
-            }
-          }
-        }
+        let isDailyReported = this.isDailyReport(todayDate, monthNum, item);
+        // let isDailyReported = false;
+        // let currentDate = moment(
+        //   new Date(todayDate.getFullYear(), monthNum, item)
+        // )
+        //   .format()
+        //   .slice(0, 10);
+        // for (let record of this.userPlans) {
+        //   if (record.end && record.isDailyReport) {
+        //     let eventDate = record.end.slice(0, 10);
+        //     if (eventDate === currentDate) {
+        //       this.eventToday = record;
+        //       isDailyReported = true;
+        //     }
+        //   }
+        // }
         if (isDailyReported) {
-          this.setState({ detailViewCalendar: normalEventList });
-          let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
-          this.setState({ normalViewModalStartDate: normalDate });
-          let normalWeekday = normalDate.getDay();
-          this.setState({ normalWeekday: normalWeekday });
+          this.setNormalModal(todayDate, normalEventList, monthNum, item);
+          // this.setState({ detailViewCalendar: normalEventList });
+          // let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+          // this.setState({ normalViewModalStartDate: normalDate });
+          // let normalWeekday = normalDate.getDay();
+          // this.setState({ normalWeekday: normalWeekday });
 
-          this.setState({ isNormalModalVis: true });
+          // this.setState({ isNormalModalVis: true });
+          // this.setState({ isWeatherVisOnPanel: "none" });
 
           return;
         } else {
@@ -372,6 +376,7 @@ export class CalendarPlanScreen extends React.Component {
               item
             ),
           });
+          this.setState({ isWeatherVisOnPanel: "none" });
           this.setState({ isNoEventDayReportModalVis: true });
           return;
         }
@@ -379,13 +384,14 @@ export class CalendarPlanScreen extends React.Component {
         //console.log("no plans");
 
         normalWeatherList = this.thisMonthWeather;
-        for (let weather of normalWeatherList) {
-          if (weather.date === item) {
-            this.setState({ detailViewTemp: weather.temp });
-            this.setState({ detailViewIcon: weather.img });
-            this.setState({ weatherText: weather.text });
-          }
-        }
+        this.setWeatherByDate(item, normalWeatherList);
+        // for (let weather of normalWeatherList) {
+        //   if (weather.date === item) {
+        //     this.setState({ detailViewTemp: weather.temp });
+        //     this.setState({ detailViewIcon: weather.img });
+        //     this.setState({ weatherText: weather.text });
+        //   }
+        // }
 
         for (let event of this.combineEventListFull) {
           let eventDate = new Date(event.start);
@@ -397,33 +403,35 @@ export class CalendarPlanScreen extends React.Component {
           }
         }
         if (item < todayDate.getDate()) {
-          //console.log("item < todayDate.getDate()");
-          let isDailyReported = false;
-          //this.eventToday = {};
-          let currentDate = moment(
-            new Date(todayDate.getFullYear(), monthNum, item)
-          )
-            .format()
-            .slice(0, 10);
-          for (let record of this.userPlans) {
-            if (record.end && record.isDailyReport) {
-              let eventDate = record.end.slice(0, 10);
-              if (eventDate === currentDate) {
-                this.eventToday = record;
-                isDailyReported = true;
-              }
-            }
-          }
+          let isDailyReported = this.isDailyReport(todayDate, monthNum, item);
+          // //console.log("item < todayDate.getDate()");
+          // let isDailyReported = false;
+          // //this.eventToday = {};
+          // let currentDate = moment(
+          //   new Date(todayDate.getFullYear(), monthNum, item)
+          // )
+          //   .format()
+          //   .slice(0, 10);
+          // for (let record of this.userPlans) {
+          //   if (record.end && record.isDailyReport) {
+          //     let eventDate = record.end.slice(0, 10);
+          //     if (eventDate === currentDate) {
+          //       this.eventToday = record;
+          //       isDailyReported = true;
+          //     }
+          //   }
+          // }
           if (isDailyReported) {
             //console.log("normalEventList", normalEventList);
-            this.setState({ detailViewCalendar: normalEventList });
-            let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
-            this.setState({ normalViewModalStartDate: normalDate });
+            this.setNormalModal(todayDate, normalEventList, monthNum, item);
+            // this.setState({ detailViewCalendar: normalEventList });
+            // let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+            // this.setState({ normalViewModalStartDate: normalDate });
 
-            let normalWeekday = normalDate.getDay();
-            this.setState({ normalWeekday: normalWeekday });
-
-            this.setState({ isNormalModalVis: true });
+            // let normalWeekday = normalDate.getDay();
+            // this.setState({ normalWeekday: normalWeekday });
+            // this.setState({ isWeatherVisOnPanel: "none" });
+            // this.setState({ isNormalModalVis: true });
 
             return;
           } else {
@@ -436,6 +444,7 @@ export class CalendarPlanScreen extends React.Component {
             });
 
             this.setState({ isNoEventDayReportModalVis: true });
+            this.setState({ isWeatherVisOnPanel: "none" });
             return;
           }
         } else if (item === todayDate.getDate()) {
@@ -454,6 +463,7 @@ export class CalendarPlanScreen extends React.Component {
             // Alert.alert("You already reported", "Activity Type Missing", [
             //   { text: "OK", onPress: () => console.log("OK Pressed") },
             // ]);
+            //this.setNormalModal(normalEventList, monthNum, item);
 
             this.setState({ detailViewCalendar: normalEventList });
             let normalDate = new Date();
@@ -461,12 +471,13 @@ export class CalendarPlanScreen extends React.Component {
             let normalWeekday = normalDate.getDay();
             this.setState({ normalWeekday: normalWeekday });
             this.setState({ isNormalModalVis: true });
+            this.setState({ isWeatherVisOnPanel: "none" });
             return;
           } else {
             //set date here
             this.setState({ noEventDayReportDate: new Date() });
-
             this.setState({ isNoEventDayReportModalVis: true });
+            this.setState({ isWeatherVisOnPanel: "none" });
             return;
           }
         }
@@ -526,13 +537,14 @@ export class CalendarPlanScreen extends React.Component {
       } else {
         slideUpWeatherList = this.nextMonthWeather;
       }
-      for (let weather of slideUpWeatherList) {
-        if (weather.date === item) {
-          this.setState({ detailViewTemp: weather.temp });
-          this.setState({ detailViewIcon: weather.img });
-          this.setState({ weatherText: weather.text });
-        }
-      }
+      this.setWeatherByDate(item, slideUpWeatherList);
+      // for (let weather of slideUpWeatherList) {
+      //   if (weather.date === item) {
+      //     this.setState({ detailViewTemp: weather.temp });
+      //     this.setState({ detailViewIcon: weather.img });
+      //     this.setState({ weatherText: weather.text });
+      //   }
+      // }
       //console.log(targetDate);
       this.setState({ isFromWeekView: false });
       this.setState({ selectedDate: item });
@@ -560,17 +572,19 @@ export class CalendarPlanScreen extends React.Component {
         } else {
           weatherList = this.lastMonthWeather;
         }
-        for (let weather of weatherList) {
-          if (weather.date === currDate) {
-            this.setState({ detailViewTemp: weather.temp });
-            this.setState({ detailViewIcon: weather.img });
-            this.setState({ weatherText: weather.text });
-          }
-        }
+        this.setWeatherByDate(currDate, weatherList);
+        // for (let weather of weatherList) {
+        //   if (weather.date === currDate) {
+        //     this.setState({ detailViewTemp: weather.temp });
+        //     this.setState({ detailViewIcon: weather.img });
+        //     this.setState({ weatherText: weather.text });
+        //   }
+        // }
         if (this.eventToday.isReported) {
           //show event detail
 
           this.setState({ detailViewTop: month + " " + item });
+          this.setState({ isWeatherVisOnPanel: "none" });
           this.setState({ isEventDetailModalVis: true });
           //console.log("this.state.thisMonthEvents",this.state.eventsThisMonth);
         } else {
@@ -579,35 +593,41 @@ export class CalendarPlanScreen extends React.Component {
           } else {
             weatherList = this.lastMonthWeather;
           }
-          for (let weather of weatherList) {
-            if (weather.date === currDate) {
-              this.setState({ detailViewTemp: weather.temp });
-              this.setState({ detailViewIcon: weather.img });
-              this.setState({ weatherText: weather.text });
-            }
-          }
+          this.setWeatherByDate(currDate, weatherList);
+          // for (let weather of weatherList) {
+          //   if (weather.date === currDate) {
+          //     this.setState({ detailViewTemp: weather.temp });
+          //     this.setState({ detailViewIcon: weather.img });
+          //     this.setState({ weatherText: weather.text });
+          //   }
+          // }
 
           if (monthNum < this.state.date.getMonth()) {
             let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
             this.setState({ normalViewModalStartDate: normalDate });
             this.setState({ isReportModalVis: true });
+            this.setState({ isWeatherVisOnPanel: "none" });
           } else if (monthNum === this.state.date.getMonth()) {
             if (item <= this.state.date.getDate()) {
-              let normalDate = new Date(
-                todayDate.getFullYear(),
-                monthNum,
-                item
-              );
-              this.setState({ normalViewModalStartDate: normalDate });
-              this.setState({ isReportModalVis: true });
+              this.setReportModal(todayDate, monthNum, item);
+              // let normalDate = new Date(
+              //   todayDate.getFullYear(),
+              //   monthNum,
+              //   item
+              // );
+              // this.setState({ normalViewModalStartDate: normalDate });
+              // this.setState({ isReportModalVis: true });
+              // this.setState({ isWeatherVisOnPanel: "none" });
             } else {
               this.eventToday = planDetailList[0];
               this.setState({ isPlannedEventModalVis: true });
+              this.setState({ isWeatherVisOnPanel: "none" });
             }
             //show planned info
           } else {
             this.eventToday = planDetailList[0];
             this.setState({ isPlannedEventModalVis: true });
+            this.setState({ isWeatherVisOnPanel: "none" });
           }
         }
       } else if (planDetailList.length != 1) {
@@ -634,13 +654,14 @@ export class CalendarPlanScreen extends React.Component {
             } else {
               weatherList = this.lastMonthWeather;
             }
-            for (let weather of weatherList) {
-              if (weather.date === currDate) {
-                this.setState({ detailViewTemp: weather.temp });
-                this.setState({ detailViewIcon: weather.img });
-                this.setState({ weatherText: weather.text });
-              }
-            }
+            this.setWeatherByDate(currDate, weatherList);
+            // for (let weather of weatherList) {
+            //   if (weather.date === currDate) {
+            //     this.setState({ detailViewTemp: weather.temp });
+            //     this.setState({ detailViewIcon: weather.img });
+            //     this.setState({ weatherText: weather.text });
+            //   }
+            // }
             this.setState({ detailViewTop: month + " " + item });
 
             if (currMonthNum === this.state.date.getMonth() + 1) {
@@ -648,41 +669,49 @@ export class CalendarPlanScreen extends React.Component {
             } else {
               weatherList = this.lastMonthWeather;
             }
-            for (let weather of weatherList) {
-              if (weather.date === currDate) {
-                this.setState({ detailViewTemp: weather.temp });
-                this.setState({ detailViewIcon: weather.img });
-                this.setState({ weatherText: weather.text });
-              }
-            }
+            this.setWeatherByDate(currDate, weatherList);
+            // for (let weather of weatherList) {
+            //   if (weather.date === currDate) {
+            //     this.setState({ detailViewTemp: weather.temp });
+            //     this.setState({ detailViewIcon: weather.img });
+            //     this.setState({ weatherText: weather.text });
+            //   }
+            // }
 
             if (monthNum < this.state.date.getMonth()) {
               if (!this.eventToday.isReported) {
-                let normalDate = new Date(
-                  todayDate.getFullYear(),
-                  monthNum,
-                  item
-                );
-                this.setState({ normalViewModalStartDate: normalDate });
-                this.setState({ isReportModalVis: true });
+                this.setReportModal(todayDate, monthNum, item);
+                // let normalDate = new Date(
+                //   todayDate.getFullYear(),
+                //   monthNum,
+                //   item
+                // );
+                // this.setState({ normalViewModalStartDate: normalDate });
+                // this.setState({ isReportModalVis: true });
+                // this.setState({ isWeatherVisOnPanel: "none" });
               } else {
                 this.setState({ isEventDetailModalVis: true });
+                this.setState({ isWeatherVisOnPanel: "none" });
               }
             } else if (monthNum === this.state.date.getMonth()) {
               if (item <= this.state.date.getDate()) {
                 if (!this.eventToday.isReported) {
-                  let normalDate = new Date(
-                    todayDate.getFullYear(),
-                    monthNum,
-                    item
-                  );
-                  this.setState({ normalViewModalStartDate: normalDate });
-                  this.setState({ isReportModalVis: true });
+                  this.setReportModal(todayDate, monthNum, item);
+                  // let normalDate = new Date(
+                  //   todayDate.getFullYear(),
+                  //   monthNum,
+                  //   item
+                  // );
+                  // this.setState({ normalViewModalStartDate: normalDate });
+                  // this.setState({ isReportModalVis: true });
+                  // this.setState({ isWeatherVisOnPanel: "none" });
                 } else {
                   this.setState({ isEventDetailModalVis: true });
+                  this.setState({ isWeatherVisOnPanel: "none" });
                 }
               } else {
                 this.setState({ isPlannedEventModalVis: true });
+                this.setState({ isWeatherVisOnPanel: "none" });
               }
             }
           }
@@ -696,6 +725,50 @@ export class CalendarPlanScreen extends React.Component {
   //   this.setState({eventsThisMonth:newListByActivity});
   //   console.log("updateMonthCalView()",this.state.eventsThisMonth);
   // }
+  setNormalModal = (todayDate, normalEventList, monthNum, item) => {
+    this.setState({ detailViewCalendar: normalEventList });
+    let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+    this.setState({ normalViewModalStartDate: normalDate });
+    let normalWeekday = normalDate.getDay();
+    this.setState({ normalWeekday: normalWeekday });
+
+    this.setState({ isNormalModalVis: true });
+    this.setState({ isWeatherVisOnPanel: "none" });
+  };
+  setReportModal = (todayDate, monthNum, item) => {
+    let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
+    this.setState({ normalViewModalStartDate: normalDate });
+    this.setState({ isReportModalVis: true });
+    this.setState({ isWeatherVisOnPanel: "none" });
+  };
+  isDailyReport = (todayDate, monthNum, item) => {
+    let isDailyReported = false;
+    //this.eventToday = {};
+    let currentDate = moment(new Date(todayDate.getFullYear(), monthNum, item))
+      .format()
+      .slice(0, 10);
+    for (let record of this.userPlans) {
+      if (record.end && record.isDailyReport) {
+        let eventDate = record.end.slice(0, 10);
+        if (eventDate === currentDate) {
+          this.eventToday = record;
+          isDailyReported = true;
+        }
+      }
+    }
+    return isDailyReported;
+  };
+
+  setWeatherByDate = (date, weatherList) => {
+    for (let weather of weatherList) {
+      if (weather.date === date) {
+        this.setState({ detailViewTemp: weather.temp });
+        this.setState({ detailViewIcon: weather.img });
+        this.setState({ weatherText: weather.text });
+      }
+    }
+  };
+
   onPlanBtnPressed = async () => {
     let item = this.state.selectedDate;
     let month = this.state.selectedMonth + 1;
