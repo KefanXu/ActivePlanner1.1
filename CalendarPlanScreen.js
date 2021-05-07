@@ -240,7 +240,7 @@ export class CalendarPlanScreen extends React.Component {
       isPlannedDate: this.isPlannedDate,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
-    // this.monthCalRef = React.createRef();
+    
   }
 
   reportPopUp = async (userPlanList) => {
