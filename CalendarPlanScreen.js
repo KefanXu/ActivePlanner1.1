@@ -152,6 +152,10 @@ export class CalendarPlanScreen extends React.Component {
       }
     }
     this.detailViewCalendar = [];
+
+    this.isPlannedToday = false;
+    this.isPlannedDate = new Date();
+
     this.normalViewModalStartDate = new Date();
     this.isNoEventDayReportModalVis = false;
     this.reportPopUp(this.userPlans);
@@ -231,6 +235,9 @@ export class CalendarPlanScreen extends React.Component {
       userDefinedActivityText: "",
 
       noEventDayReportDate: new Date(),
+
+      isPlannedToday: this.isPlannedToday,
+      isPlannedDate: this.isPlannedDate,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
     // this.monthCalRef = React.createRef();
@@ -280,6 +287,12 @@ export class CalendarPlanScreen extends React.Component {
                 await this.setState({ weatherText: weather.text });
               }
             }
+          }
+        }
+        if (event.title) {
+          if (event.timeStamp.slice(0, 10) === currentDate) {
+            this.isPlannedToday = true;
+            this.isPlannedDate = event.start.slice(0, 10);
           }
         }
       }
@@ -642,8 +655,44 @@ export class CalendarPlanScreen extends React.Component {
   };
 
   onPlanBtnPressed = async () => {
+    if (this.state.isPlannedToday) {
+      Alert.alert(
+        "You already planned today",
+        "You could delete the planned activity on " +
+          this.state.isPlannedDate +
+          " and start a new one",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+      );
+      return;
+    }
     let item = this.state.selectedDate;
     let month = this.state.selectedMonth + 1;
+
+    let planable = true;
+    for (let event of this.userPlans) {
+      if (event.title && event.isDeleted === false) {
+        let eventDate = new Date(event.start);
+        if (
+          eventDate.getMonth() === this.state.selectedMonth &&
+          eventDate.getDate() === item
+        ) {
+          console.log("event.title", event);
+          planable = false;
+        }
+      }
+    }
+    if (!planable) {
+      Alert.alert("Can't plan two event on a same day", "Pick another day", [
+        {
+          text: "OK",
+          onPress: () => {
+            planable = true;
+          },
+        },
+      ]);
+      return;
+    }
+
     let monthNum = "";
     let dateNum = "";
     if (item < 10) {
@@ -724,14 +773,23 @@ export class CalendarPlanScreen extends React.Component {
         },
       ]
     );
+    this.setState({ isPlannedToday: true });
+    this.setState({ isPlannedDate: newEvent.start });
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
   onDeletePressed = async () => {
-    console.log(this.eventToday);
+    //console.log(this.eventToday);
 
     this.setState({ isPlannedEventModalVis: false });
     this.eventToday.isDeleted = true;
+
+    if (
+      this.eventToday.timeStamp.slice(0, 10) === moment(new Date()).format().slice(0, 10)
+    ) {
+      this.setState({ isPlannedToday: false });
+    }
+
     await this.dataModel.updatePlan(this.userKey, this.eventToday);
     await this.dataModel.deleteReminders(this.eventToday);
     let monthNum = parseInt(this.eventToday.end.slice(5, 7));
