@@ -162,6 +162,7 @@ export class MonthCalendar extends React.Component {
                 alignItems: "center",
                 alignContent: "space-between",
                 //backgroundColor: rowIndex == 0 ? "" : "#fff",
+                width:"100%",
                 borderRadius: rowIndex == 0 ? 15 : 0,
                 margin: rowIndex == 0 ? 17 : 0,
               }}
@@ -306,6 +307,7 @@ export class MonthCalendar extends React.Component {
               style={{
                 flex: 1,
                 textAlign: "center",
+                width:50,
                 height: "70%",
                 //backgroundColor: "blue",
                 flexDirection: "column",
@@ -382,7 +384,8 @@ export class MonthCalendar extends React.Component {
               >
                 <View
                   style={{
-                    //backgroundColor: "blue",
+                    //backgroundColor: "grey",
+                    
                     flex: 1,
                     height: "100%",
                     width: "100%",

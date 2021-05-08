@@ -11,6 +11,7 @@ import {
   Modal,
   LayoutAnimation,
   SectionList,
+  Dimensions,
   Button,
   Animated,
 } from "react-native";
@@ -240,7 +241,6 @@ export class CalendarPlanScreen extends React.Component {
       isPlannedDate: this.isPlannedDate,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
-    
   }
 
   reportPopUp = async (userPlanList) => {
@@ -785,7 +785,8 @@ export class CalendarPlanScreen extends React.Component {
     this.eventToday.isDeleted = true;
 
     if (
-      this.eventToday.timeStamp.slice(0, 10) === moment(new Date()).format().slice(0, 10)
+      this.eventToday.timeStamp.slice(0, 10) ===
+      moment(new Date()).format().slice(0, 10)
     ) {
       this.setState({ isPlannedToday: false });
     }
@@ -1026,15 +1027,70 @@ export class CalendarPlanScreen extends React.Component {
 
       calView = (
         <View>
-          <MonthCalendar
-            ref={this.monthCalRef}
-            thisMonthEvents={this.state.eventsThisMonth}
-            monthCalCurrDate={this.state.monthCalCurrDate}
-            weatherThisMonth={this.state.weatherThisMonth}
-            onPress={(item, monthNum, month) =>
-              this.onPress(item, monthNum, month)
-            }
-          />
+          <ScrollView
+            style={{ height: "95%", width: "100%" }}
+            contentContainerStyle={{ height: "100%", paddingBottom: 0 }}
+            contentOffset={{ x: Dimensions.get("window").width + 53, y: 0 }}
+            //contentOffset={{x: this.midViewX ,y:0}}
+            horizontal={true}
+          >
+            <View
+              style={{
+                marginLeft: 20,
+                marginRight: 20,
+                backgroundColor: "#D8D8D8",
+                padding: 10,
+                width:350,
+                borderRadius: 15,
+              }}
+            >
+            <Text style={{fontSize:24, fontWeight:"bold", margin:15}}>Previous Records</Text>
+            </View>
+            <View
+              style={{
+                marginLeft: 20,
+                marginRight: 20,
+                backgroundColor: "#D8D8D8",
+                padding: 10,
+                borderRadius: 15,
+              }}
+            >
+              <MonthCalendar
+                ref={this.monthCalRef}
+                thisMonthEvents={this.state.eventsLastMonth}
+                monthCalCurrDate={
+                  new Date(
+                    this.state.date.getFullYear(),
+                    this.state.date.getMonth() - 1,
+                    15
+                  )
+                }
+                weatherThisMonth={this.lastMonthWeather}
+                onPress={(item, monthNum, month) =>
+                  this.onPress(item, monthNum, month)
+                }
+              />
+            </View>
+            <View
+              style={{
+                marginLeft: 20,
+                marginRight: 20,
+                backgroundColor: "#D8D8D8",
+                padding: 10,
+                borderRadius: 15,
+              }}
+            >
+              <MonthCalendar
+                ref={this.monthCalRef}
+                thisMonthEvents={this.state.eventsThisMonth}
+                monthCalCurrDate={this.state.monthCalCurrDate}
+                weatherThisMonth={this.state.weatherThisMonth}
+                onPress={(item, monthNum, month) =>
+                  this.onPress(item, monthNum, month)
+                }
+              />
+            </View>
+          </ScrollView>
           <TouchableOpacity
             style={{
               flex: 1,
