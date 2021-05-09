@@ -19,6 +19,7 @@ import {
 import EventCalendar from "react-native-events-calendar";
 import { Calendar } from "react-native-big-calendar";
 import { log } from "react-native-reanimated";
+import moment, { min } from "moment";
 
 export class MonthCalendar extends React.Component {
   constructor(props) {
@@ -46,11 +47,13 @@ export class MonthCalendar extends React.Component {
     // this.nextMonthEvents = this.props.nextMonthEvents;
 
     this.dayEventsList;
+    this.todayDate = new Date();
 
     this.state = {
       activeDate: this.props.monthCalCurrDate,
       //thisMonthEvents: this.thisMonthEvents,
       dayEventsList: [],
+      targetDate:"",
     };
     this.processEvents();
   }
@@ -62,7 +65,12 @@ export class MonthCalendar extends React.Component {
       this.props.monthCalCurrDate.getMonth(),
       this.months[this.props.monthCalCurrDate.getMonth()]
     );
+    let todayDate = new Date();
+    let targetDate = new Date(todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay();
+    console.log("targetDate",targetDate);
+    this.setState({targetDate:targetDate});
     this.processEvents();
+
     // EventRegister.emit("calendarPressed","pressed"+item);
   };
   processEvents = () => {
@@ -384,7 +392,7 @@ export class MonthCalendar extends React.Component {
               >
                 <View
                   style={{
-                    //backgroundColor: "grey",
+                    backgroundColor: (new Date(this.todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay() === this.state.targetDate && item != -1) ? "#819FF7": "#D8D8D8",
                     
                     flex: 1,
                     height: "100%",
@@ -559,7 +567,7 @@ export class MonthCalendar extends React.Component {
                 </View>
                 <View
                   style={{
-                    backgroundColor: "#D8D8D8",
+                    backgroundColor: (new Date(this.todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay() === this.state.targetDate && item != -1) ? "#819FF7": "#D8D8D8",
                     flex: 1,
                     height: "100%",
                     alignItems: "flex-end",

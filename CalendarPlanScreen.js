@@ -66,7 +66,7 @@ export class CalendarPlanScreen extends React.Component {
       { key: 1, section: true, label: "Physical Activities" },
     ];
     let activityList = this.props.route.params.userActivityList;
-    console.log("activityList", activityList);
+    //console.log("activityList", activityList);
     this.index = 1;
     for (let activity of activityList) {
       this.index++;
@@ -77,6 +77,7 @@ export class CalendarPlanScreen extends React.Component {
       this.activityData.push(activityObj);
     }
     this.monthCalRef = React.createRef();
+    this.monthCalRefLast = React.createRef();
     this.weekCalRef = React.createRef();
     this.dataModel = getDataModel();
     this.userEmail = this.props.route.params.userEmail;
@@ -822,6 +823,7 @@ export class CalendarPlanScreen extends React.Component {
     //console.log("this.state.eventsThisMonth", this.state.eventsThisMonth);
     if (!this.state.isFromWeekView) {
       this.monthCalRef.current.processEvents();
+      this.monthCalRefLast.current.processEvents();
 
       this.setState({ isMonthCalVis: true });
       this.setState({ indexView: "Month" });
@@ -836,19 +838,22 @@ export class CalendarPlanScreen extends React.Component {
     this.setState({ eventFilteredList: false });
     this.setState({ timeFilteredList: false });
     let currentList = [];
-    if (this.state.monthCalCurrentMonth === this.state.date.getMonth()) {
+    let currentListLast = [];
+    // if (this.state.monthCalCurrentMonth === this.state.date.getMonth()) {
+    //   currentList = this.combinedEventListThis;
+    // } else if (
+    //   this.state.monthCalCurrentMonth ===
+    //   this.state.date.getMonth() - 1
+    // ) {
+      currentListLast = this.combinedEventListLast;
+    // } else {
       currentList = this.combinedEventListThis;
-    } else if (
-      this.state.monthCalCurrentMonth ===
-      this.state.date.getMonth() - 1
-    ) {
-      currentList = this.combinedEventListLast;
-    } else {
-      currentList = this.combinedEventListNext;
-    }
+    //}
     await this.setState({ eventsThisMonth: currentList });
+    await this.setState({ eventsLastMonth: currentListLast });
 
     this.monthCalRef.current.processEvents();
+    this.monthCalRefLast.current.processEvents();
   };
 
   NoEventSecView = (props) => {
@@ -1030,7 +1035,7 @@ export class CalendarPlanScreen extends React.Component {
           <ScrollView
             style={{ height: "95%", width: "100%" }}
             contentContainerStyle={{ height: "100%", paddingBottom: 0 }}
-            contentOffset={{ x: Dimensions.get("window").width + 53, y: 0 }}
+            contentOffset={{ x: 6, y: 0 }}
             //contentOffset={{x: this.midViewX ,y:0}}
             horizontal={true}
           >
@@ -1040,11 +1045,13 @@ export class CalendarPlanScreen extends React.Component {
                 marginRight: 20,
                 backgroundColor: "#D8D8D8",
                 padding: 10,
-                width:350,
+                width: 350,
                 borderRadius: 15,
               }}
             >
-            <Text style={{fontSize:24, fontWeight:"bold", margin:15}}>Previous Records</Text>
+              <Text style={{ fontSize: 24, fontWeight: "bold", margin: 15 }}>
+                Previous Records
+              </Text>
             </View>
             <View
               style={{
@@ -1056,7 +1063,7 @@ export class CalendarPlanScreen extends React.Component {
               }}
             >
               <MonthCalendar
-                ref={this.monthCalRef}
+                ref={this.monthCalRefLast}
                 thisMonthEvents={this.state.eventsLastMonth}
                 monthCalCurrDate={
                   new Date(
@@ -1091,7 +1098,7 @@ export class CalendarPlanScreen extends React.Component {
               />
             </View>
           </ScrollView>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flex: 1,
               position: "absolute",
@@ -1134,7 +1141,6 @@ export class CalendarPlanScreen extends React.Component {
               }
             }}
           >
-            {/* <Text style={{fontWeight:"bold", fontSize:8}}>Previous</Text> */}
             <AntDesign name="leftcircle" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -1179,9 +1185,8 @@ export class CalendarPlanScreen extends React.Component {
               }
             }}
           >
-            {/* <Text>Next</Text> */}
             <AntDesign name="rightcircle" size={24} color="black" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       );
     } else {
@@ -2966,48 +2971,61 @@ export class CalendarPlanScreen extends React.Component {
                       this.isActivitySelected = true;
                       let newListByActivity = [];
                       let currentList = [];
+                      let currentListLast = [];
                       if (!this.state.timeFilteredList) {
                         await this.resetCalendarView();
-                        if (
-                          this.state.monthCalCurrentMonth ===
-                          this.state.date.getMonth()
-                        ) {
-                          currentList = this.combinedEventListThis;
-                        } else if (
-                          this.state.monthCalCurrentMonth ===
-                          this.state.date.getMonth() - 1
-                        ) {
-                          currentList = this.combinedEventListLast;
-                        } else {
-                          currentList = this.combinedEventListNext;
-                        }
+                        // if (
+                        //   this.state.monthCalCurrentMonth ===
+                        //   this.state.date.getMonth()
+                        // ) {
+                        //   currentList = this.combinedEventListThis;
+                        // } else if (
+                        //   this.state.monthCalCurrentMonth ===
+                        //   this.state.date.getMonth() - 1
+                        // ) {
+                        //   currentList = this.combinedEventListLast;
+                        // } else {
+                        //   currentList = this.combinedEventListNext;
+                        // }
+                        currentList = this.state.eventsThisMonth;
+                        currentListLast = this.state.eventsLastMonth;
                         await this.setState({ eventFilteredList: true });
                         await this.setState({ timeFilteredList: false });
                       } else {
                         currentList = this.state.eventsThisMonth;
+                        currentListLast = this.state.eventsLastMonth;
                         //let tempList = currentList;
                         await this.setState({ eventFilteredList: false });
                         await this.setState({ timeFilteredList: false });
                       }
 
-                      console.log(
-                        "this.state.eventFilteredList",
-                        this.state.eventFilteredList
-                      );
-                      console.log(
-                        "this.state.timeFilteredList",
-                        this.state.timeFilteredList
-                      );
+                      // console.log(
+                      //   "this.state.eventFilteredList",
+                      //   this.state.eventFilteredList
+                      // );
+                      // console.log(
+                      //   "this.state.timeFilteredList",
+                      //   this.state.timeFilteredList
+                      // );
 
                       let eventListDates = [];
+                      let eventListDatesLast = [];
                       for (let event of currentList) {
                         let dateNum = String(event.start.slice(8, 10));
                         if (!eventListDates.includes(dateNum)) {
                           eventListDates.push(dateNum);
                         }
                       }
-
+                      for (let event of currentListLast) {
+                        let dateNum = String(event.start.slice(8, 10));
+                        if (!eventListDatesLast.includes(dateNum)) {
+                          eventListDatesLast.push(dateNum);
+                        }
+                      }
+                      console.log("eventListDatesLast",eventListDatesLast);
                       let dayEventsList = [];
+                      let dayEventsListLast = [];
+
                       for (let dateNum of eventListDates) {
                         let dayEventObj = {
                           dateNum: parseInt(dateNum),
@@ -3015,6 +3033,15 @@ export class CalendarPlanScreen extends React.Component {
                           isFiltered: false,
                         };
                         dayEventsList.push(dayEventObj);
+                      }
+
+                      for (let dateNum of eventListDatesLast) {
+                        let dayEventObj = {
+                          dateNum: parseInt(dateNum),
+                          dayEvents: [],
+                          isFiltered: false,
+                        };
+                        dayEventsListLast.push(dayEventObj);
                       }
 
                       for (let date of dayEventsList) {
@@ -3027,9 +3054,31 @@ export class CalendarPlanScreen extends React.Component {
                         }
                       }
 
+                      for (let date of dayEventsListLast) {
+                        for (let event of currentListLast) {
+                          let dateNum = parseInt(event.start.slice(8, 10));
+                          if (dateNum === date.dateNum) {
+                            let newEvent = event;
+                            date.dayEvents.push(newEvent);
+                          }
+                        }
+                      }
+                      console.log("dayEventsListLast",dayEventsListLast);
+
                       let newEventList = [];
+                      let newEventListLast = [];
 
                       for (let date of dayEventsList) {
+                        for (let event of date.dayEvents) {
+                          if (event.title) {
+                            if (event.title === item.label) {
+                              date.isFiltered = true;
+                            }
+                          }
+                        }
+                      }
+
+                      for (let date of dayEventsListLast) {
                         for (let event of date.dayEvents) {
                           if (event.title) {
                             if (event.title === item.label) {
@@ -3046,12 +3095,24 @@ export class CalendarPlanScreen extends React.Component {
                           }
                         }
                       }
+                      for (let date of dayEventsListLast) {
+                        if (date.isFiltered) {
+                          for (let event of date.dayEvents) {
+                            newEventListLast.push(event);
+                          }
+                        }
+                      }
 
                       //this.setState({tempList:tempList})
+                      console.log("newEventListLast",newEventListLast);
 
                       await this.setState({ eventsThisMonth: newEventList });
+                      await this.setState({
+                        eventsLastMonth: newEventListLast,
+                      });
 
                       this.monthCalRef.current.processEvents();
+                      this.monthCalRefLast.current.processEvents();
                     }}
                   />
                 </View>
@@ -3073,6 +3134,7 @@ export class CalendarPlanScreen extends React.Component {
                       let startHour = moment(date).hour();
                       this.setState({ datePickerDate: date });
                       let newList = [];
+                      let newListLast = [];
 
                       if (this.state.eventFilteredList) {
                         if (!this.state.timeFilteredList) {
@@ -3104,16 +3166,28 @@ export class CalendarPlanScreen extends React.Component {
                             newList.push(event);
                           }
                         }
+                        for (let event of this.state.eventsLastMonth) {
+                          if (parseInt(event.start.slice(11, 13)) < 12) {
+                            newListLast.push(event);
+                          }
+                        }
                       } else {
                         for (let event of this.state.eventsThisMonth) {
                           if (parseInt(event.start.slice(11, 13)) > 12) {
                             newList.push(event);
                           }
                         }
+                        for (let event of this.state.eventsLastMonth) {
+                          if (parseInt(event.start.slice(11, 13)) > 12) {
+                            newListLast.push(event);
+                          }
+                        }
                       }
                       await this.setState({ eventsThisMonth: newList });
+                      await this.setState({ eventsLastMonth: newListLast });
 
                       this.monthCalRef.current.processEvents();
+                      this.monthCalRefLast.current.processEvents();
                     }}
                     style={{
                       width: "100%",
@@ -3165,7 +3239,7 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <TextInput
                   style={{ fontSize: 16, marginLeft: 5 }}
-                  placeholder="add self-defined activity"
+                  placeholder="add new activity"
                   value={this.state.userDefinedActivityText}
                   onChangeText={(text) =>
                     this.setState({ userDefinedActivityText: text })
@@ -3181,9 +3255,28 @@ export class CalendarPlanScreen extends React.Component {
                         key: this.index,
                         label: this.state.userDefinedActivityText,
                       };
+                      for (let activity of activityList) {
+                        let activityToLowerCase = activity.label.toLowerCase();
+                        let newActivityToLowerCase = this.state.userDefinedActivityText.toLowerCase();
+                        if (activityToLowerCase === newActivityToLowerCase) {
+                          Alert.alert(
+                            this.state.userDefinedActivityText +
+                              " already existed",
+                            "Please add another activity",
+                            [
+                              {
+                                text: "OK",
+                                onPress: () => console.log("OK Pressed"),
+                              },
+                            ]
+                          );
+                          this.setState({ userDefinedActivityText: "" });
+                          return;
+                        }
+                      }
                       // console.log("newActivity",newActivity);
                       activityList.push(newActivity);
-                      this.setState({ userDefinedActivityText: activityList });
+                      this.setState({ userDefinedActivityText: "" });
                       await this.dataModel.updateUserActivities(
                         this.userKey,
                         this.state.userDefinedActivityText

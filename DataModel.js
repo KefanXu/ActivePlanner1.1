@@ -42,6 +42,11 @@ class DataModel {
   }
 
   asyncInit = async () => {
+    this.usersRef = firebase.firestore().collection("users");
+    this.users = [];
+    this.plans = [];
+    this.key = "";
+    
     await this.loadUsers();
     //console.log("this.users", this.users);
   };
@@ -160,8 +165,8 @@ class DataModel {
     let updatedList = {
       activityList: userActivityList[0].activityList,
     };
-    console.log("updatedList", updatedList);
-    console.log("docKey", docKey);
+    //console.log("updatedList", updatedList);
+    //console.log("docKey", docKey);
     await this.usersRef
       .doc(key)
       .collection("my_activities")
