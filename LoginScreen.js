@@ -261,9 +261,9 @@ export class LoginScreen extends React.Component {
     let thisMonthWeather;
     let nextMonthWeather;
     //console.log("userInfo",userInfo);
-    // console.log("userPlans",userPlans);
+    console.log("userPlans", userPlans);
     let isWeatherNotExist = await this.dataModel.isWeatherNotExist(key);
-    console.log("weatherCollectionSnapshot.empty", isWeatherNotExist);
+    //console.log("weatherCollectionSnapshot.empty", isWeatherNotExist);
     if (isWeatherNotExist) {
       [
         lastMonthWeather,
@@ -289,6 +289,35 @@ export class LoginScreen extends React.Component {
         weatherFullList.push(newWeather);
       }
       await this.dataModel.updateWeatherInfo(key, weatherFullList);
+
+      for (let event of userInfo.userPlans) {
+        if (event.end) {
+          if (parseInt(event.end.slice(5, 7)) === todayDate.getMonth() + 1) {
+            for (let weather of thisMonthWeather) {
+              if (parseInt(event.end.slice(8, 10)) === weather.date) {
+                console.log("weather", weather);
+                event.weather = weather.text;
+                event.temp = weather.temp;
+              }
+            }
+          } else if (
+            parseInt(event.end.slice(5, 7)) === todayDate.getMonth()
+          ) {
+            for (let weather of lastMonthWeather) {
+              if (parseInt(event.end.slice(8, 10)) === weather.date) {
+                console.log("weather", weather);
+                event.weather = weather.text;
+                event.temp = weather.temp;
+              }
+            }
+          }
+        }
+      }
+      for (let event of userInfo.userPlans) {
+        await this.dataModel.updatePlan(userInfo.key, event);
+      }
+
+
     } else {
       [
         lastMonthWeather,
@@ -296,6 +325,9 @@ export class LoginScreen extends React.Component {
         nextMonthWeather,
       ] = await this.dataModel.getWeatherInfo(key);
     }
+    //let todayDate2 = new Date();
+
+    //console.log("userPlans", userInfo.userPlans);
 
     // console.log("lastMonthWeather", lastMonthWeather);
     // console.log("thisMonthWeather", thisMonthWeather);

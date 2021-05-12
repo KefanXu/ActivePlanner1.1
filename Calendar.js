@@ -427,7 +427,7 @@ export class MonthCalendar extends React.Component {
                       }
                       if (item.isPlanned) {
                         if (item.isReported) {
-                          if (!item.isActivityCompleted) {
+                          if (item.isActivityCompleted) {
                             return (
                               <View
                                 style={{
@@ -435,7 +435,7 @@ export class MonthCalendar extends React.Component {
                                   height: 15,
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  backgroundColor: "red",
+                                  backgroundColor: "green",
                                   borderRadius: 5,
                                   flex: 1,
                                 }}
@@ -454,12 +454,12 @@ export class MonthCalendar extends React.Component {
                               </View>
                             );
                           } else {
-                            if (item.isThirtyMin) {
+                            if (item.isOtherActivity) {
                               return (
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "green",
+                                    backgroundColor: "yellow",
                                     borderRadius: 5,
                                     flex: 1,
                                     height: 15,
@@ -487,7 +487,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "yellow",
+                                    backgroundColor: "red",
                                     borderRadius: 5,
                                     flex: 1,
                                     height: 15,
@@ -592,12 +592,12 @@ export class MonthCalendar extends React.Component {
 
                       if (item.isPlanned) {
                         if (item.isReported) {
-                          if (!item.isActivityCompleted) {
+                          if (item.isActivityCompleted) {
                             return (
                               <View
                                 style={{
                                   width: "100%",
-                                  backgroundColor: "red",
+                                  backgroundColor: "green",
                                   borderRadius: 5,
                                   flex: 1,
                                   height: 15,
@@ -620,12 +620,12 @@ export class MonthCalendar extends React.Component {
                               </View>
                             );
                           } else {
-                            if (item.isThirtyMin) {
+                            if (item.isOtherActivity) {
                               return (
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "green",
+                                    backgroundColor: "yellow",
                                     height: 15,
                                     alignItems: "center",
                                     justifyContent: "center",
@@ -652,7 +652,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "yellow",
+                                    backgroundColor: "red",
                                     borderRadius: 5,
                                     height: 15,
                                     alignItems: "center",
