@@ -1,3 +1,4 @@
+// This is the SECOND version of Physicify that will be used in the SECOND phase of study
 import React from "react";
 import {
   TextInput,

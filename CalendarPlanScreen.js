@@ -924,6 +924,209 @@ export class CalendarPlanScreen extends React.Component {
       </Text>
     );
   };
+  activityFilter = async (item) => {
+    this.selectedActivity = item.label;
+    this.isActivitySelected = true;
+    let newListByActivity = [];
+    let currentList = [];
+    let currentListLast = [];
+    if (!this.state.timeFilteredList) {
+      await this.resetCalendarView();
+      // if (
+      //   this.state.monthCalCurrentMonth ===
+      //   this.state.date.getMonth()
+      // ) {
+      //   currentList = this.combinedEventListThis;
+      // } else if (
+      //   this.state.monthCalCurrentMonth ===
+      //   this.state.date.getMonth() - 1
+      // ) {
+      //   currentList = this.combinedEventListLast;
+      // } else {
+      //   currentList = this.combinedEventListNext;
+      // }
+      currentList = this.state.eventsThisMonth;
+      currentListLast = this.state.eventsLastMonth;
+      await this.setState({ eventFilteredList: true });
+      await this.setState({ timeFilteredList: false });
+    } else {
+      currentList = this.state.eventsThisMonth;
+      currentListLast = this.state.eventsLastMonth;
+      //let tempList = currentList;
+      await this.setState({ eventFilteredList: false });
+      await this.setState({ timeFilteredList: false });
+    }
+
+    // console.log(
+    //   "this.state.eventFilteredList",
+    //   this.state.eventFilteredList
+    // );
+    // console.log(
+    //   "this.state.timeFilteredList",
+    //   this.state.timeFilteredList
+    // );
+
+    let eventListDates = [];
+    let eventListDatesLast = [];
+    for (let event of currentList) {
+      let dateNum = String(event.start.slice(8, 10));
+      if (!eventListDates.includes(dateNum)) {
+        eventListDates.push(dateNum);
+      }
+    }
+    for (let event of currentListLast) {
+      let dateNum = String(event.start.slice(8, 10));
+      if (!eventListDatesLast.includes(dateNum)) {
+        eventListDatesLast.push(dateNum);
+      }
+    }
+    console.log("eventListDatesLast", eventListDatesLast);
+    let dayEventsList = [];
+    let dayEventsListLast = [];
+
+    for (let dateNum of eventListDates) {
+      let dayEventObj = {
+        dateNum: parseInt(dateNum),
+        dayEvents: [],
+        isFiltered: false,
+      };
+      dayEventsList.push(dayEventObj);
+    }
+
+    for (let dateNum of eventListDatesLast) {
+      let dayEventObj = {
+        dateNum: parseInt(dateNum),
+        dayEvents: [],
+        isFiltered: false,
+      };
+      dayEventsListLast.push(dayEventObj);
+    }
+
+    for (let date of dayEventsList) {
+      for (let event of currentList) {
+        let dateNum = parseInt(event.start.slice(8, 10));
+        if (dateNum === date.dateNum) {
+          let newEvent = event;
+          date.dayEvents.push(newEvent);
+        }
+      }
+    }
+
+    for (let date of dayEventsListLast) {
+      for (let event of currentListLast) {
+        let dateNum = parseInt(event.start.slice(8, 10));
+        if (dateNum === date.dateNum) {
+          let newEvent = event;
+          date.dayEvents.push(newEvent);
+        }
+      }
+    }
+    console.log("dayEventsListLast", dayEventsListLast);
+
+    let newEventList = [];
+    let newEventListLast = [];
+
+    for (let date of dayEventsList) {
+      for (let event of date.dayEvents) {
+        if (event.title) {
+          if (event.title === item.label) {
+            date.isFiltered = true;
+          }
+        }
+      }
+    }
+
+    for (let date of dayEventsListLast) {
+      for (let event of date.dayEvents) {
+        if (event.title) {
+          if (event.title === item.label) {
+            date.isFiltered = true;
+          }
+        }
+      }
+    }
+
+    for (let date of dayEventsList) {
+      if (date.isFiltered) {
+        for (let event of date.dayEvents) {
+          newEventList.push(event);
+        }
+      }
+    }
+    for (let date of dayEventsListLast) {
+      if (date.isFiltered) {
+        for (let event of date.dayEvents) {
+          newEventListLast.push(event);
+        }
+      }
+    }
+
+    //this.setState({tempList:tempList})
+    console.log("newEventListLast", newEventListLast);
+
+    await this.setState({ eventsThisMonth: newEventList });
+    await this.setState({
+      eventsLastMonth: newEventListLast,
+    });
+
+    this.monthCalRef.current.processEvents();
+    this.monthCalRefLast.current.processEvents();
+  };
+  dateTimeFilter = async (date) => {
+    //let setDate = moment(date);
+    console.log("DateTimePicker", date);
+    let startHour = moment(date).hour();
+    this.setState({ datePickerDate: date });
+    let newList = [];
+    let newListLast = [];
+
+    if (this.state.eventFilteredList) {
+      if (!this.state.timeFilteredList) {
+        await this.resetCalendarView();
+        await this.setState({ timeFilteredList: true });
+        await this.setState({ eventFilteredList: false });
+      } else {
+        await this.setState({ timeFilteredList: true });
+        await this.setState({ eventFilteredList: true });
+      }
+    } else {
+      await this.resetCalendarView();
+      await this.setState({ timeFilteredList: true });
+      await this.setState({ eventFilteredList: false });
+    }
+    console.log("this.state.eventFilteredList", this.state.eventFilteredList);
+    console.log("this.state.timeFilteredList", this.state.timeFilteredList);
+    this.setState({ date: new Date() });
+
+    if (startHour < 12) {
+      for (let event of this.state.eventsThisMonth) {
+        if (parseInt(event.start.slice(11, 13)) < 12) {
+          newList.push(event);
+        }
+      }
+      for (let event of this.state.eventsLastMonth) {
+        if (parseInt(event.start.slice(11, 13)) < 12) {
+          newListLast.push(event);
+        }
+      }
+    } else {
+      for (let event of this.state.eventsThisMonth) {
+        if (parseInt(event.start.slice(11, 13)) > 12) {
+          newList.push(event);
+        }
+      }
+      for (let event of this.state.eventsLastMonth) {
+        if (parseInt(event.start.slice(11, 13)) > 12) {
+          newListLast.push(event);
+        }
+      }
+    }
+    await this.setState({ eventsThisMonth: newList });
+    await this.setState({ eventsLastMonth: newListLast });
+
+    this.monthCalRef.current.processEvents();
+    this.monthCalRefLast.current.processEvents();
+  };
 
   render() {
     let calView;
@@ -2180,7 +2383,7 @@ export class CalendarPlanScreen extends React.Component {
                       // this.setState({ isSecondNoStepVis: "none" });
                       // this.setState({ isThirdNoStepVis: "none" });
                       // this.setState({ isThirdYesStepVis: "none" });
-                      this.resetReport()
+                      this.resetReport();
 
                       let dailyReport = {};
                       dailyReport.isDailyReport = true;
@@ -3106,152 +3309,7 @@ export class CalendarPlanScreen extends React.Component {
                     data={this.state.activityData}
                     initValue={this.state.activityPickerInitVal}
                     onChange={async (item) => {
-                      this.selectedActivity = item.label;
-                      this.isActivitySelected = true;
-                      let newListByActivity = [];
-                      let currentList = [];
-                      let currentListLast = [];
-                      if (!this.state.timeFilteredList) {
-                        await this.resetCalendarView();
-                        // if (
-                        //   this.state.monthCalCurrentMonth ===
-                        //   this.state.date.getMonth()
-                        // ) {
-                        //   currentList = this.combinedEventListThis;
-                        // } else if (
-                        //   this.state.monthCalCurrentMonth ===
-                        //   this.state.date.getMonth() - 1
-                        // ) {
-                        //   currentList = this.combinedEventListLast;
-                        // } else {
-                        //   currentList = this.combinedEventListNext;
-                        // }
-                        currentList = this.state.eventsThisMonth;
-                        currentListLast = this.state.eventsLastMonth;
-                        await this.setState({ eventFilteredList: true });
-                        await this.setState({ timeFilteredList: false });
-                      } else {
-                        currentList = this.state.eventsThisMonth;
-                        currentListLast = this.state.eventsLastMonth;
-                        //let tempList = currentList;
-                        await this.setState({ eventFilteredList: false });
-                        await this.setState({ timeFilteredList: false });
-                      }
-
-                      // console.log(
-                      //   "this.state.eventFilteredList",
-                      //   this.state.eventFilteredList
-                      // );
-                      // console.log(
-                      //   "this.state.timeFilteredList",
-                      //   this.state.timeFilteredList
-                      // );
-
-                      let eventListDates = [];
-                      let eventListDatesLast = [];
-                      for (let event of currentList) {
-                        let dateNum = String(event.start.slice(8, 10));
-                        if (!eventListDates.includes(dateNum)) {
-                          eventListDates.push(dateNum);
-                        }
-                      }
-                      for (let event of currentListLast) {
-                        let dateNum = String(event.start.slice(8, 10));
-                        if (!eventListDatesLast.includes(dateNum)) {
-                          eventListDatesLast.push(dateNum);
-                        }
-                      }
-                      console.log("eventListDatesLast", eventListDatesLast);
-                      let dayEventsList = [];
-                      let dayEventsListLast = [];
-
-                      for (let dateNum of eventListDates) {
-                        let dayEventObj = {
-                          dateNum: parseInt(dateNum),
-                          dayEvents: [],
-                          isFiltered: false,
-                        };
-                        dayEventsList.push(dayEventObj);
-                      }
-
-                      for (let dateNum of eventListDatesLast) {
-                        let dayEventObj = {
-                          dateNum: parseInt(dateNum),
-                          dayEvents: [],
-                          isFiltered: false,
-                        };
-                        dayEventsListLast.push(dayEventObj);
-                      }
-
-                      for (let date of dayEventsList) {
-                        for (let event of currentList) {
-                          let dateNum = parseInt(event.start.slice(8, 10));
-                          if (dateNum === date.dateNum) {
-                            let newEvent = event;
-                            date.dayEvents.push(newEvent);
-                          }
-                        }
-                      }
-
-                      for (let date of dayEventsListLast) {
-                        for (let event of currentListLast) {
-                          let dateNum = parseInt(event.start.slice(8, 10));
-                          if (dateNum === date.dateNum) {
-                            let newEvent = event;
-                            date.dayEvents.push(newEvent);
-                          }
-                        }
-                      }
-                      console.log("dayEventsListLast", dayEventsListLast);
-
-                      let newEventList = [];
-                      let newEventListLast = [];
-
-                      for (let date of dayEventsList) {
-                        for (let event of date.dayEvents) {
-                          if (event.title) {
-                            if (event.title === item.label) {
-                              date.isFiltered = true;
-                            }
-                          }
-                        }
-                      }
-
-                      for (let date of dayEventsListLast) {
-                        for (let event of date.dayEvents) {
-                          if (event.title) {
-                            if (event.title === item.label) {
-                              date.isFiltered = true;
-                            }
-                          }
-                        }
-                      }
-
-                      for (let date of dayEventsList) {
-                        if (date.isFiltered) {
-                          for (let event of date.dayEvents) {
-                            newEventList.push(event);
-                          }
-                        }
-                      }
-                      for (let date of dayEventsListLast) {
-                        if (date.isFiltered) {
-                          for (let event of date.dayEvents) {
-                            newEventListLast.push(event);
-                          }
-                        }
-                      }
-
-                      //this.setState({tempList:tempList})
-                      console.log("newEventListLast", newEventListLast);
-
-                      await this.setState({ eventsThisMonth: newEventList });
-                      await this.setState({
-                        eventsLastMonth: newEventListLast,
-                      });
-
-                      this.monthCalRef.current.processEvents();
-                      this.monthCalRefLast.current.processEvents();
+                      await this.activityFilter(item);
                     }}
                   />
                 </View>
@@ -3268,65 +3326,7 @@ export class CalendarPlanScreen extends React.Component {
                     is24Hour={true}
                     display="default"
                     onChange={async (e, date) => {
-                      //let setDate = moment(date);
-                      console.log("DateTimePicker", date);
-                      let startHour = moment(date).hour();
-                      this.setState({ datePickerDate: date });
-                      let newList = [];
-                      let newListLast = [];
-
-                      if (this.state.eventFilteredList) {
-                        if (!this.state.timeFilteredList) {
-                          await this.resetCalendarView();
-                          await this.setState({ timeFilteredList: true });
-                          await this.setState({ eventFilteredList: false });
-                        } else {
-                          await this.setState({ timeFilteredList: true });
-                          await this.setState({ eventFilteredList: true });
-                        }
-                      } else {
-                        await this.resetCalendarView();
-                        await this.setState({ timeFilteredList: true });
-                        await this.setState({ eventFilteredList: false });
-                      }
-                      console.log(
-                        "this.state.eventFilteredList",
-                        this.state.eventFilteredList
-                      );
-                      console.log(
-                        "this.state.timeFilteredList",
-                        this.state.timeFilteredList
-                      );
-                      this.setState({ date: new Date() });
-
-                      if (startHour < 12) {
-                        for (let event of this.state.eventsThisMonth) {
-                          if (parseInt(event.start.slice(11, 13)) < 12) {
-                            newList.push(event);
-                          }
-                        }
-                        for (let event of this.state.eventsLastMonth) {
-                          if (parseInt(event.start.slice(11, 13)) < 12) {
-                            newListLast.push(event);
-                          }
-                        }
-                      } else {
-                        for (let event of this.state.eventsThisMonth) {
-                          if (parseInt(event.start.slice(11, 13)) > 12) {
-                            newList.push(event);
-                          }
-                        }
-                        for (let event of this.state.eventsLastMonth) {
-                          if (parseInt(event.start.slice(11, 13)) > 12) {
-                            newListLast.push(event);
-                          }
-                        }
-                      }
-                      await this.setState({ eventsThisMonth: newList });
-                      await this.setState({ eventsLastMonth: newListLast });
-
-                      this.monthCalRef.current.processEvents();
-                      this.monthCalRefLast.current.processEvents();
+                      await this.dateTimeFilter(date);
                     }}
                     style={{
                       width: "100%",
@@ -3389,6 +3389,19 @@ export class CalendarPlanScreen extends React.Component {
                     onPress={async () => {
                       let activityList = this.state.activityData;
                       // console.log("activityList",activityList);
+                      if (this.state.userDefinedActivityText === "") {
+                        Alert.alert(
+                          "Invalid Name",
+                          "Activity name can't be empty",
+                          [
+                            {
+                              text: "OK",
+                              onPress: () => console.log("OK Pressed"),
+                            },
+                          ]
+                        );
+                        return;
+                      }
                       this.index++;
                       let newActivity = {
                         key: this.index,
