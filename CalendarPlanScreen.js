@@ -739,11 +739,11 @@ export class CalendarPlanScreen extends React.Component {
     // console.log(this.state.eventsThisMonth);
     if (parseInt(monthNum) === this.state.date.getMonth() + 1) {
       this.combinedEventListThis.push(newEvent);
-      await this.setState({ eventsThisMonth: this.combinedEventListThis });
     } else {
       this.combinedEventListNext.push(newEvent);
-      await this.setState({ eventsThisMonth: this.combinedEventListNext });
     }
+    await this.setState({ eventsThisMonth: this.combinedEventListThis });
+    await this.setState({ eventsThisMonth: this.combinedEventListNext });
     // let newEventList = this.eventsThisMonth;
     // console.log("newEventList", newEventList);
     // newEventList.push(newEvent);
@@ -3062,13 +3062,13 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity> */}
 
         <SlidingUpPanel
-          draggableRange={{ top: 250, bottom: 100 }}
+          draggableRange={{ top: 320, bottom: 80 }}
           showBackdrop={false}
           ref={(c) => (this._panel = c)}
         >
           <View
             style={{
-              height: 300,
+              height: 370,
               justifyContent: "space-between",
               flexDirection: "column",
               alignItems: "center",
@@ -3106,27 +3106,6 @@ export class CalendarPlanScreen extends React.Component {
                   {this.state.panelTop}
                 </Text>
                 <View style={{ flexDirection: "row" }}>
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: "black",
-                      // color: "white",
-                      width: 60,
-                      height: 30,
-                      borderRadius: 15,
-                      marginTop: 5,
-                      marginRight: 5,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    disabled={false}
-                    onPress={async () => {
-                      await this.resetCalendarView();
-                    }}
-                  >
-                    <Text style={{ color: "white", fontWeight: "bold" }}>
-                      Reset
-                    </Text>
-                  </TouchableOpacity>
                   <TouchableOpacity
                     style={{
                       backgroundColor: "black",
@@ -3193,10 +3172,223 @@ export class CalendarPlanScreen extends React.Component {
                 flex: 0.4,
                 width: "90%",
                 borderRadius: 20,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: 10,
+                backgroundColor: "#6E6E6E",
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  width: "95%",
+                  height: "90%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingLeft: 10,
+                  paddingRight: 10,
+                  marginBottom: 10,
+
+                  //backgroundColor: "white",
+                  borderRadius: 15,
+                  //backgroundColor: "blue",
+                }}
+              >
+                <View
+                  style={{
+                    flex: 0.5,
+                    marginRight: 5,
+                    flexDirection: "column",
+                    height: "100%",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ flex: 0.5, justifyContent: "center" }}>
+                    <Text
+                      style={{
+                        margin: 5,
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        fontSize: 14,
+                        color: "white",
+                      }}
+                    >
+                      Activity
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 0.5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: "white",
+                      width: "100%",
+
+                      borderRadius: 20,
+                    }}
+                  >
+                    <ModalSelector
+                      style={{ borderWidth: 0 }}
+                      // touchableStyle={{ color: "white" }}
+                      optionContainerStyle={{ borderWidth: 0 }}
+                      selectStyle={{ borderWidth: 0 }}
+                      selectTextStyle={{
+                        textAlign: "left",
+                        color: "blue",
+                        fontWeight: "bold",
+                      }}
+                      initValueTextStyle={{
+                        textAlign: "left",
+                        color: "blue",
+                        fontWeight: "bold",
+                      }}
+                      backdropPressToClose={true}
+                      overlayStyle={{
+                        flex: 1,
+                        padding: "5%",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(0,0,0,0)",
+                      }}
+                      optionContainerStyle={{
+                        backgroundColor: "white",
+                        borderRadius: 15,
+                      }}
+                      optionTextStyle={{ fontWeight: "bold" }}
+                      sectionTextStyle={{ fontWeight: "bold" }}
+                      cancelStyle={{
+                        backgroundColor: "grey",
+                        borderRadius: 15,
+                      }}
+                      cancelTextStyle={{ fontWeight: "bold", color: "white" }}
+                      data={this.state.activityData}
+                      initValue={this.state.activityPickerInitVal}
+                      onChange={async (item) => {
+                        await this.activityFilter(item);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                <View
+                  style={{
+                    flex: 0.5,
+                    flexDirection: "column",
+                    height: "100%",
+                    justifyContent: "space-between",
+                    marginLeft: 5,
+                  }}
+                >
+                  <View style={{ flex: 0.5, justifyContent: "center" }}>
+                    <Text
+                      style={{
+                        margin: 5,
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        fontSize: 14,
+                        color: "white",
+                      }}
+                    >
+                      Add new activity
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flex: 0.5,
+                      backgroundColor: "white",
+                      height: 50,
+                      borderRadius: 20,
+                      borderWidth: 2,
+                      borderColor: "black",
+                      marginRight: 0,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <TextInput
+                      style={{ fontSize: 16, marginLeft: 5, flex:0.8 }}
+                      placeholder="new activity"
+                      value={this.state.userDefinedActivityText}
+                      onChangeText={(text) =>
+                        this.setState({ userDefinedActivityText: text })
+                      }
+                    ></TextInput>
+                    <View style={{marginRight:"5%", flex:0.2}}>
+                      <TouchableOpacity
+                        onPress={async () => {
+                          let activityList = this.state.activityData;
+                          // console.log("activityList",activityList);
+                          if (this.state.userDefinedActivityText === "") {
+                            Alert.alert(
+                              "Invalid Name",
+                              "Activity name can't be empty",
+                              [
+                                {
+                                  text: "OK",
+                                  onPress: () => console.log("OK Pressed"),
+                                },
+                              ]
+                            );
+                            return;
+                          }
+                          this.index++;
+                          let newActivity = {
+                            key: this.index,
+                            label: this.state.userDefinedActivityText,
+                          };
+                          for (let activity of activityList) {
+                            let activityToLowerCase = activity.label.toLowerCase();
+                            let newActivityToLowerCase = this.state.userDefinedActivityText.toLowerCase();
+                            if (
+                              activityToLowerCase === newActivityToLowerCase
+                            ) {
+                              Alert.alert(
+                                this.state.userDefinedActivityText +
+                                  " already existed",
+                                "Please add another activity",
+                                [
+                                  {
+                                    text: "OK",
+                                    onPress: () => console.log("OK Pressed"),
+                                  },
+                                ]
+                              );
+                              this.setState({ userDefinedActivityText: "" });
+                              return;
+                            }
+                          }
+                          // console.log("newActivity",newActivity);
+                          activityList.push(newActivity);
+                          this.setState({ userDefinedActivityText: "" });
+                          await this.dataModel.updateUserActivities(
+                            this.userKey,
+                            this.state.userDefinedActivityText
+                          );
+                        }}
+                      >
+                        <Ionicons
+                          name="ios-add-circle"
+                          size={30}
+                          color={"black"}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View
+              style={{
+                flex: 0.4,
+                width: "90%",
+                borderRadius: 20,
                 flexDirection: "column",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginTop: 20,
+                marginTop: 10,
                 backgroundColor: "#6E6E6E",
               }}
             >
@@ -3212,19 +3404,6 @@ export class CalendarPlanScreen extends React.Component {
                   paddingRight: 10,
                 }}
               >
-                <View style={{ flex: 1, justifyContent: "center" }}>
-                  <Text
-                    style={{
-                      margin: 5,
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      fontSize: 14,
-                      color: "white",
-                    }}
-                  >
-                    Activity
-                  </Text>
-                </View>
                 <View style={{ flex: 1, justifyContent: "center" }}>
                   <Text
                     style={{
@@ -3274,50 +3453,7 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 1,
                     justifyContent: "center",
                     alignItems: "center",
-                  }}
-                >
-                  <ModalSelector
-                    style={{ borderWidth: 0 }}
-                    // touchableStyle={{ color: "white" }}
-                    optionContainerStyle={{ borderWidth: 0 }}
-                    selectStyle={{ borderWidth: 0 }}
-                    selectTextStyle={{
-                      textAlign: "left",
-                      color: "blue",
-                      fontWeight: "bold",
-                    }}
-                    initValueTextStyle={{
-                      textAlign: "left",
-                      color: "blue",
-                      fontWeight: "bold",
-                    }}
-                    backdropPressToClose={true}
-                    overlayStyle={{
-                      flex: 1,
-                      padding: "5%",
-                      justifyContent: "center",
-                      backgroundColor: "rgba(0,0,0,0)",
-                    }}
-                    optionContainerStyle={{
-                      backgroundColor: "white",
-                      borderRadius: 15,
-                    }}
-                    optionTextStyle={{ fontWeight: "bold" }}
-                    sectionTextStyle={{ fontWeight: "bold" }}
-                    cancelStyle={{ backgroundColor: "grey", borderRadius: 15 }}
-                    cancelTextStyle={{ fontWeight: "bold", color: "white" }}
-                    data={this.state.activityData}
-                    initValue={this.state.activityPickerInitVal}
-                    onChange={async (item) => {
-                      await this.activityFilter(item);
-                    }}
-                  />
-                </View>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
+                    marginLeft:"10%"
                   }}
                 >
                   <DateTimePicker
@@ -3359,102 +3495,62 @@ export class CalendarPlanScreen extends React.Component {
                 width: "90%",
                 borderRadius: 20,
                 justifyContent: "space-between",
-                marginTop: 20,
+                alignItems:"flex-start",
+                marginTop: 1,
+                //backgroundColor:"red"
               }}
             >
-              <View
+                        <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                width: "100%",
+                borderRadius: 20,
+                justifyContent: "space-between",
+                alignItems:"center",
+                marginTop: 10,
+                //backgroundColor:"red"
+              }}
+            >
+              <TouchableOpacity
                 style={{
-                  flex: 0.7,
                   backgroundColor: "white",
-                  height: 50,
+                  borderColor:"black",
+                  borderWidth:2,
+                  width: 120,
+                  height: 40,
                   borderRadius: 15,
-                  borderWidth: 2,
-                  borderColor: "black",
-                  marginRight: 10,
-                  flexDirection: "row",
+                  marginRight: 5,
+                  justifyContent: "center",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                }}
+                disabled={false}
+                onPress={async () => {
+                  await this.resetCalendarView();
                 }}
               >
-                <TextInput
-                  style={{ fontSize: 16, marginLeft: 5 }}
-                  placeholder="add new activity"
-                  value={this.state.userDefinedActivityText}
-                  onChangeText={(text) =>
-                    this.setState({ userDefinedActivityText: text })
-                  }
-                ></TextInput>
-                <View style={{}}>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      let activityList = this.state.activityData;
-                      // console.log("activityList",activityList);
-                      if (this.state.userDefinedActivityText === "") {
-                        Alert.alert(
-                          "Invalid Name",
-                          "Activity name can't be empty",
-                          [
-                            {
-                              text: "OK",
-                              onPress: () => console.log("OK Pressed"),
-                            },
-                          ]
-                        );
-                        return;
-                      }
-                      this.index++;
-                      let newActivity = {
-                        key: this.index,
-                        label: this.state.userDefinedActivityText,
-                      };
-                      for (let activity of activityList) {
-                        let activityToLowerCase = activity.label.toLowerCase();
-                        let newActivityToLowerCase = this.state.userDefinedActivityText.toLowerCase();
-                        if (activityToLowerCase === newActivityToLowerCase) {
-                          Alert.alert(
-                            this.state.userDefinedActivityText +
-                              " already existed",
-                            "Please add another activity",
-                            [
-                              {
-                                text: "OK",
-                                onPress: () => console.log("OK Pressed"),
-                              },
-                            ]
-                          );
-                          this.setState({ userDefinedActivityText: "" });
-                          return;
-                        }
-                      }
-                      // console.log("newActivity",newActivity);
-                      activityList.push(newActivity);
-                      this.setState({ userDefinedActivityText: "" });
-                      await this.dataModel.updateUserActivities(
-                        this.userKey,
-                        this.state.userDefinedActivityText
-                      );
-                    }}
-                  >
-                    <Ionicons name="ios-add-circle" size={30} color={"black"} />
-                  </TouchableOpacity>
-                </View>
-              </View>
+                <Text style={{ color: "black", fontWeight: "bold" }}>
+                  Reset Filter
+                </Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 disabled={this.state.isPlanBtnDisable}
                 onPress={() => this.onPlanBtnPressed()}
                 style={{
-                  flex: 0.3,
+                  // flex: 0.3,
                   backgroundColor: "black",
                   color: "white",
-                  width: 100,
-                  height: 50,
+                  width: 120,
+                  height: 40,
                   borderRadius: 15,
+                  
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
                 <Text style={{ color: "white", fontWeight: "bold" }}>Plan</Text>
               </TouchableOpacity>
+              </View>
             </View>
           </View>
         </SlidingUpPanel>
