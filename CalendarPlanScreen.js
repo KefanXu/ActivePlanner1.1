@@ -32,6 +32,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
 
 import ModalSelector from "react-native-modal-selector";
+import { VictoryBar } from 'victory';
 
 // let index = 0;
 // const data = [
@@ -1337,6 +1338,7 @@ export class CalendarPlanScreen extends React.Component {
                   <Text style={{color:"green"}}>{this.state.completedRecords}</Text> of
                   them
                 </Text>
+                <VictoryBar/>
               </View>
             </View>
             <View

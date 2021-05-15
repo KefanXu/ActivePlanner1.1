@@ -36,7 +36,8 @@
     "react-native-screens": "~2.15.2",
     "react-native-switch-selector": "^2.1.4",
     "react-native-web": "~0.13.12",
-    "rn-sliding-up-panel": "^2.4.5"
+    "rn-sliding-up-panel": "^2.4.5",
+    "victory": "^35.7.1"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"
