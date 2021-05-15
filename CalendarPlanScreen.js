@@ -163,6 +163,11 @@ export class CalendarPlanScreen extends React.Component {
     this.btnName = "Next";
     this.nextBtnState = "next";
     this.reportPopUp(this.userPlans);
+
+    this.totalRecords = 0;
+    this.completedRecords = 0;
+    this.uncompletedRecords = 0;
+    this.processRecords(this.userPlans);
     this.state = {
       isMonthCalVis: true,
       date: new Date(),
@@ -242,9 +247,44 @@ export class CalendarPlanScreen extends React.Component {
 
       isPlannedToday: this.isPlannedToday,
       isPlannedDate: this.isPlannedDate,
+
+      totalRecords: this.totalRecords,
+      completedRecords: this.completedRecords,
+      uncompletedRecords: this.uncompletedRecords,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
+
+  processRecords = (userPlanList) => {
+    let preRecordsList = [];
+    for (let event of userPlanList) {
+      if (event.title && event.isReported && !event.isDeleted) {
+        preRecordsList.push(event);
+      }
+    }
+    let completedList = [];
+    let uncompletedList = [];
+    for (let event of preRecordsList) {
+      if (event.isActivityCompleted) {
+        completedList.push(event);
+      } else {
+        uncompletedList.push(event);
+      }
+    }
+    if (
+      this.totalRecords === 0 &&
+      this.completedRecords === 0 &&
+      this.uncompletedRecords === 0
+    ) {
+      this.totalRecords = preRecordsList.length;
+      this.completedRecords = completedList.length;
+      this.uncompletedRecords = uncompletedList.length;
+    } else {
+      this.setState({ totalRecords: preRecordsList.length });
+      this.setState({ completedRecords: completedList.length });
+      this.setState({ uncompletedRecords: uncompletedList.length });
+    }
+  };
 
   reportPopUp = async (userPlanList) => {
     let currentDate = moment(new Date()).format().slice(0, 10);
@@ -760,9 +800,8 @@ export class CalendarPlanScreen extends React.Component {
       newEvent
     );
 
-    newEvent.reportReminderKey = await this.dataModel.scheduleReportNotification(
-      newEvent
-    );
+    newEvent.reportReminderKey =
+      await this.dataModel.scheduleReportNotification(newEvent);
     await this.dataModel.createNewPlan(this.userKey, newEvent);
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
@@ -1275,9 +1314,30 @@ export class CalendarPlanScreen extends React.Component {
                 borderRadius: 15,
               }}
             >
-              <Text style={{ fontSize: 24, fontWeight: "bold", margin: 15 }}>
-                Previous Records
-              </Text>
+              <View style={{ flex: 1, margin: 15 }}>
+                <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+                  Previous Records
+                </Text>
+                <Text
+                  style={{ fontSize: 24, fontWeight: "bold", marginTop: 5 }}
+                >
+                  <Text style={{ color: "green" }}>
+                    {this.state.completedRecords}
+                  </Text>{" "}
+                  / {this.state.totalRecords}
+                </Text>
+                <Text
+                  style={{ fontSize: 12, fontWeight: "bold", marginTop: 5 }}
+                >
+                  Until {moment(new Date()).format().slice(0, 10)}, I have{" "}
+                  <Text style={{ color: "blue" }}>
+                    {this.state.totalRecords}
+                  </Text>{" "}
+                  physical exercise planned and reported, and I completed{" "}
+                  <Text style={{color:"green"}}>{this.state.completedRecords}</Text> of
+                  them
+                </Text>
+              </View>
             </View>
             <View
               style={{
@@ -1966,16 +2026,19 @@ export class CalendarPlanScreen extends React.Component {
                       this.resetReport();
 
                       let eventToUpdate = this.eventToday;
-                      eventToUpdate.isActivityCompleted = this.state.isActivityCompleted;
+                      eventToUpdate.isActivityCompleted =
+                        this.state.isActivityCompleted;
                       eventToUpdate.isReported = true;
                       if (this.state.isActivityCompleted) {
                         eventToUpdate.isOtherActivity = "";
                         eventToUpdate.reason = "";
                       } else {
-                        eventToUpdate.isOtherActivity = this.state.isOtherActivity;
+                        eventToUpdate.isOtherActivity =
+                          this.state.isOtherActivity;
                         eventToUpdate.reason = this.state.reason;
                         if (this.state.isOtherActivity) {
-                          eventToUpdate.otherActivity = this.state.otherActivity;
+                          eventToUpdate.otherActivity =
+                            this.state.otherActivity;
                         } else {
                           eventToUpdate.otherActivity = ";";
                         }
@@ -2399,7 +2462,7 @@ export class CalendarPlanScreen extends React.Component {
 
                       dailyReport.end = moment(this.state.noEventDayReportDate)
                         .format()
-                        .slice(0, 19);
+                        .slice(0, 10);
                       dailyReport.start = dailyReport.end;
 
                       let timeStamp = moment(new Date()).format();
@@ -3309,14 +3372,14 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                   >
                     <TextInput
-                      style={{ fontSize: 16, marginLeft: 5, flex:0.8 }}
+                      style={{ fontSize: 16, marginLeft: 5, flex: 0.8 }}
                       placeholder="new activity"
                       value={this.state.userDefinedActivityText}
                       onChangeText={(text) =>
                         this.setState({ userDefinedActivityText: text })
                       }
                     ></TextInput>
-                    <View style={{marginRight:"5%", flex:0.2}}>
+                    <View style={{ marginRight: "5%", flex: 0.2 }}>
                       <TouchableOpacity
                         onPress={async () => {
                           let activityList = this.state.activityData;
@@ -3340,8 +3403,10 @@ export class CalendarPlanScreen extends React.Component {
                             label: this.state.userDefinedActivityText,
                           };
                           for (let activity of activityList) {
-                            let activityToLowerCase = activity.label.toLowerCase();
-                            let newActivityToLowerCase = this.state.userDefinedActivityText.toLowerCase();
+                            let activityToLowerCase =
+                              activity.label.toLowerCase();
+                            let newActivityToLowerCase =
+                              this.state.userDefinedActivityText.toLowerCase();
                             if (
                               activityToLowerCase === newActivityToLowerCase
                             ) {
@@ -3453,7 +3518,7 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 1,
                     justifyContent: "center",
                     alignItems: "center",
-                    marginLeft:"10%"
+                    marginLeft: "10%",
                   }}
                 >
                   <DateTimePicker
@@ -3495,61 +3560,63 @@ export class CalendarPlanScreen extends React.Component {
                 width: "90%",
                 borderRadius: 20,
                 justifyContent: "space-between",
-                alignItems:"flex-start",
+                alignItems: "flex-start",
                 marginTop: 1,
                 //backgroundColor:"red"
               }}
             >
-                        <View
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                width: "100%",
-                borderRadius: 20,
-                justifyContent: "space-between",
-                alignItems:"center",
-                marginTop: 10,
-                //backgroundColor:"red"
-              }}
-            >
-              <TouchableOpacity
+              <View
                 style={{
-                  backgroundColor: "white",
-                  borderColor:"black",
-                  borderWidth:2,
-                  width: 120,
-                  height: 40,
-                  borderRadius: 15,
-                  marginRight: 5,
-                  justifyContent: "center",
+                  flex: 1,
+                  flexDirection: "row",
+                  width: "100%",
+                  borderRadius: 20,
+                  justifyContent: "space-between",
                   alignItems: "center",
-                }}
-                disabled={false}
-                onPress={async () => {
-                  await this.resetCalendarView();
+                  marginTop: 10,
+                  //backgroundColor:"red"
                 }}
               >
-                <Text style={{ color: "black", fontWeight: "bold" }}>
-                  Reset Filter
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={this.state.isPlanBtnDisable}
-                onPress={() => this.onPlanBtnPressed()}
-                style={{
-                  // flex: 0.3,
-                  backgroundColor: "black",
-                  color: "white",
-                  width: 120,
-                  height: 40,
-                  borderRadius: 15,
-                  
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Plan</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "white",
+                    borderColor: "black",
+                    borderWidth: 2,
+                    width: 120,
+                    height: 40,
+                    borderRadius: 15,
+                    marginRight: 5,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  disabled={false}
+                  onPress={async () => {
+                    await this.resetCalendarView();
+                  }}
+                >
+                  <Text style={{ color: "black", fontWeight: "bold" }}>
+                    Reset Filter
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  disabled={this.state.isPlanBtnDisable}
+                  onPress={() => this.onPlanBtnPressed()}
+                  style={{
+                    // flex: 0.3,
+                    backgroundColor: "black",
+                    color: "white",
+                    width: 120,
+                    height: 40,
+                    borderRadius: 15,
+
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                    Plan
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
