@@ -32,6 +32,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
 
 import ModalSelector from "react-native-modal-selector";
+import {
+  VictoryBar,
+  VictoryChart,
+  VictoryTheme,
+  VictoryPie,
+} from "victory-native";
+import { FlatList } from "react-native-gesture-handler";
 
 // let index = 0;
 // const data = [
@@ -42,8 +49,32 @@ import ModalSelector from "react-native-modal-selector";
 //   { key: index++, label: "Biking" },
 //   { key: index++, label: "Jumping Rope" },
 // ];
+// const data = [
+//   { quarter: 1, earnings: 13000 },
+//   { quarter: 2, earnings: 16500 },
+//   { quarter: 3, earnings: 14250 },
+//   { quarter: 4, earnings: 19000 },
+// ];
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const PIECHART = {
+  pie: {
+    style: {
+      data: {
+        padding: 0,
+        stroke: "transparent",
+        strokeWidth: 1,
+      },
+      labels: Object.assign({}, { fontSize: 11 }, { padding: 0 }),
+    },
+    colorScale: ["red", "green"],
+    width: "100%",
+    height: "100%",
+
+    padding: 0,
+  },
+};
+//const WEATHERLIST = [{key: "Thunderstorm", icon: "⛈"}]
 
 export class CalendarPlanScreen extends React.Component {
   constructor(props) {
@@ -167,6 +198,7 @@ export class CalendarPlanScreen extends React.Component {
     this.totalRecords = 0;
     this.completedRecords = 0;
     this.uncompletedRecords = 0;
+    this.weekDayList = [];
     this.processRecords(this.userPlans);
     this.state = {
       isMonthCalVis: true,
@@ -251,11 +283,26 @@ export class CalendarPlanScreen extends React.Component {
       totalRecords: this.totalRecords,
       completedRecords: this.completedRecords,
       uncompletedRecords: this.uncompletedRecords,
+      weekDayList: this.weekDayList,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
 
   processRecords = (userPlanList) => {
+    let weekDayList = [];
+    let weekDayNum = 0;
+    for (let weekDay of WEEKDAY) {
+      let weekDayObj = {
+        weekDay: weekDay,
+        key: weekDay,
+        weekDayNum: weekDayNum,
+        completed: 0,
+        uncompleted: 0,
+      };
+      weekDayList.push(weekDayObj);
+      weekDayNum++;
+    }
+
     let preRecordsList = [];
     for (let event of userPlanList) {
       if (event.title && event.isReported && !event.isDeleted) {
@@ -265,12 +312,33 @@ export class CalendarPlanScreen extends React.Component {
     let completedList = [];
     let uncompletedList = [];
     for (let event of preRecordsList) {
+      // console.log(event.start);
+      // console.log((new Date(event.start)).getDay());
+      for (let weekDay of weekDayList) {
+        if (new Date(event.start).getDay() === weekDay.weekDayNum) {
+          if (event.isActivityCompleted) {
+            weekDay.completed++;
+          } else {
+            weekDay.uncompleted++;
+          }
+        }
+      }
+
       if (event.isActivityCompleted) {
         completedList.push(event);
       } else {
         uncompletedList.push(event);
       }
     }
+    console.log("this.weekDayList", weekDayList);
+    if (this.weekDayList.length === 0) {
+      this.weekDayList = weekDayList;
+      //console.log("this.weekDayList",this.weekDayList);
+    } else {
+      this.setState({ weekDayList: weekDayList });
+      //console.log("setState",this.state.weekDayList);
+    }
+
     if (
       this.totalRecords === 0 &&
       this.completedRecords === 0 &&
@@ -1304,7 +1372,7 @@ export class CalendarPlanScreen extends React.Component {
             //contentOffset={{x: this.midViewX ,y:0}}
             horizontal={true}
           >
-            <View
+            <ScrollView
               style={{
                 marginLeft: 20,
                 marginRight: 20,
@@ -1313,32 +1381,296 @@ export class CalendarPlanScreen extends React.Component {
                 width: 350,
                 borderRadius: 15,
               }}
+              contentContainerStyle={{ alignItems: "center" }}
             >
-              <View style={{ flex: 1, margin: 15 }}>
-                <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-                  Previous Records
-                </Text>
-                <Text
-                  style={{ fontSize: 24, fontWeight: "bold", marginTop: 5 }}
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  flexDirection: "row",
+                  marginBottom: 10,
+                }}
+              >
+                <View style={{ flex: 0.8 }}>
+                  <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+                    Previous Records
+                  </Text>
+                  <Text
+                    style={{ fontSize: 24, fontWeight: "bold", marginTop: 5 }}
+                  >
+                    <Text style={{ color: "green" }}>
+                      {this.state.completedRecords}
+                    </Text>{" "}
+                    / {this.state.totalRecords}
+                  </Text>
+                  <Text
+                    style={{ fontSize: 12, fontWeight: "bold", marginTop: 5 }}
+                  >
+                    Until {moment(new Date()).format().slice(0, 10)}, I have{" "}
+                    <Text style={{ color: "blue" }}>
+                      {this.state.totalRecords}
+                    </Text>{" "}
+                    physical exercise planned and reported, and I completed{" "}
+                    <Text style={{ color: "green" }}>
+                      {this.state.completedRecords}
+                    </Text>{" "}
+                    of them
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 0.2,
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                    transform: [{ scale: 1 }],
+                    // backgroundColor: "blue",
+                  }}
                 >
-                  <Text style={{ color: "green" }}>
-                    {this.state.completedRecords}
-                  </Text>{" "}
-                  / {this.state.totalRecords}
-                </Text>
-                <Text
-                  style={{ fontSize: 12, fontWeight: "bold", marginTop: 5 }}
-                >
-                  Until {moment(new Date()).format().slice(0, 10)}, I have{" "}
-                  <Text style={{ color: "blue" }}>
-                    {this.state.totalRecords}
-                  </Text>{" "}
-                  physical exercise planned and reported, and I completed{" "}
-                  <Text style={{color:"green"}}>{this.state.completedRecords}</Text> of
-                  them
-                </Text>
+                  <View
+                    style={{
+                      flex: 0.2,
+                      //backgroundColor: "red",
+                      width: "100%",
+                      marginTop: "50%",
+                      transform: [{ scale: 1 }],
+                      justifyContent: "flex-start",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <VictoryPie
+                      style={{ labels: { fill: "white" } }}
+                      // style={{ flex: 1, marginTop:0 }}
+                      innerRadius={10}
+                      labelRadius={60}
+                      width={50}
+                      height={50}
+                      //labels={({ datum }) => `# ${datum.y}`}
+                      //labelComponent={<CustomLabel />}
+                      theme={PIECHART}
+                      data={[
+                        {
+                          x: this.state.uncompletedRecords,
+                          y: this.state.uncompletedRecords,
+                        },
+                        {
+                          x: this.state.completedRecords,
+                          y: this.state.completedRecords,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
               </View>
-            </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                }}
+              >
+                <Text style={{ flex: 0.2, fontWeight: "bold", marginLeft:10, marginBottom:10 }}>
+                  by Weekday
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems:"center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding:10
+                  }}
+                >
+                  <FlatList
+                    horizontal={true}
+                    contentContainerStyle={{
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent:"space-between",
+                      width: "100%",
+                      
+                      // backgroundColor:"red"
+                    }}
+                    data={this.state.weekDayList}
+                    renderItem={({ item }) => (
+                      <View>
+                        <Text style={{ flex: 0.2, fontWeight: "bold", textAlign:"center" }}>
+                          {item.weekDay}
+                        </Text>
+                        <View
+                          style={{
+                            flex: 0.8,
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            //backgroundColor:"red"
+                          }}
+                        >
+                          <VictoryPie
+                            style={{ labels: { fill: "white" } }}
+                            // style={{ flex: 1, marginTop:0 }}
+                            innerRadius={10}
+                            labelRadius={60}
+                            width={40}
+                            height={40}
+                            labels={({ datum }) => `# ${datum.y}`}
+                            //labelComponent={<CustomLabel />}
+                            theme={{
+                              pie: {
+                                style: {
+                                  data: {
+                                    padding: 0,
+                                    stroke: "transparent",
+                                    strokeWidth: 1,
+                                  },
+                                  labels: Object.assign(
+                                    {},
+                                    { fontSize: 11 },
+                                    { padding: 0 }
+                                  ),
+                                },
+                                colorScale: ["green", "red"],
+                                width: "100%",
+                                height: "100%",
+
+                                padding: 0,
+                              },
+                            }}
+                            data={[
+                              {
+                                x: item.completed,
+                                y: item.completed,
+                              },
+                              {
+                                x: item.uncompleted,
+                                y: item.uncompleted,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  />
+
+                  {/* <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>2</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>3</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>4</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>5</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>6</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ flex: 0.2 }}>7</Text>
+                    <View
+                      style={{
+                        flex: 0.8,
+                        backgroundColor: "grey",
+                        width: "100%",
+                      }}
+                    >
+                      <Text>2</Text> */}
+                  {/* </View>
+                  </View> */}
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "row",
+                }}
+              >
+                <Text>by Weather</Text>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "row",
+                }}
+              >
+                <Text>by Activity</Text>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "row",
+                }}
+              >
+                <Text>by Perception</Text>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "row",
+                }}
+              >
+                <Text>by Timing</Text>
+              </View>
+            </ScrollView>
             <View
               style={{
                 marginLeft: 20,

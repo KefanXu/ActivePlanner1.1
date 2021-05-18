@@ -214,12 +214,8 @@ export class LoginScreen extends React.Component {
       timeMax
     );
     //console.log("calEvents",calEvents);
-    let [
-      previousMonthList,
-      thisMonthList,
-      nextMonthList,
-      fullEventList,
-    ] = this.processCalEvent(calEvents.items);
+    let [previousMonthList, thisMonthList, nextMonthList, fullEventList] =
+      this.processCalEvent(calEvents.items);
     let key;
     let isUserFound = false;
     console.log("calendarsID", calendarsID);
@@ -240,9 +236,8 @@ export class LoginScreen extends React.Component {
 
     // console.log("user key:",key);
 
-    let userDefineActivitiesNotExist = await this.dataModel.isUserDefineActivitiesExist(
-      key
-    );
+    let userDefineActivitiesNotExist =
+      await this.dataModel.isUserDefineActivitiesExist(key);
     if (userDefineActivitiesNotExist) {
       await this.dataModel.createUserActivities(key);
     }
@@ -262,15 +257,12 @@ export class LoginScreen extends React.Component {
     let thisMonthWeather;
     let nextMonthWeather;
     //console.log("userInfo",userInfo);
-    console.log("userPlans", userPlans);
+    //console.log("userPlans", userPlans);
     let isWeatherNotExist = await this.dataModel.isWeatherNotExist(key);
     //console.log("weatherCollectionSnapshot.empty", isWeatherNotExist);
     if (isWeatherNotExist) {
-      [
-        lastMonthWeather,
-        thisMonthWeather,
-        nextMonthWeather,
-      ] = await this.fetchWeatherInfo(userPlans);
+      [lastMonthWeather, thisMonthWeather, nextMonthWeather] =
+        await this.fetchWeatherInfo(userPlans);
       //console.log("lastMonthWeather", lastMonthWeather);
       let weatherFullList = [];
       let todayDate = new Date();
@@ -301,9 +293,7 @@ export class LoginScreen extends React.Component {
                 event.temp = weather.temp;
               }
             }
-          } else if (
-            parseInt(event.end.slice(5, 7)) === todayDate.getMonth()
-          ) {
+          } else if (parseInt(event.end.slice(5, 7)) === todayDate.getMonth()) {
             for (let weather of lastMonthWeather) {
               if (parseInt(event.end.slice(8, 10)) === weather.date) {
                 console.log("weather", weather);
@@ -317,14 +307,9 @@ export class LoginScreen extends React.Component {
       for (let event of userInfo.userPlans) {
         await this.dataModel.updatePlan(userInfo.key, event);
       }
-
-
     } else {
-      [
-        lastMonthWeather,
-        thisMonthWeather,
-        nextMonthWeather,
-      ] = await this.dataModel.getWeatherInfo(key);
+      [lastMonthWeather, thisMonthWeather, nextMonthWeather] =
+        await this.dataModel.getWeatherInfo(key);
     }
     //let todayDate2 = new Date();
 
@@ -383,9 +368,15 @@ export class LoginScreen extends React.Component {
 
     for (let dayEvent of eventList) {
       //console.log("dayEvent.start ",dayEvent.start);
-
+      let timeStamp;
       if (dayEvent.start) {
-        let timeStamp = dayEvent.start.dateTime.slice(0, 7);
+        //console.log("dayEvent", dayEvent);
+        if (dayEvent.start.dateTime) {
+          timeStamp = dayEvent.start.dateTime.slice(0, 7);
+        } else {
+          timeStamp = dayEvent.start.date.slice(0, 7);
+        }
+
         //console.log("typeof(dayEvent.start.dateTime)",typeof(dayEvent.start.dateTime));
         let simplifiedEvent = {
           start: dayEvent.start.dateTime,
