@@ -207,6 +207,10 @@ export class CalendarPlanScreen extends React.Component {
     this.uncompletedRecords = 0;
     this.weekDayList = [];
     this.weatherCollectionList = [];
+    this.activityCollectionList = [];
+    this.perceptionCollectionList = [];
+    this.timingCollectionList = [];
+
     this.processRecords(this.userPlans);
     this.state = {
       isMonthCalVis: true,
@@ -293,6 +297,9 @@ export class CalendarPlanScreen extends React.Component {
       uncompletedRecords: this.uncompletedRecords,
       weekDayList: this.weekDayList,
       weatherCollectionList: this.weatherCollectionList,
+      activityCollectionList: this.activityCollectionList,
+      perceptionCollectionList: this.perceptionCollectionList,
+      timingCollectionList: this.timingCollectionList,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
@@ -300,6 +307,17 @@ export class CalendarPlanScreen extends React.Component {
   processRecords = (userPlanList) => {
     let weekDayList = [];
     let weatherCollectionList = [];
+    let activityList = [];
+    let activityCollectionList = [];
+    let perceptionCollectionList = [
+      { key: "Positive", completed: 0, uncompleted: 0 },
+      { key: "Neutral", completed: 0, uncompleted: 0 },
+      { key: "Negative", completed: 0, uncompleted: 0 },
+    ];
+    let timingCollectionList = [
+      { key: "Before 12pm", completed: 0, uncompleted: 0 },
+      { key: "After 12pm", completed: 0, uncompleted: 0 },
+    ];
     //let activityCollectionList = [];
 
     let weekDayNum = 0;
@@ -329,7 +347,19 @@ export class CalendarPlanScreen extends React.Component {
     for (let event of userPlanList) {
       if (event.title && event.isReported && !event.isDeleted) {
         preRecordsList.push(event);
+        let activityName = event.title;
+        if (!activityList.includes(activityName)) {
+          activityList.push(activityName);
+        }
       }
+    }
+    for (let activity of activityList) {
+      let activityObj = {
+        key: activity,
+        completed: 0,
+        uncompleted: 0,
+      };
+      activityCollectionList.push(activityObj);
     }
     let completedList = [];
     let uncompletedList = [];
@@ -356,6 +386,45 @@ export class CalendarPlanScreen extends React.Component {
           }
         }
       }
+      for (let activity of activityCollectionList) {
+        if (event.title === activity.key) {
+          if (event.isActivityCompleted) {
+            activity.completed++;
+          } else {
+            activity.uncompleted++;
+          }
+        }
+      }
+      for (let perception of perceptionCollectionList) {
+        if (event.feeling && event.feeling != "") {
+          if (event.feeling === perception.key) {
+            if (event.isActivityCompleted) {
+              perception.completed++;
+            } else {
+              perception.uncompleted++;
+            }
+          }
+        }
+      }
+      for (let timing of timingCollectionList) {
+        if (parseInt(event.start.slice(11, 13)) < 12) {
+          if (timing.key === "Before 12pm") {
+            if (event.isActivityCompleted) {
+              timing.completed++;
+            } else {
+              timing.uncompleted++;
+            }
+          }
+        } else {
+          if (timing.key === "After 12pm") {
+            if (event.isActivityCompleted) {
+              timing.completed++;
+            } else {
+              timing.uncompleted++;
+            }
+          }
+        }
+      }
 
       if (event.isActivityCompleted) {
         completedList.push(event);
@@ -373,7 +442,8 @@ export class CalendarPlanScreen extends React.Component {
     //   }
     // }
     //console.log("this.weekDayList", weekDayList);
-    console.log("weatherCollectionList", weatherCollectionList);
+    //console.log("weatherCollectionList", weatherCollectionList);
+    console.log("timingCollectionList", timingCollectionList);
 
     if (this.weekDayList.length === 0) {
       this.weekDayList = weekDayList;
@@ -387,6 +457,21 @@ export class CalendarPlanScreen extends React.Component {
       this.weatherCollectionList = weatherCollectionList;
     } else {
       this.setState({ weatherCollectionList: weatherCollectionList });
+    }
+    if (this.activityCollectionList.length === 0) {
+      this.activityCollectionList = activityCollectionList;
+    } else {
+      this.setState({ activityCollectionList: activityCollectionList });
+    }
+    if (this.perceptionCollectionList.length === 0) {
+      this.perceptionCollectionList = perceptionCollectionList;
+    } else {
+      this.setState({ perceptionCollectionList: perceptionCollectionList });
+    }
+    if (this.timingCollectionList.length === 0) {
+      this.timingCollectionList = timingCollectionList;
+    } else {
+      this.setState({ timingCollectionList: timingCollectionList });
     }
 
     if (
@@ -1561,6 +1646,7 @@ export class CalendarPlanScreen extends React.Component {
                             flex: 0.2,
                             fontWeight: "bold",
                             textAlign: "center",
+                            fontSize: 10,
                           }}
                         >
                           {item.weekDay}
@@ -1654,11 +1740,11 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   <FlatList
                     horizontal={true}
+                    style={{ flex: 1 }}
                     contentContainerStyle={{
                       flex: 1,
                       flexDirection: "row",
                       justifyContent: "space-between",
-                      width: "100%",
 
                       // backgroundColor:"red"
                     }}
@@ -1670,12 +1756,12 @@ export class CalendarPlanScreen extends React.Component {
                             flex: 0.2,
                             fontWeight: "bold",
                             textAlign: "center",
-                            fontSize:10,
-                            marginBottom:2
-
+                            fontSize: 10,
+                            marginBottom: 2,
                           }}
                         >
-                          {item.key}{"\n"} {item.icon}
+                          {item.key}
+                          {"\n"} {item.icon}
                         </Text>
                         <View
                           style={{
@@ -1738,30 +1824,336 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.8,
                   width: "95%",
                   marginTop: 5,
-                  flexDirection: "row",
+                  flexDirection: "column",
+                  // backgroundColor:"red"
                 }}
               >
-                <Text>by Activity</Text>
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Activity
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <FlatList
+                    horizontal={true}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{
+                      flexDirection: "row",
+                      flex: 1,
+                      justifyContent: "space-between",
+                      //width: "100%",
+
+                      // backgroundColor:"red"
+                    }}
+                    data={this.state.activityCollectionList}
+                    renderItem={({ item }) => (
+                      <View>
+                        <Text
+                          style={{
+                            flex: 0.2,
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            fontSize: 10,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {item.key}
+                        </Text>
+                        <View
+                          style={{
+                            flex: 0.8,
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            //backgroundColor:"red"
+                          }}
+                        >
+                          <VictoryPie
+                            style={{ labels: { fill: "white" } }}
+                            // style={{ flex: 1, marginTop:0 }}
+                            innerRadius={10}
+                            labelRadius={60}
+                            width={40}
+                            height={40}
+                            labels={({ datum }) => `# ${datum.y}`}
+                            //labelComponent={<CustomLabel />}
+                            theme={{
+                              pie: {
+                                style: {
+                                  data: {
+                                    padding: 0,
+                                    stroke: "transparent",
+                                    strokeWidth: 1,
+                                  },
+                                  labels: Object.assign(
+                                    {},
+                                    { fontSize: 11 },
+                                    { padding: 0 }
+                                  ),
+                                },
+                                colorScale: ["green", "red"],
+                                width: "100%",
+                                height: "100%",
+
+                                padding: 0,
+                              },
+                            }}
+                            data={[
+                              {
+                                x: item.completed,
+                                y: item.completed,
+                              },
+                              {
+                                x: item.uncompleted,
+                                y: item.uncompleted,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  />
+                </View>
               </View>
               <View
                 style={{
                   flex: 0.8,
                   width: "95%",
                   marginTop: 5,
-                  flexDirection: "row",
+                  flexDirection: "column",
+                  // backgroundColor:"red"
                 }}
               >
-                <Text>by Perception</Text>
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Perception
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <FlatList
+                    horizontal={true}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{
+                      flexDirection: "row",
+                      flex: 1,
+                      justifyContent: "space-between",
+                      //width: "100%",
+
+                      // backgroundColor:"red"
+                    }}
+                    data={this.state.perceptionCollectionList}
+                    renderItem={({ item }) => (
+                      <View>
+                        <Text
+                          style={{
+                            flex: 0.2,
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            fontSize: 10,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {item.key}
+                        </Text>
+                        <View
+                          style={{
+                            flex: 0.8,
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            //backgroundColor:"red"
+                          }}
+                        >
+                          <VictoryPie
+                            style={{ labels: { fill: "white" } }}
+                            // style={{ flex: 1, marginTop:0 }}
+                            innerRadius={10}
+                            labelRadius={60}
+                            width={40}
+                            height={40}
+                            labels={({ datum }) => `# ${datum.y}`}
+                            //labelComponent={<CustomLabel />}
+                            theme={{
+                              pie: {
+                                style: {
+                                  data: {
+                                    padding: 0,
+                                    stroke: "transparent",
+                                    strokeWidth: 1,
+                                  },
+                                  labels: Object.assign(
+                                    {},
+                                    { fontSize: 11 },
+                                    { padding: 0 }
+                                  ),
+                                },
+                                colorScale: ["green", "red"],
+                                width: "100%",
+                                height: "100%",
+
+                                padding: 0,
+                              },
+                            }}
+                            data={[
+                              {
+                                x: item.completed,
+                                y: item.completed,
+                              },
+                              {
+                                x: item.uncompleted,
+                                y: item.uncompleted,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  />
+                </View>
               </View>
-              <View
+                            <View
                 style={{
                   flex: 0.8,
                   width: "95%",
                   marginTop: 5,
-                  flexDirection: "row",
+                  flexDirection: "column",
+                  // backgroundColor:"red"
                 }}
               >
-                <Text>by Timing</Text>
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Timing
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <FlatList
+                    horizontal={true}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{
+                      flexDirection: "row",
+                      flex: 1,
+                      justifyContent: "space-between",
+                      //width: "100%",
+
+                      // backgroundColor:"red"
+                    }}
+                    data={this.state.timingCollectionList}
+                    renderItem={({ item }) => (
+                      <View>
+                        <Text
+                          style={{
+                            flex: 0.2,
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            fontSize: 10,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {item.key}
+                        </Text>
+                        <View
+                          style={{
+                            flex: 0.8,
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            //backgroundColor:"red"
+                          }}
+                        >
+                          <VictoryPie
+                            style={{ labels: { fill: "white" } }}
+                            // style={{ flex: 1, marginTop:0 }}
+                            innerRadius={10}
+                            labelRadius={60}
+                            width={40}
+                            height={40}
+                            labels={({ datum }) => `# ${datum.y}`}
+                            //labelComponent={<CustomLabel />}
+                            theme={{
+                              pie: {
+                                style: {
+                                  data: {
+                                    padding: 0,
+                                    stroke: "transparent",
+                                    strokeWidth: 1,
+                                  },
+                                  labels: Object.assign(
+                                    {},
+                                    { fontSize: 11 },
+                                    { padding: 0 }
+                                  ),
+                                },
+                                colorScale: ["green", "red"],
+                                width: "100%",
+                                height: "100%",
+
+                                padding: 0,
+                              },
+                            }}
+                            data={[
+                              {
+                                x: item.completed,
+                                y: item.completed,
+                              },
+                              {
+                                x: item.uncompleted,
+                                y: item.uncompleted,
+                              },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  />
+                </View>
               </View>
             </ScrollView>
             <View
@@ -3550,7 +3942,7 @@ export class CalendarPlanScreen extends React.Component {
         </TouchableOpacity> */}
 
         <SlidingUpPanel
-          draggableRange={{ top: 320, bottom: 80 }}
+          draggableRange={{ top: 320, bottom: 60 }}
           showBackdrop={false}
           ref={(c) => (this._panel = c)}
         >
