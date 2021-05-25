@@ -608,6 +608,8 @@ export class CalendarPlanScreen extends React.Component {
             ),
           });
           this.setState({ isWeatherVisOnPanel: "none" });
+          this.setState({ btnName: "Submit"});
+          this.setState({ nextBtnState: "submit"});
           this.setState({ isNoEventDayReportModalVis: true });
           return;
         }
@@ -640,7 +642,8 @@ export class CalendarPlanScreen extends React.Component {
                 item
               ),
             });
-
+          this.setState({ btnName: "Submit"});
+          this.setState({ nextBtnState: "submit"});
             this.setState({ isNoEventDayReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
             return;
@@ -674,6 +677,8 @@ export class CalendarPlanScreen extends React.Component {
           } else {
             //set date here
             this.setState({ noEventDayReportDate: new Date() });
+          this.setState({ btnName: "Submit"});
+          this.setState({ nextBtnState: "submit"});
             this.setState({ isNoEventDayReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
             return;
@@ -781,6 +786,8 @@ export class CalendarPlanScreen extends React.Component {
           if (monthNum < this.state.date.getMonth()) {
             let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
             this.setState({ normalViewModalStartDate: normalDate });
+            this.setState({ nextBtnState: "next"});
+            this.setState({ btnName: "Next"});
             this.setState({ isReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
           } else if (monthNum === this.state.date.getMonth()) {
@@ -871,6 +878,8 @@ export class CalendarPlanScreen extends React.Component {
   setReportModal = (todayDate, monthNum, item) => {
     let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
     this.setState({ normalViewModalStartDate: normalDate });
+                this.setState({ nextBtnState: "next"});
+            this.setState({ btnName: "Next"});
     this.setState({ isReportModalVis: true });
     this.setState({ isWeatherVisOnPanel: "none" });
   };
@@ -985,8 +994,8 @@ export class CalendarPlanScreen extends React.Component {
     } else {
       this.combinedEventListNext.push(newEvent);
     }
-    await this.setState({ eventsThisMonth: this.combinedEventListThis });
-    await this.setState({ eventsThisMonth: this.combinedEventListNext });
+    // await this.setState({ eventsThisMonth: this.combinedEventListThis });
+    // await this.setState({ eventsThisMonth: this.combinedEventListNext });
     // let newEventList = this.eventsThisMonth;
     // console.log("newEventList", newEventList);
     // newEventList.push(newEvent);
@@ -1029,6 +1038,8 @@ export class CalendarPlanScreen extends React.Component {
     );
     this.setState({ isPlannedToday: true });
     this.setState({ isPlannedDate: newEvent.start });
+    await this.resetCalendarView();
+    
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -2993,6 +3004,8 @@ export class CalendarPlanScreen extends React.Component {
                   <TouchableOpacity
                     onPress={() => {
                       this.setState({ isNoEventDayReportModalVis: false });
+                                this.setState({ btnName: "Next"});
+          this.setState({ nextBtnState: "next"});
                       // this.setState({ feeling: "Neutral" });
                       // this.setState({ isActivityCompleted: false });
                       // this.setState({ isOtherActivity: false });
@@ -3754,7 +3767,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    <Text style={{ fontSize: 14, fontWeight: "bold" }}>
                       Planned: {this.eventToday.title} at{" "}
                       {this.eventToday.start.slice(11, 16)}
                       {/* {this.state.detailViewTop} */}

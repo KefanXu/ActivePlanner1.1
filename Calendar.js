@@ -48,12 +48,14 @@ export class MonthCalendar extends React.Component {
 
     this.dayEventsList;
     this.todayDate = new Date();
+    let targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 1)
 
     this.state = {
       activeDate: this.props.monthCalCurrDate,
       //thisMonthEvents: this.thisMonthEvents,
       dayEventsList: [],
-      targetDate:"",
+      targetDate: targetDate.getDay(),
     };
     this.processEvents();
   }
