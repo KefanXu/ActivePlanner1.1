@@ -1584,18 +1584,16 @@ export class CalendarPlanScreen extends React.Component {
                       alignItems: "flex-start",
                     }}
                   >
-                    <VictoryBar
+                    <VictoryPie
                       style={{ labels: { fill: "white" } }}
                       // style={{ flex: 1, marginTop:0 }}
-                      // innerRadius={10}
-                      // labelRadius={60}
-                      barWidth = {25}
-                      horizontal={false}
+                      innerRadius={10}
+                      labelRadius={60}
                       width={50}
-                      height={150}
+                      height={50}
                       //labels={({ datum }) => `# ${datum.y}`}
                       //labelComponent={<CustomLabel />}
-                      theme={VictoryTheme.material}
+                      theme={PIECHART}
                       data={[
                         {
                           x: this.state.uncompletedRecords,
@@ -1673,37 +1671,36 @@ export class CalendarPlanScreen extends React.Component {
                             //backgroundColor:"red"
                           }}
                         >
-                          <VictoryBar
+                          <VictoryPie
                             style={{ labels: { fill: "white" } }}
                             // style={{ flex: 1, marginTop:0 }}
-                            // innerRadius={10}
-                            // labelRadius={60}
-                            barWidth={5}
-                            width={50}
-                            // height={150}
-                            // labels={({ datum }) => `# ${datum.y}`}
+                            innerRadius={10}
+                            labelRadius={60}
+                            width={40}
+                            height={40}
+                            labels={({ datum }) => `# ${datum.y}`}
                             //labelComponent={<CustomLabel />}
-                            // theme={{
-                            //   pie: {
-                            //     style: {
-                            //       data: {
-                            //         padding: 0,
-                            //         stroke: "transparent",
-                            //         strokeWidth: 1,
-                            //       },
-                            //       labels: Object.assign(
-                            //         {},
-                            //         { fontSize: 11 },
-                            //         { padding: 0 }
-                            //       ),
-                            //     },
-                            //     colorScale: ["green", "red"],
-                            //     width: "100%",
-                            //     height: "100%",
+                            theme={{
+                              pie: {
+                                style: {
+                                  data: {
+                                    padding: 0,
+                                    stroke: "transparent",
+                                    strokeWidth: 1,
+                                  },
+                                  labels: Object.assign(
+                                    {},
+                                    { fontSize: 11 },
+                                    { padding: 0 }
+                                  ),
+                                },
+                                colorScale: ["green", "red"],
+                                width: "100%",
+                                height: "100%",
 
-                            //     padding: 0,
-                            //   },
-                            // }}
+                                padding: 0,
+                              },
+                            }}
                             data={[
                               {
                                 x: item.completed,
