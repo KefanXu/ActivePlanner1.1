@@ -2443,7 +2443,7 @@ export class CalendarPlanScreen extends React.Component {
                 }}
               >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-                  Tell us about your day ! (Planned Event Report)
+                  Physical Exercise Report
                 </Text>
                 <Text
                   style={{ fontSize: 14, fontWeight: "bold", marginTop: 5 }}
@@ -2518,7 +2518,7 @@ export class CalendarPlanScreen extends React.Component {
                   >
                     {/* Did you {this.eventToday.title} for 30 min at{" "}
                     {this.eventToday.start.slice(11, 16)} */}
-                    Did you engage yourself in any physical exercise?
+                    Did you engage yourself in any other physical exercise?
                   </Text>
                   <SwitchSelector
                     options={[
@@ -2561,7 +2561,15 @@ export class CalendarPlanScreen extends React.Component {
                       marginTop: "20%",
                     }}
                   >
-                    How satisfied are you with today's activity?
+                                        {this.state.isActivityCompleted
+                      ? "How do you feel about " +
+                        this.eventToday.title +
+                        " on " +
+                        this.eventToday.start.slice(5, 10) +
+                        "?"
+                      : "How do you feel about " +
+                        this.state.otherActivity +
+                        "?"}
                   </Text>
                   <SwitchSelector
                     options={[
@@ -2647,8 +2655,7 @@ export class CalendarPlanScreen extends React.Component {
                       marginTop: "20%",
                     }}
                   >
-                    Did you do any other activities (if yes, what activity and
-                    when)?
+                    Tell us what physical exercise you did?
                   </Text>
                   <View
                     style={{
@@ -3155,7 +3162,9 @@ export class CalendarPlanScreen extends React.Component {
                       marginBottom: "10%",
                     }}
                   >
-                    How satisfied are you with today's activity?
+                    How satisfied are you with {this.state.otherActivity} on {moment(this.state.noEventDayReportDate)
+                    .format()
+                    .slice(5, 10)}?
                   </Text>
                   <SwitchSelector
                     options={[
