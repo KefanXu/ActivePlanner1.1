@@ -30,6 +30,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
+import victoryTheme from "./material";
+import victoryThemeActivity from "./materialActivity";
 
 import ModalSelector from "react-native-modal-selector";
 import {
@@ -37,6 +39,7 @@ import {
   VictoryChart,
   VictoryTheme,
   VictoryPie,
+  VictoryGroup,
 } from "victory-native";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -443,7 +446,7 @@ export class CalendarPlanScreen extends React.Component {
     // }
     //console.log("this.weekDayList", weekDayList);
     //console.log("weatherCollectionList", weatherCollectionList);
-    console.log("timingCollectionList", timingCollectionList);
+    //console.log("timingCollectionList", timingCollectionList);
 
     if (this.weekDayList.length === 0) {
       this.weekDayList = weekDayList;
@@ -608,8 +611,8 @@ export class CalendarPlanScreen extends React.Component {
             ),
           });
           this.setState({ isWeatherVisOnPanel: "none" });
-          this.setState({ btnName: "Submit"});
-          this.setState({ nextBtnState: "submit"});
+          this.setState({ btnName: "Submit" });
+          this.setState({ nextBtnState: "submit" });
           this.setState({ isNoEventDayReportModalVis: true });
           return;
         }
@@ -642,8 +645,8 @@ export class CalendarPlanScreen extends React.Component {
                 item
               ),
             });
-          this.setState({ btnName: "Submit"});
-          this.setState({ nextBtnState: "submit"});
+            this.setState({ btnName: "Submit" });
+            this.setState({ nextBtnState: "submit" });
             this.setState({ isNoEventDayReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
             return;
@@ -677,8 +680,8 @@ export class CalendarPlanScreen extends React.Component {
           } else {
             //set date here
             this.setState({ noEventDayReportDate: new Date() });
-          this.setState({ btnName: "Submit"});
-          this.setState({ nextBtnState: "submit"});
+            this.setState({ btnName: "Submit" });
+            this.setState({ nextBtnState: "submit" });
             this.setState({ isNoEventDayReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
             return;
@@ -786,8 +789,8 @@ export class CalendarPlanScreen extends React.Component {
           if (monthNum < this.state.date.getMonth()) {
             let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
             this.setState({ normalViewModalStartDate: normalDate });
-            this.setState({ nextBtnState: "next"});
-            this.setState({ btnName: "Next"});
+            this.setState({ nextBtnState: "next" });
+            this.setState({ btnName: "Next" });
             this.setState({ isReportModalVis: true });
             this.setState({ isWeatherVisOnPanel: "none" });
           } else if (monthNum === this.state.date.getMonth()) {
@@ -878,8 +881,8 @@ export class CalendarPlanScreen extends React.Component {
   setReportModal = (todayDate, monthNum, item) => {
     let normalDate = new Date(todayDate.getFullYear(), monthNum, item);
     this.setState({ normalViewModalStartDate: normalDate });
-                this.setState({ nextBtnState: "next"});
-            this.setState({ btnName: "Next"});
+    this.setState({ nextBtnState: "next" });
+    this.setState({ btnName: "Next" });
     this.setState({ isReportModalVis: true });
     this.setState({ isWeatherVisOnPanel: "none" });
   };
@@ -1039,7 +1042,7 @@ export class CalendarPlanScreen extends React.Component {
     this.setState({ isPlannedToday: true });
     this.setState({ isPlannedDate: newEvent.start });
     await this.resetCalendarView();
-    
+
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
   };
@@ -1164,7 +1167,9 @@ export class CalendarPlanScreen extends React.Component {
           }
         }
         if (userFeeling.isExerciseToday) {
-          activityText = "I did " + userFeeling.otherActivity;
+          //activityText = "I did " + userFeeling.otherActivity;
+          activityText = "I did " + "";
+
         } else {
           activityText = "I didn't do any physical exercise today.";
         }
@@ -1425,9 +1430,9 @@ export class CalendarPlanScreen extends React.Component {
               {" " + this.eventToday.start.slice(11, 16)}
             </Text>{" "}
             for 30 minutes
-            {"\n"}
+            {/* {"\n"}
             {"\n"}I feel{" "}
-            <Text style={{ color: colorCode }}>{feelingEmoji}</Text>
+            <Text style={{ color: colorCode }}>{feelingEmoji}</Text> */}
           </Text>
         </View>
       );
@@ -1458,9 +1463,9 @@ export class CalendarPlanScreen extends React.Component {
               {" " + this.eventToday.title}
             </Text>{" "}
             exactly as I planned because {this.eventToday.reason}
-            {"\n"}I did {" " + this.eventToday.otherActivity}
-            {"\n"}I feel{" "}
-            <Text style={{ color: colorCode }}>{feelingEmoji}</Text>
+            {"\n"}I did <Text style={{ color: "#00FFFF" }}>{this.eventToday.otherActivity}</Text> instead
+            {/* {"\n"}I feel{" "}
+            <Text style={{ color: colorCode }}>{feelingEmoji}</Text> */}
           </Text>
         </View>
       );
@@ -1639,6 +1644,99 @@ export class CalendarPlanScreen extends React.Component {
                     padding: 10,
                   }}
                 >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={60}
+                    width={300}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={["green", "red"]}
+                    >
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          { x: "Sun", y: this.state.weekDayList[0].completed },
+                          { x: "Mon", y: this.state.weekDayList[1].completed },
+                          { x: "Tue", y: this.state.weekDayList[2].completed },
+                          { x: "Wed", y: this.state.weekDayList[3].completed },
+                          { x: "Thu", y: this.state.weekDayList[4].completed },
+                          { x: "Fri", y: this.state.weekDayList[5].completed },
+                          { x: "Sat", y: this.state.weekDayList[6].completed },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Sun",
+                            y: this.state.weekDayList[0].uncompleted,
+                          },
+                          {
+                            x: "Mon",
+                            y: this.state.weekDayList[1].uncompleted,
+                          },
+                          {
+                            x: "Tue",
+                            y: this.state.weekDayList[2].uncompleted,
+                          },
+                          {
+                            x: "Wed",
+                            y: this.state.weekDayList[3].uncompleted,
+                          },
+                          {
+                            x: "Thu",
+                            y: this.state.weekDayList[4].uncompleted,
+                          },
+                          {
+                            x: "Fri",
+                            y: this.state.weekDayList[5].uncompleted,
+                          },
+                          {
+                            x: "Sat",
+                            y: this.state.weekDayList[6].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
+                </View>
+              </View>
+              {/* <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:"red"
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Weekday
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
                   <FlatList
                     horizontal={true}
                     contentContainerStyle={{
@@ -1717,8 +1815,8 @@ export class CalendarPlanScreen extends React.Component {
                     )}
                   />
                 </View>
-              </View>
-              <View
+              </View> */}
+              {/* <View
                 style={{
                   flex: 0.8,
                   width: "95%",
@@ -1829,6 +1927,112 @@ export class CalendarPlanScreen extends React.Component {
                     )}
                   />
                 </View>
+              </View> */}
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:"red"
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Weather
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={60}
+                    width={300}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={["green", "red"]}
+                    >
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Thunder",
+                            y: this.state.weatherCollectionList[0].completed,
+                          },
+                          {
+                            x: "Drizzle",
+                            y: this.state.weatherCollectionList[1].completed,
+                          },
+                          {
+                            x: "Rain",
+                            y: this.state.weatherCollectionList[2].completed,
+                          },
+                          {
+                            x: "Show",
+                            y: this.state.weatherCollectionList[3].completed,
+                          },
+                          {
+                            x: "Clear",
+                            y: this.state.weatherCollectionList[4].completed,
+                          },
+                          {
+                            x: "Clouds",
+                            y: this.state.weatherCollectionList[5].completed,
+                          },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Thunder",
+                            y: this.state.weatherCollectionList[0].uncompleted,
+                          },
+                          {
+                            x: "Drizzle",
+                            y: this.state.weatherCollectionList[1].uncompleted,
+                          },
+                          {
+                            x: "Rain",
+                            y: this.state.weatherCollectionList[2].uncompleted,
+                          },
+                          {
+                            x: "Show",
+                            y: this.state.weatherCollectionList[3].uncompleted,
+                          },
+                          {
+                            x: "Clear",
+                            y: this.state.weatherCollectionList[4].uncompleted,
+                          },
+                          {
+                            x: "Clouds",
+                            y: this.state.weatherCollectionList[5].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
+                </View>
               </View>
               <View
                 style={{
@@ -1858,7 +2062,7 @@ export class CalendarPlanScreen extends React.Component {
                     backgroundColor: "white",
                     borderRadius: 10,
                     width: "100%",
-                    padding: 10,
+                    padding: 5,
                   }}
                 >
                   <FlatList
@@ -1866,9 +2070,9 @@ export class CalendarPlanScreen extends React.Component {
                     style={{ flex: 1 }}
                     contentContainerStyle={{
                       flexDirection: "row",
-                      flex: 1,
                       justifyContent: "space-between",
-                      //width: "100%",
+                      width: "100%",
+                      height: "100%",
 
                       // backgroundColor:"red"
                     }}
@@ -1890,12 +2094,47 @@ export class CalendarPlanScreen extends React.Component {
                           style={{
                             flex: 0.8,
                             width: "100%",
+                            height:"100%",
                             alignItems: "center",
                             justifyContent: "center",
                             //backgroundColor:"red"
                           }}
                         >
-                          <VictoryPie
+                          <VictoryChart
+                            domain={{ y: [0.5, 10.5] }}
+                            theme={victoryThemeActivity}
+                            labels={({ datum }) => datum.y}
+                            height={60}
+                            width={50}
+                            // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                            // style={{axis:{stroke: "transparent"}}}
+                          >
+                            <VictoryGroup
+                              offset={10}
+                              style={{ data: { width: 10 } }}
+                              colorScale={["green", "red"]}
+                            >
+                              <VictoryBar
+                                labels={({ datum }) => datum.y}
+                                data={[
+                                  {
+                                    x: "Completed",
+                                    y: item.completed,
+                                  },
+                                ]}
+                              />
+                              <VictoryBar
+                                labels={({ datum }) => datum.y}
+                                data={[
+                                  {
+                                    x: "Uncompleted",
+                                    y: item.uncompleted,
+                                  },
+                                ]}
+                              />
+                            </VictoryGroup>
+                          </VictoryChart>
+                          {/* <VictoryPie
                             style={{ labels: { fill: "white" } }}
                             // style={{ flex: 1, marginTop:0 }}
                             innerRadius={10}
@@ -1935,14 +2174,14 @@ export class CalendarPlanScreen extends React.Component {
                                 y: item.uncompleted,
                               },
                             ]}
-                          />
+                          /> */}
                         </View>
                       </View>
                     )}
                   />
                 </View>
               </View>
-              <View
+              {/* <View
                 style={{
                   flex: 0.8,
                   width: "95%",
@@ -2053,8 +2292,82 @@ export class CalendarPlanScreen extends React.Component {
                     )}
                   />
                 </View>
-              </View>
+              </View> */}
                             <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:"red"
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Timing
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={60}
+                    width={150}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={["green", "red"]}
+                    >
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].completed,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].completed,
+                          },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].uncompleted,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
+                </View>
+              </View>
+              {/* <View
                 style={{
                   flex: 0.8,
                   width: "95%",
@@ -2165,7 +2478,7 @@ export class CalendarPlanScreen extends React.Component {
                     )}
                   />
                 </View>
-              </View>
+              </View> */}
             </ScrollView>
             <View
               style={{
@@ -2196,7 +2509,9 @@ export class CalendarPlanScreen extends React.Component {
               style={{
                 marginLeft: 20,
                 marginRight: 20,
-                backgroundColor: "#D8D8D8",
+                backgroundColor: "white",
+                borderColor:"black",
+                borderWidth:2,
                 padding: 10,
                 borderRadius: 15,
               }}
@@ -2211,6 +2526,32 @@ export class CalendarPlanScreen extends React.Component {
                 }
               />
             </View>
+                        {/* <View
+              style={{
+                marginLeft: 20,
+                marginRight: 20,
+                backgroundColor: "#D8D8D8",
+                padding: 10,
+                borderRadius: 15,
+              }}
+            >
+              <MonthCalendar
+                ref={this.monthCalRefLast}
+                thisMonthEvents={this.state.eventsLastMonth}
+                monthCalCurrDate={
+                  new Date(
+                    this.state.date.getFullYear(),
+                    this.state.date.getMonth() - 1,
+                    15
+                  )
+                }
+                weatherThisMonth={this.lastMonthWeather}
+                onPress={(item, monthNum, month) =>
+                  this.onPress(item, monthNum, month)
+                }
+              />
+            </View> */}
+
           </ScrollView>
           {/* <TouchableOpacity
             style={{
@@ -2561,7 +2902,7 @@ export class CalendarPlanScreen extends React.Component {
                       marginTop: "20%",
                     }}
                   >
-                                        {this.state.isActivityCompleted
+                    {this.state.isActivityCompleted
                       ? "How do you feel about " +
                         this.eventToday.title +
                         " on " +
@@ -3011,8 +3352,8 @@ export class CalendarPlanScreen extends React.Component {
                   <TouchableOpacity
                     onPress={() => {
                       this.setState({ isNoEventDayReportModalVis: false });
-                                this.setState({ btnName: "Next"});
-          this.setState({ nextBtnState: "next"});
+                      this.setState({ btnName: "Next" });
+                      this.setState({ nextBtnState: "next" });
                       // this.setState({ feeling: "Neutral" });
                       // this.setState({ isActivityCompleted: false });
                       // this.setState({ isOtherActivity: false });
@@ -3162,9 +3503,11 @@ export class CalendarPlanScreen extends React.Component {
                       marginBottom: "10%",
                     }}
                   >
-                    How satisfied are you with {this.state.otherActivity} on {moment(this.state.noEventDayReportDate)
-                    .format()
-                    .slice(5, 10)}?
+                    How satisfied are you with {this.state.otherActivity} on{" "}
+                    {moment(this.state.noEventDayReportDate)
+                      .format()
+                      .slice(5, 10)}
+                    ?
                   </Text>
                   <SwitchSelector
                     options={[

@@ -49,7 +49,7 @@ export class MonthCalendar extends React.Component {
     this.dayEventsList;
     this.todayDate = new Date();
     let targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 1)
+    targetDate.setDate(targetDate.getDate() + 1);
 
     this.state = {
       activeDate: this.props.monthCalCurrDate,
@@ -68,9 +68,13 @@ export class MonthCalendar extends React.Component {
       this.months[this.props.monthCalCurrDate.getMonth()]
     );
     let todayDate = new Date();
-    let targetDate = new Date(todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay();
-    console.log("targetDate",targetDate);
-    this.setState({targetDate:targetDate});
+    let targetDate = new Date(
+      todayDate.getFullYear(),
+      this.props.monthCalCurrDate.getMonth(),
+      item
+    ).getDay();
+    console.log("targetDate", targetDate);
+    this.setState({ targetDate: targetDate });
     this.processEvents();
 
     // EventRegister.emit("calendarPressed","pressed"+item);
@@ -172,8 +176,10 @@ export class MonthCalendar extends React.Component {
                 alignItems: "center",
                 alignContent: "space-between",
                 //backgroundColor: rowIndex == 0 ? "" : "#fff",
-                width:"100%",
+                width: "100%",
                 borderRadius: rowIndex == 0 ? 15 : 0,
+                // borderColor:"red",
+                // borderWidth:2,
                 margin: rowIndex == 0 ? 17 : 0,
               }}
             >
@@ -311,13 +317,19 @@ export class MonthCalendar extends React.Component {
               iconEmoji = "";
               break;
           }
+          let backColor;
+          if (this.props.monthCalCurrDate.getMonth() === this.todayDate.getMonth()) {
+            backColor = "white";
+          } else {
+            backColor = "#D8D8D8";
+          }
 
           return (
             <View
               style={{
                 flex: 1,
                 textAlign: "center",
-                width:50,
+                width: 50,
                 height: "70%",
                 //backgroundColor: "blue",
                 flexDirection: "column",
@@ -332,6 +344,8 @@ export class MonthCalendar extends React.Component {
                   width: "95%",
                   flexDirection: "row",
                   backgroundColor: item != -1 ? "white" : "rgba(0,0,0,0)",
+                  borderColor: item != -1 ? "#D8D8D8" : "rgba(0,0,0,0)",
+                  borderWidth: 2,
                   borderRadius: 15,
                   marginTop: 2,
                   justifyContent: "center",
@@ -348,14 +362,14 @@ export class MonthCalendar extends React.Component {
                     width: "100%",
                     justifyContent: "center",
                     alignItems: "center",
-                    flexDirection:"row"
+                    flexDirection: "row",
                   }}
                 >
                   <Text
                     style={{
                       flex: 1,
                       textAlign: "center",
-                      alignSelf:"center",
+                      alignSelf: "center",
                       height: "100%",
                       justifyContent: "center",
                       alignContent: "center",
@@ -394,8 +408,15 @@ export class MonthCalendar extends React.Component {
               >
                 <View
                   style={{
-                    backgroundColor: (new Date(this.todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay() === this.state.targetDate && item != -1) ? "#819FF7": "#D8D8D8",
-                    
+                    backgroundColor:
+                      new Date(
+                        this.todayDate.getFullYear(),
+                        this.props.monthCalCurrDate.getMonth(),
+                        item
+                      ).getDay() === this.state.targetDate && item != -1
+                        ? "#819FF7"
+                        : backColor,
+
                     flex: 1,
                     height: "100%",
                     width: "100%",
@@ -420,11 +441,14 @@ export class MonthCalendar extends React.Component {
                       let feelingEmoji = "";
                       if (item.feeling) {
                         if (item.feeling === "Positive") {
-                          feelingEmoji = "🙂";
+                          // feelingEmoji = "🙂";
+                          feelingEmoji = "";
                         } else if (item.feeling === "Negative") {
-                          feelingEmoji = "😕";
+                          // feelingEmoji = "😕";
+                          feelingEmoji = "";
                         } else {
-                          feelingEmoji = "😑";
+                          // feelingEmoji = "😑";
+                          feelingEmoji = "";
                         }
                       }
                       if (item.isPlanned) {
@@ -569,7 +593,14 @@ export class MonthCalendar extends React.Component {
                 </View>
                 <View
                   style={{
-                    backgroundColor: (new Date(this.todayDate.getFullYear(), this.props.monthCalCurrDate.getMonth(), item).getDay() === this.state.targetDate && item != -1) ? "#819FF7": "#D8D8D8",
+                    backgroundColor:
+                      new Date(
+                        this.todayDate.getFullYear(),
+                        this.props.monthCalCurrDate.getMonth(),
+                        item
+                      ).getDay() === this.state.targetDate && item != -1
+                        ? "#819FF7"
+                        : backColor,
                     flex: 1,
                     height: "100%",
                     alignItems: "flex-end",
@@ -584,11 +615,14 @@ export class MonthCalendar extends React.Component {
                       let feelingEmoji = "";
                       if (item.feeling) {
                         if (item.feeling === "Positive") {
-                          feelingEmoji = "🙂";
+                          // feelingEmoji = "🙂";
+                          feelingEmoji = "";
                         } else if (item.feeling === "Negative") {
-                          feelingEmoji = "😕";
+                          // feelingEmoji = "😕";
+                          feelingEmoji = "";
                         } else {
-                          feelingEmoji = "😑";
+                          // feelingEmoji = "😑";
+                          feelingEmoji = "";
                         }
                       }
 
