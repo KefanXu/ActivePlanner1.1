@@ -46,7 +46,7 @@ class DataModel {
     this.users = [];
     this.plans = [];
     this.key = "";
-    
+    await this.askPermission();
     await this.loadUsers();
     //console.log("this.users", this.users);
   };

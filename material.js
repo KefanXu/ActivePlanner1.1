@@ -35,6 +35,7 @@ const baseProps = {
 const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
+  fontWight: "bold",
   letterSpacing,
   padding,
   fill: blueGrey700,
@@ -78,7 +79,7 @@ export default {
         }),
         grid: {
           fill: "none",
-          stroke: blueGrey50,
+          stroke: "transparent",
           strokeDasharray,
           strokeLinecap,
           strokeLinejoin,
@@ -93,7 +94,9 @@ export default {
           strokeLinejoin
         },
         tickLabels: assign({}, baseLabelStyles, {
-          fill: blueGrey700
+          fill: blueGrey700,
+          
+
         })
       }
     },

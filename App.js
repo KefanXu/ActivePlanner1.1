@@ -8,6 +8,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { LoginScreen } from './LoginScreen';
 import {SignUp} from './SignUp';
 import {CalendarPlanScreen} from './CalendarPlanScreen';
+import {ReportCollection} from "./ReportCollection";
+
 
 
 const Stack = createStackNavigator();
@@ -25,6 +27,8 @@ function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home Screen" component={CalendarPlanScreen} />
+        <Stack.Screen name="ReportCollection" component={ReportCollection} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

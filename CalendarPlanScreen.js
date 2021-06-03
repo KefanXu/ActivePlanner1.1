@@ -119,6 +119,7 @@ export class CalendarPlanScreen extends React.Component {
     }
     this.monthCalRef = React.createRef();
     this.monthCalRefLast = React.createRef();
+    this.monthCalRefNext = React.createRef();
     this.weekCalRef = React.createRef();
     this.dataModel = getDataModel();
     this.userEmail = this.props.route.params.userEmail;
@@ -181,7 +182,7 @@ export class CalendarPlanScreen extends React.Component {
           ) {
             this.combinedEventListLast.push(event);
           }
-        } else {
+        } else if (monthNum === currMonth.getMonth() + 2) {
           if (
             !this.combinedEventListNext.includes(event) &&
             !this.combinedEventListNext.some(
@@ -195,6 +196,8 @@ export class CalendarPlanScreen extends React.Component {
       }
     }
     this.detailViewCalendar = [];
+    this.preList;
+    this.preListLength;
 
     this.isPlannedToday = false;
     this.isPlannedDate = new Date();
@@ -204,6 +207,7 @@ export class CalendarPlanScreen extends React.Component {
     this.btnName = "Next";
     this.nextBtnState = "next";
     this.reportPopUp(this.userPlans);
+    this.getUnfinishedReport();
 
     this.totalRecords = 0;
     this.completedRecords = 0;
@@ -303,9 +307,66 @@ export class CalendarPlanScreen extends React.Component {
       activityCollectionList: this.activityCollectionList,
       perceptionCollectionList: this.perceptionCollectionList,
       timingCollectionList: this.timingCollectionList,
+
+      preList: this.preList,
+      preListLength: this.preListLength,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
+  getUnfinishedReport = () => {
+    let preList = [];
+    let todayDate = new Date();
+    let dailyReport = {};
+    //this.dataModel = getDataModel();
+    dailyReport.start = moment(todayDate).format().slice(0, 10);
+    dailyReport.end = dailyReport.start;
+    dailyReport.key = dailyReport.start;
+    dailyReport.title = "Daily Report";
+    let isReportExist = false;
+    for (let event of this.userPlans) {
+      if (event.start && !event.isDeleted) {
+        if (event.start.slice(0, 10) === dailyReport.start.slice(0, 10)) {
+          isReportExist = true;
+        }
+      }
+    }
+    if (!isReportExist) {
+      //report.date = date;
+      preList.push(dailyReport);
+    }
+
+    //this.preList.push(dailyReport);
+    for (let i = 1; i < 5; i++) {
+      let preDate = todayDate.setDate(todayDate.getDate() - 1);
+      let report = {};
+      let date = moment(preDate).format().slice(0, 10);
+      let isReportExist = false;
+      for (let event of this.userPlans) {
+        if (event.start) {
+          if (
+            event.start.slice(0, 10) === date.slice(0, 10) &&
+            !event.isDeleted
+          ) {
+            isReportExist = true;
+          }
+        }
+      }
+      if (!isReportExist) {
+        report.title = "Daily Report";
+        report.start = date;
+        report.end = report.start;
+        report.key = report.start;
+        preList.push(report);
+      }
+    }
+    if (this.preList) {
+      this.setState({ preList: preList });
+      this.setState({ preListLength: preList.length });
+    } else {
+      this.preList = preList;
+      this.preListLength = preList.length;
+    }
+  };
 
   processRecords = (userPlanList) => {
     let weekDayList = [];
@@ -1072,7 +1133,7 @@ export class CalendarPlanScreen extends React.Component {
       }
       this.combinedEventListThis.splice(deleteIndex, 1);
       await this.setState({ eventsThisMonth: this.combinedEventListThis });
-    } else {
+    } else if (monthNum === this.state.date.getMonth() + 2) {
       let deleteIndex;
       for (let event of this.combinedEventListNext) {
         if (event.timeStamp === this.eventToday.timeStamp) {
@@ -1080,7 +1141,7 @@ export class CalendarPlanScreen extends React.Component {
         }
       }
       this.combinedEventListNext.splice(deleteIndex, 1);
-      await this.setState({ eventsThisMonth: this.combinedEventListNext });
+      await this.setState({ eventsNextMonth: this.combinedEventListNext });
     }
     await this.dataModel.loadUserPlans(this.userKey);
     this.userPlans = this.dataModel.getUserPlans();
@@ -1091,6 +1152,7 @@ export class CalendarPlanScreen extends React.Component {
     if (!this.state.isFromWeekView) {
       this.monthCalRef.current.processEvents();
       this.monthCalRefLast.current.processEvents();
+      this.monthCalRefNext.current.processEvents();
 
       this.setState({ isMonthCalVis: true });
       this.setState({ indexView: "Month" });
@@ -1121,6 +1183,7 @@ export class CalendarPlanScreen extends React.Component {
 
     this.monthCalRef.current.processEvents();
     this.monthCalRefLast.current.processEvents();
+    this.monthCalRefNext.current.processEvents();
   };
 
   resetReport = () => {
@@ -1169,7 +1232,6 @@ export class CalendarPlanScreen extends React.Component {
         if (userFeeling.isExerciseToday) {
           //activityText = "I did " + userFeeling.otherActivity;
           activityText = "I did " + "";
-
         } else {
           activityText = "I didn't do any physical exercise today.";
         }
@@ -1178,7 +1240,8 @@ export class CalendarPlanScreen extends React.Component {
 
     return (
       <Text>
-        {activityText} {conText} {feelingIcon}
+        {activityText}
+        {/* {conText} {feelingIcon} */}
       </Text>
     );
   };
@@ -1329,6 +1392,7 @@ export class CalendarPlanScreen extends React.Component {
 
     this.monthCalRef.current.processEvents();
     this.monthCalRefLast.current.processEvents();
+    this.monthCalRefNext.current.processEvents();
   };
   dateTimeFilter = async (date) => {
     //let setDate = moment(date);
@@ -1384,6 +1448,7 @@ export class CalendarPlanScreen extends React.Component {
 
     this.monthCalRef.current.processEvents();
     this.monthCalRefLast.current.processEvents();
+    this.monthCalRefNext.current.processEvents();
   };
 
   render() {
@@ -1463,7 +1528,11 @@ export class CalendarPlanScreen extends React.Component {
               {" " + this.eventToday.title}
             </Text>{" "}
             exactly as I planned because {this.eventToday.reason}
-            {"\n"}I did <Text style={{ color: "#00FFFF" }}>{this.eventToday.otherActivity}</Text> instead
+            {"\n"}I did{" "}
+            <Text style={{ color: "#00FFFF" }}>
+              {this.eventToday.otherActivity}
+            </Text>{" "}
+            instead
             {/* {"\n"}I feel{" "}
             <Text style={{ color: colorCode }}>{feelingEmoji}</Text> */}
           </Text>
@@ -1544,7 +1613,7 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <View style={{ flex: 0.8 }}>
                   <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-                    Previous Records
+                    Planning History
                   </Text>
                   <Text
                     style={{ fontSize: 24, fontWeight: "bold", marginTop: 5 }}
@@ -1557,7 +1626,7 @@ export class CalendarPlanScreen extends React.Component {
                   <Text
                     style={{ fontSize: 12, fontWeight: "bold", marginTop: 5 }}
                   >
-                    Until {moment(new Date()).format().slice(0, 10)}, I have{" "}
+                    By {moment(new Date()).format().slice(0, 10)}, I have{" "}
                     <Text style={{ color: "blue" }}>
                       {this.state.totalRecords}
                     </Text>{" "}
@@ -1615,6 +1684,59 @@ export class CalendarPlanScreen extends React.Component {
               </View>
               <View
                 style={{
+                  flex: 1,
+                  width: "95%",
+                  height: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                  borderRadius: 20,
+                  borderColor: "black",
+                  borderWidth: 1,
+                }}
+              >
+                <View style={{ flex: 0.6, marginLeft: 10 }}>
+                  <Text style={{ fontWeight: "bold", fontSize: 10 }}>
+                    You have{" "}
+                    <Text style={{ color: "red" }}>
+                      {this.state.preListLength}{" "}
+                    </Text>
+                    uncompleted daily reports
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "black",
+                    color: "white",
+                    flex: 0.4,
+                    height: 25,
+                    margin: 2,
+                    borderRadius: 30,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  // disabled={this.state.isDailyReportBtnDisabled}
+                  disabled={false}
+                  onPress={
+                    () => {
+                      this.props.navigation.navigate("ReportCollection", {
+                        userKey: this.userKey,
+                        userPlans: this.userPlans,
+                      });
+                    }
+                    // this.setState({ isNoEventDayReportModalVis: true })
+                  }
+                >
+                  <Text
+                    style={{ color: "white", fontWeight: "bold", fontSize: 10 }}
+                  >
+                    Complete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{
                   flex: 0.8,
                   width: "95%",
                   marginTop: 5,
@@ -1647,7 +1769,7 @@ export class CalendarPlanScreen extends React.Component {
                   <VictoryChart
                     theme={victoryTheme}
                     labels={({ datum }) => datum.y}
-                    height={60}
+                    height={100}
                     width={300}
                     // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
                     // style={{axis:{stroke: "transparent"}}}
@@ -1699,6 +1821,80 @@ export class CalendarPlanScreen extends React.Component {
                           {
                             x: "Sat",
                             y: this.state.weekDayList[6].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:"red"
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Timing
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={100}
+                    width={150}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={["green", "red"]}
+                    >
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].completed,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].completed,
+                          },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].uncompleted,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].uncompleted,
                           },
                         ]}
                       />
@@ -1962,7 +2158,7 @@ export class CalendarPlanScreen extends React.Component {
                   <VictoryChart
                     theme={victoryTheme}
                     labels={({ datum }) => datum.y}
-                    height={60}
+                    height={100}
                     width={300}
                     // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
                     // style={{axis:{stroke: "transparent"}}}
@@ -2051,7 +2247,7 @@ export class CalendarPlanScreen extends React.Component {
                     marginBottom: 10,
                   }}
                 >
-                  by Activity
+                  by Activity Type
                 </Text>
                 <View
                   style={{
@@ -2094,7 +2290,7 @@ export class CalendarPlanScreen extends React.Component {
                           style={{
                             flex: 0.8,
                             width: "100%",
-                            height:"100%",
+                            height: "100%",
                             alignItems: "center",
                             justifyContent: "center",
                             //backgroundColor:"red"
@@ -2104,7 +2300,7 @@ export class CalendarPlanScreen extends React.Component {
                             domain={{ y: [0.5, 10.5] }}
                             theme={victoryThemeActivity}
                             labels={({ datum }) => datum.y}
-                            height={60}
+                            height={100}
                             width={50}
                             // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
                             // style={{axis:{stroke: "transparent"}}}
@@ -2293,80 +2489,6 @@ export class CalendarPlanScreen extends React.Component {
                   />
                 </View>
               </View> */}
-                            <View
-                style={{
-                  flex: 0.8,
-                  width: "95%",
-                  marginTop: 5,
-                  flexDirection: "column",
-                  // backgroundColor:"red"
-                }}
-              >
-                <Text
-                  style={{
-                    flex: 0.2,
-                    fontWeight: "bold",
-                    marginLeft: 10,
-                    marginBottom: 10,
-                  }}
-                >
-                  by Timing
-                </Text>
-                <View
-                  style={{
-                    flex: 0.8,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    backgroundColor: "white",
-                    borderRadius: 10,
-                    width: "100%",
-                    padding: 10,
-                  }}
-                >
-                  <VictoryChart
-                    theme={victoryTheme}
-                    labels={({ datum }) => datum.y}
-                    height={60}
-                    width={150}
-                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
-                    // style={{axis:{stroke: "transparent"}}}
-                  >
-                    <VictoryGroup
-                      offset={10}
-                      style={{ data: { width: 10 } }}
-                      colorScale={["green", "red"]}
-                    >
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          {
-                            x: "Before 12pm",
-                            y: this.state.timingCollectionList[0].completed,
-                          },
-                          {
-                            x: "After 12pm",
-                            y: this.state.timingCollectionList[1].completed,
-                          },
-                        ]}
-                      />
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          {
-                            x: "Before 12pm",
-                            y: this.state.timingCollectionList[0].uncompleted,
-                          },
-                          {
-                            x: "After 12pm",
-                            y: this.state.timingCollectionList[1].uncompleted,
-                          },
-                        ]}
-                      />
-                    </VictoryGroup>
-                  </VictoryChart>
-                </View>
-              </View>
               {/* <View
                 style={{
                   flex: 0.8,
@@ -2510,8 +2632,8 @@ export class CalendarPlanScreen extends React.Component {
                 marginLeft: 20,
                 marginRight: 20,
                 backgroundColor: "white",
-                borderColor:"black",
-                borderWidth:2,
+                borderColor: "black",
+                borderWidth: 2,
                 padding: 10,
                 borderRadius: 15,
               }}
@@ -2526,7 +2648,7 @@ export class CalendarPlanScreen extends React.Component {
                 }
               />
             </View>
-                        {/* <View
+            <View
               style={{
                 marginLeft: 20,
                 marginRight: 20,
@@ -2536,22 +2658,21 @@ export class CalendarPlanScreen extends React.Component {
               }}
             >
               <MonthCalendar
-                ref={this.monthCalRefLast}
-                thisMonthEvents={this.state.eventsLastMonth}
+                ref={this.monthCalRefNext}
+                thisMonthEvents={this.state.eventsNextMonth}
                 monthCalCurrDate={
                   new Date(
                     this.state.date.getFullYear(),
-                    this.state.date.getMonth() - 1,
+                    this.state.date.getMonth() + 1,
                     15
                   )
                 }
-                weatherThisMonth={this.lastMonthWeather}
+                weatherThisMonth={this.nextMonthWeather}
                 onPress={(item, monthNum, month) =>
                   this.onPress(item, monthNum, month)
                 }
               />
-            </View> */}
-
+            </View>
           </ScrollView>
           {/* <TouchableOpacity
             style={{
@@ -2821,7 +2942,7 @@ export class CalendarPlanScreen extends React.Component {
                     You planned {this.eventToday.title} on{" "}
                     {this.eventToday.start.slice(5, 10)} at{" "}
                     {this.eventToday.start.slice(11, 16)} for 30 min, did you
-                    followed your plan?
+                    follow your plan?
                   </Text>
                   <SwitchSelector
                     options={[
@@ -2903,20 +3024,20 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                   >
                     {this.state.isActivityCompleted
-                      ? "How do you feel about " +
+                      ? "How satisfied are you with what you've experienced as a result of " +
                         this.eventToday.title +
                         " on " +
                         this.eventToday.start.slice(5, 10) +
                         "?"
-                      : "How do you feel about " +
+                      : "How satisfied are you with what you've experienced as a result of " +
                         this.state.otherActivity +
                         "?"}
                   </Text>
                   <SwitchSelector
                     options={[
-                      { label: "😕 Negative", value: "Negative" },
-                      { label: "😑 Neutral", value: "Neutral" },
-                      { label: "🙂 Positive", value: "Positive" },
+                      { label: "Unsatisfied", value: "Unsatisfied" },
+                      { label: "Neutral", value: "Neutral" },
+                      { label: "Satisfied", value: "Satisfied" },
                     ]}
                     initial={1}
                     buttonMargin={1}
@@ -3503,7 +3624,8 @@ export class CalendarPlanScreen extends React.Component {
                       marginBottom: "10%",
                     }}
                   >
-                    How satisfied are you with {this.state.otherActivity} on{" "}
+                    How satisfied are you with what you've experienced as a
+                    result of {this.state.otherActivity} on{" "}
                     {moment(this.state.noEventDayReportDate)
                       .format()
                       .slice(5, 10)}
@@ -3511,9 +3633,9 @@ export class CalendarPlanScreen extends React.Component {
                   </Text>
                   <SwitchSelector
                     options={[
-                      { label: "😕 Negative", value: "Negative" },
-                      { label: "😑 Neutral", value: "Neutral" },
-                      { label: "🙂 Positive", value: "Positive" },
+                      { label: "Unsatisfied", value: "Unsatisfied" },
+                      { label: "Neutral", value: "Neutral" },
+                      { label: "Satisfied", value: "Satisfied" },
                     ]}
                     initial={1}
                     buttonMargin={1}
@@ -4369,7 +4491,7 @@ export class CalendarPlanScreen extends React.Component {
                     }}
                   >
                     <Text style={{ color: "white", fontWeight: "bold" }}>
-                      View event
+                      View Schedule
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -4777,7 +4899,7 @@ export class CalendarPlanScreen extends React.Component {
                   }}
                 >
                   <Text style={{ color: "black", fontWeight: "bold" }}>
-                    Reset Filter
+                    Full View
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
