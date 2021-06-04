@@ -198,6 +198,10 @@ export class CalendarPlanScreen extends React.Component {
     this.detailViewCalendar = [];
     this.preList;
     this.preListLength;
+    this.pastPlans = [];
+    this.futurePlans = [];
+    this.planToday = [];
+    this.getPreviousPlanLists();
 
     this.isPlannedToday = false;
     this.isPlannedDate = new Date();
@@ -310,9 +314,77 @@ export class CalendarPlanScreen extends React.Component {
 
       preList: this.preList,
       preListLength: this.preListLength,
+
+      pastPlans: this.pastPlans,
+      futurePlans: this.futurePlans,
+      todayPlan: this.planToday,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
+  getPreviousPlanLists = () => {
+    this.planToday = [];
+    this.pastPlans = [];
+    let todayDate = new Date();
+    for (let event of this.userPlans) {
+      if (event.title && !event.isDeleted) {
+        let eventDate = new Date(event.start);
+        if (!event.isReported) {
+          if (
+            eventDate.getMonth() === todayDate.getMonth() &&
+            eventDate.getDate() === todayDate.getDate()
+          ) {
+            if (
+              !this.planToday.includes(event) &&
+              !this.planToday.some((e) => e.timeStamp === event.timeStamp)
+            ) {
+              this.planToday.push(event);
+            }
+          } else {
+            if (todayDate >= eventDate) {
+              if (
+                !this.pastPlans.includes(event) &&
+                !this.pastPlans.some((e) => e.timeStamp === event.timeStamp)
+              ) {
+                this.pastPlans.push(event);
+              }
+            } else {
+              if (
+                !this.futurePlans.includes(event) &&
+                !this.futurePlans.some((e) => e.timeStamp === event.timeStamp)
+              ) {
+                this.futurePlans.push(event);
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+  componentDidMount = async () => {
+    this.dataModel = getDataModel();
+    await this.dataModel.asyncInit();
+    this.focusUnsubscribe = this.props.navigation.addListener(
+      "focus",
+      this.onFocus
+    );
+    //
+  };
+  onFocus = async () => {
+    console.log("on Focus");
+    this.dataModel = getDataModel();
+    await this.dataModel.asyncInit();
+
+    await this.dataModel.loadUserPlans(this.userKey);
+    this.userPlans = this.dataModel.getUserPlans();
+
+    this.reportPopUp(this.userPlans);
+    this.getUnfinishedReport();
+    if (this.isNoEventDayReportModalVis) {
+      this.setState({ isNoEventDayReportModalVis: true });
+      this.setState({ btnName: "Submit" });
+      this.setState({ nextBtnState: "submit" });
+    }
+  };
   getUnfinishedReport = () => {
     let preList = [];
     let todayDate = new Date();
@@ -1698,7 +1770,7 @@ export class CalendarPlanScreen extends React.Component {
               >
                 <View style={{ flex: 0.6, marginLeft: 10 }}>
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
-                    You have{" "}
+                    I have{" "}
                     <Text style={{ color: "red" }}>
                       {this.state.preListLength}{" "}
                     </Text>
@@ -1723,6 +1795,8 @@ export class CalendarPlanScreen extends React.Component {
                       this.props.navigation.navigate("ReportCollection", {
                         userKey: this.userKey,
                         userPlans: this.userPlans,
+                        planToday: this.state.todayPlan,
+                        pastPlans: this.state.pastPlans,
                       });
                     }
                     // this.setState({ isNoEventDayReportModalVis: true })
