@@ -35,7 +35,6 @@ const baseProps = {
 const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
-  fontWight: "bold",
   letterSpacing,
   padding,
   fill: blueGrey700,
@@ -95,8 +94,6 @@ export default {
         },
         tickLabels: assign({}, baseLabelStyles, {
           fill: blueGrey700,
-          
-
         })
       }
     },

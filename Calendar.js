@@ -20,6 +20,10 @@ import EventCalendar from "react-native-events-calendar";
 import { Calendar } from "react-native-big-calendar";
 import { log } from "react-native-reanimated";
 import moment, { min } from "moment";
+const RED = "#D55E00";
+const GREEN = "#009E73";
+const BACKGROUND_COLOR = "white";
+
 
 export class MonthCalendar extends React.Component {
   constructor(props) {
@@ -178,7 +182,7 @@ export class MonthCalendar extends React.Component {
                 //backgroundColor: rowIndex == 0 ? "" : "#fff",
                 width: "100%",
                 borderRadius: rowIndex == 0 ? 15 : 0,
-                // borderColor:"red",
+                // borderColor:RED,
                 // borderWidth:2,
                 margin: rowIndex == 0 ? 17 : 0,
               }}
@@ -321,7 +325,7 @@ export class MonthCalendar extends React.Component {
           if (this.props.monthCalCurrDate.getMonth() === this.todayDate.getMonth()) {
             backColor = "white";
           } else {
-            backColor = "#D8D8D8";
+            backColor = BACKGROUND_COLOR;
           }
 
           return (
@@ -430,7 +434,7 @@ export class MonthCalendar extends React.Component {
                       width: "100%",
                       height:"100%",
                       marginHorizontal: 5,
-                      backgroundColor: "green",
+                      backgroundColor: GREEN,
                     }}
                   > */}
                   <FlatList
@@ -461,7 +465,7 @@ export class MonthCalendar extends React.Component {
                                   height: 15,
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  backgroundColor: "green",
+                                  backgroundColor: GREEN,
                                   borderRadius: 5,
                                   flex: 1,
                                 }}
@@ -485,7 +489,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "yellow",
+                                    backgroundColor: "#F0E442",
                                     borderRadius: 5,
                                     flex: 1,
                                     height: 15,
@@ -513,7 +517,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "red",
+                                    backgroundColor: RED,
                                     borderRadius: 5,
                                     flex: 1,
                                     height: 15,
@@ -633,7 +637,7 @@ export class MonthCalendar extends React.Component {
                               <View
                                 style={{
                                   width: "100%",
-                                  backgroundColor: "green",
+                                  backgroundColor: GREEN,
                                   borderRadius: 5,
                                   flex: 1,
                                   height: 15,
@@ -661,7 +665,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "yellow",
+                                    backgroundColor: "#F0E442",
                                     height: 15,
                                     alignItems: "center",
                                     justifyContent: "center",
@@ -688,7 +692,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "red",
+                                    backgroundColor: RED,
                                     borderRadius: 5,
                                     height: 15,
                                     alignItems: "center",
@@ -776,7 +780,7 @@ export class MonthCalendar extends React.Component {
             style={{
               flex: 0.1,
               flexDirection: "column",
-              //backgroundColor: "red",
+              //backgroundColor: RED,
               justifyContent: "space-around",
               alignItems: "center",
             }}

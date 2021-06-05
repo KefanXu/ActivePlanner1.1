@@ -18,7 +18,8 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator 
-        initialRouteName="Login"   
+        initialRouteName="Login"
+           
         screenOptions={{
           headerShown: false,
           headerLeft:null
@@ -27,7 +28,7 @@ function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home Screen" component={CalendarPlanScreen} />
-        <Stack.Screen name="ReportCollection" component={ReportCollection} />
+        <Stack.Screen name="ReportCollection" component={ReportCollection} options={{gestureEnabled: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>

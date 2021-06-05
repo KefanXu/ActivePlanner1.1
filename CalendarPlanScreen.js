@@ -32,6 +32,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
 import victoryTheme from "./material";
 import victoryThemeActivity from "./materialActivity";
+import AnimatedLoader from "react-native-animated-loader";
 
 import ModalSelector from "react-native-modal-selector";
 import {
@@ -60,6 +61,9 @@ import { FlatList } from "react-native-gesture-handler";
 // ];
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const BACKGROUND_COLOR = "white";
+const RED = "#D55E00";
+const GREEN = "#009E73";
 const PIECHART = {
   pie: {
     style: {
@@ -70,7 +74,7 @@ const PIECHART = {
       },
       labels: Object.assign({}, { fontSize: 11 }, { padding: 0 }),
     },
-    colorScale: ["red", "green"],
+    colorScale: [RED, GREEN, "grey"],
     width: "100%",
     height: "100%",
 
@@ -318,6 +322,8 @@ export class CalendarPlanScreen extends React.Component {
       pastPlans: this.pastPlans,
       futurePlans: this.futurePlans,
       todayPlan: this.planToday,
+
+      isLoaderVis: false,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
@@ -370,15 +376,21 @@ export class CalendarPlanScreen extends React.Component {
     //
   };
   onFocus = async () => {
-    console.log("on Focus");
-    this.dataModel = getDataModel();
-    await this.dataModel.asyncInit();
+    if (this.props.route.params.needsUpdate) {
+      this.setState({ isLoaderVis: true });
+      this.dataModel = getDataModel();
+      await this.dataModel.asyncInit();
 
-    await this.dataModel.loadUserPlans(this.userKey);
-    this.userPlans = this.dataModel.getUserPlans();
+      await this.dataModel.loadUserPlans(this.userKey);
+      this.userPlans = this.dataModel.getUserPlans();
 
-    this.reportPopUp(this.userPlans);
-    this.getUnfinishedReport();
+      this.reportPopUp(this.userPlans);
+      this.processRecords(this.userPlans);
+      this.getUnfinishedReport();
+      await this.resetCalendarView();
+      this.setState({ isLoaderVis: false });
+    }
+
     if (this.isNoEventDayReportModalVis) {
       this.setState({ isNoEventDayReportModalVis: true });
       this.setState({ btnName: "Submit" });
@@ -1302,8 +1314,8 @@ export class CalendarPlanScreen extends React.Component {
           }
         }
         if (userFeeling.isExerciseToday) {
-          //activityText = "I did " + userFeeling.otherActivity;
-          activityText = "I did " + "";
+          activityText = "I did " + userFeeling.otherActivity;
+          //activityText = "I did " + "";
         } else {
           activityText = "I didn't do any physical exercise today.";
         }
@@ -1311,7 +1323,7 @@ export class CalendarPlanScreen extends React.Component {
     }
 
     return (
-      <Text>
+      <Text style={{ fontWeight: "bold" }}>
         {activityText}
         {/* {conText} {feelingIcon} */}
       </Text>
@@ -1546,8 +1558,8 @@ export class CalendarPlanScreen extends React.Component {
             marginTop: 5,
             marginBottom: 5,
             borderRadius: 15,
-            flex: 0.2,
-            backgroundColor: "green",
+            flex: 0.15,
+            backgroundColor: GREEN,
           }}
         >
           <Text
@@ -1599,7 +1611,7 @@ export class CalendarPlanScreen extends React.Component {
             <Text style={{ color: "#00FFFF" }}>
               {" " + this.eventToday.title}
             </Text>{" "}
-            exactly as I planned because {this.eventToday.reason}
+            as I planned because {this.eventToday.reason}
             {"\n"}I did{" "}
             <Text style={{ color: "#00FFFF" }}>
               {this.eventToday.otherActivity}
@@ -1657,10 +1669,24 @@ export class CalendarPlanScreen extends React.Component {
 
       calView = (
         <View>
+          <View style={{ flex: 0.3 }}>
+            <AnimatedLoader
+              visible={this.state.isLoaderVis}
+              overlayColor="rgba(255,255,255,0.75)"
+              source={require("./assets/loader.json")}
+              animationStyle={{ width: 100, height: 100 }}
+              speed={1}
+            >
+              <Text style={{ fontWeight: "bold", textAlign: "center" }}>
+                Update Calendar...
+              </Text>
+            </AnimatedLoader>
+          </View>
           <ScrollView
             style={{ height: "95%", width: "100%" }}
             contentContainerStyle={{ height: "100%", paddingBottom: 0 }}
             contentOffset={{ x: 6, y: 0 }}
+            showsHorizontalScrollIndicator={false}
             //contentOffset={{x: this.midViewX ,y:0}}
             horizontal={true}
           >
@@ -1668,12 +1694,13 @@ export class CalendarPlanScreen extends React.Component {
               style={{
                 marginLeft: 20,
                 marginRight: 20,
-                backgroundColor: "#D8D8D8",
+                backgroundColor: BACKGROUND_COLOR,
                 padding: 10,
                 width: 350,
                 borderRadius: 15,
               }}
               contentContainerStyle={{ alignItems: "center" }}
+              showsVerticalScrollIndicator={false}
             >
               <View
                 style={{
@@ -1690,7 +1717,7 @@ export class CalendarPlanScreen extends React.Component {
                   <Text
                     style={{ fontSize: 24, fontWeight: "bold", marginTop: 5 }}
                   >
-                    <Text style={{ color: "green" }}>
+                    <Text style={{ color: GREEN }}>
                       {this.state.completedRecords}
                     </Text>{" "}
                     / {this.state.totalRecords}
@@ -1703,7 +1730,7 @@ export class CalendarPlanScreen extends React.Component {
                       {this.state.totalRecords}
                     </Text>{" "}
                     physical exercise planned and reported, and I completed{" "}
-                    <Text style={{ color: "green" }}>
+                    <Text style={{ color: GREEN }}>
                       {this.state.completedRecords}
                     </Text>{" "}
                     of them
@@ -1722,7 +1749,7 @@ export class CalendarPlanScreen extends React.Component {
                   <View
                     style={{
                       flex: 0.2,
-                      //backgroundColor: "red",
+                      //backgroundColor: RED,
                       width: "100%",
                       marginTop: "50%",
                       transform: [{ scale: 1 }],
@@ -1749,6 +1776,14 @@ export class CalendarPlanScreen extends React.Component {
                           x: this.state.completedRecords,
                           y: this.state.completedRecords,
                         },
+                        {
+                          x:
+                            this.state.pastPlans.length +
+                            this.state.todayPlan.length,
+                          y:
+                            this.state.pastPlans.length +
+                            this.state.todayPlan.length,
+                        },
                       ]}
                     />
                   </View>
@@ -1771,8 +1806,10 @@ export class CalendarPlanScreen extends React.Component {
                 <View style={{ flex: 0.6, marginLeft: 10 }}>
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                     I have{" "}
-                    <Text style={{ color: "red" }}>
-                      {this.state.preListLength}{" "}
+                    <Text style={{ color: RED }}>
+                      {this.state.preListLength +
+                        +this.state.pastPlans.length +
+                        this.state.todayPlan.length}{" "}
                     </Text>
                     uncompleted daily reports
                   </Text>
@@ -1815,7 +1852,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -1833,6 +1870,8 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 0.8,
                     flexDirection: "row",
                     justifyContent: "space-between",
+                    borderColor:"black",
+                    borderWidth:1,
                     alignItems: "center",
                     backgroundColor: "white",
                     borderRadius: 10,
@@ -1851,8 +1890,9 @@ export class CalendarPlanScreen extends React.Component {
                     <VictoryGroup
                       offset={10}
                       style={{ data: { width: 10 } }}
-                      colorScale={["green", "red"]}
+                      colorScale={[GREEN, RED]}
                     >
+                    
                       <VictoryBar
                         labels={({ datum }) => datum.y}
                         data={[
@@ -1908,7 +1948,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -1928,6 +1968,8 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
+                                        borderColor:"black",
+                    borderWidth:1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 10,
@@ -1944,7 +1986,7 @@ export class CalendarPlanScreen extends React.Component {
                     <VictoryGroup
                       offset={10}
                       style={{ data: { width: 10 } }}
-                      colorScale={["green", "red"]}
+                      colorScale={[GREEN, RED]}
                     >
                       <VictoryBar
                         labels={({ datum }) => datum.y}
@@ -1982,7 +2024,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2015,7 +2057,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       width: "100%",
 
-                      // backgroundColor:"red"
+                      // backgroundColor:RED
                     }}
                     data={this.state.weekDayList}
                     renderItem={({ item }) => (
@@ -2036,7 +2078,7 @@ export class CalendarPlanScreen extends React.Component {
                             width: "100%",
                             alignItems: "center",
                             justifyContent: "center",
-                            //backgroundColor:"red"
+                            //backgroundColor:RED
                           }}
                         >
                           <VictoryPie
@@ -2062,7 +2104,7 @@ export class CalendarPlanScreen extends React.Component {
                                     { padding: 0 }
                                   ),
                                 },
-                                colorScale: ["green", "red"],
+                                colorScale: [GREEN, RED],
                                 width: "100%",
                                 height: "100%",
 
@@ -2092,7 +2134,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2125,7 +2167,7 @@ export class CalendarPlanScreen extends React.Component {
                       flexDirection: "row",
                       justifyContent: "space-between",
 
-                      // backgroundColor:"red"
+                      // backgroundColor:RED
                     }}
                     data={this.state.weatherCollectionList}
                     renderItem={({ item }) => (
@@ -2148,7 +2190,7 @@ export class CalendarPlanScreen extends React.Component {
                             width: "100%",
                             alignItems: "center",
                             justifyContent: "center",
-                            //backgroundColor:"red"
+                            //backgroundColor:RED
                           }}
                         >
                           <VictoryPie
@@ -2174,7 +2216,7 @@ export class CalendarPlanScreen extends React.Component {
                                     { padding: 0 }
                                   ),
                                 },
-                                colorScale: ["green", "red"],
+                                colorScale: [GREEN, RED],
                                 width: "100%",
                                 height: "100%",
 
@@ -2204,7 +2246,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2224,6 +2266,8 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
+                                        borderColor:"black",
+                    borderWidth:1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 10,
@@ -2240,7 +2284,7 @@ export class CalendarPlanScreen extends React.Component {
                     <VictoryGroup
                       offset={10}
                       style={{ data: { width: 10 } }}
-                      colorScale={["green", "red"]}
+                      colorScale={[GREEN, RED]}
                     >
                       <VictoryBar
                         labels={({ datum }) => datum.y}
@@ -2310,7 +2354,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2330,6 +2374,8 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
+                                        borderColor:"black",
+                    borderWidth:1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 5,
@@ -2344,7 +2390,7 @@ export class CalendarPlanScreen extends React.Component {
                       width: "100%",
                       height: "100%",
 
-                      // backgroundColor:"red"
+                      // backgroundColor:RED
                     }}
                     data={this.state.activityCollectionList}
                     renderItem={({ item }) => (
@@ -2367,7 +2413,7 @@ export class CalendarPlanScreen extends React.Component {
                             height: "100%",
                             alignItems: "center",
                             justifyContent: "center",
-                            //backgroundColor:"red"
+                            //backgroundColor:RED
                           }}
                         >
                           <VictoryChart
@@ -2382,7 +2428,7 @@ export class CalendarPlanScreen extends React.Component {
                             <VictoryGroup
                               offset={10}
                               style={{ data: { width: 10 } }}
-                              colorScale={["green", "red"]}
+                              colorScale={[GREEN, RED]}
                             >
                               <VictoryBar
                                 labels={({ datum }) => datum.y}
@@ -2427,7 +2473,7 @@ export class CalendarPlanScreen extends React.Component {
                                     { padding: 0 }
                                   ),
                                 },
-                                colorScale: ["green", "red"],
+                                colorScale: [GREEN, RED],
                                 width: "100%",
                                 height: "100%",
 
@@ -2457,7 +2503,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2491,7 +2537,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       //width: "100%",
 
-                      // backgroundColor:"red"
+                      // backgroundColor:RED
                     }}
                     data={this.state.perceptionCollectionList}
                     renderItem={({ item }) => (
@@ -2513,7 +2559,7 @@ export class CalendarPlanScreen extends React.Component {
                             width: "100%",
                             alignItems: "center",
                             justifyContent: "center",
-                            //backgroundColor:"red"
+                            //backgroundColor:RED
                           }}
                         >
                           <VictoryPie
@@ -2539,7 +2585,7 @@ export class CalendarPlanScreen extends React.Component {
                                     { padding: 0 }
                                   ),
                                 },
-                                colorScale: ["green", "red"],
+                                colorScale: [GREEN, RED],
                                 width: "100%",
                                 height: "100%",
 
@@ -2569,7 +2615,7 @@ export class CalendarPlanScreen extends React.Component {
                   width: "95%",
                   marginTop: 5,
                   flexDirection: "column",
-                  // backgroundColor:"red"
+                  // backgroundColor:RED
                 }}
               >
                 <Text
@@ -2603,7 +2649,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       //width: "100%",
 
-                      // backgroundColor:"red"
+                      // backgroundColor:RED
                     }}
                     data={this.state.timingCollectionList}
                     renderItem={({ item }) => (
@@ -2625,7 +2671,7 @@ export class CalendarPlanScreen extends React.Component {
                             width: "100%",
                             alignItems: "center",
                             justifyContent: "center",
-                            //backgroundColor:"red"
+                            //backgroundColor:RED
                           }}
                         >
                           <VictoryPie
@@ -2651,7 +2697,7 @@ export class CalendarPlanScreen extends React.Component {
                                     { padding: 0 }
                                   ),
                                 },
-                                colorScale: ["green", "red"],
+                                colorScale: [GREEN, RED],
                                 width: "100%",
                                 height: "100%",
 
@@ -2680,7 +2726,7 @@ export class CalendarPlanScreen extends React.Component {
               style={{
                 marginLeft: 20,
                 marginRight: 20,
-                backgroundColor: "#D8D8D8",
+                backgroundColor: BACKGROUND_COLOR,
                 padding: 10,
                 borderRadius: 15,
               }}
@@ -2726,7 +2772,7 @@ export class CalendarPlanScreen extends React.Component {
               style={{
                 marginLeft: 20,
                 marginRight: 20,
-                backgroundColor: "#D8D8D8",
+                backgroundColor: BACKGROUND_COLOR,
                 padding: 10,
                 borderRadius: 15,
               }}
@@ -2839,57 +2885,58 @@ export class CalendarPlanScreen extends React.Component {
           </TouchableOpacity> */}
         </View>
       );
-    } else {
-      console.log("render week cal");
-      //console.log("this state", this.state.eventsThisMonth);
-      calView = (
-        <View
-          style={
-            ({ backgroundColor: "red", justifyContent: "flex-start" },
-            [{ transform: [{ scaleY: 1 }] }])
-          }
-        >
-          <Calendar
-            // events={[{ title: "test", start: new Date(), end: new Date() }]}
-            refs={this.weekCalRef}
-            contentContainerStyle={{ justifyContent: "flex-start" }}
-            events={this.state.fullEventList}
-            eventCellStyle={(event) => {
-              if (event.color) {
-                return { backgroundColor: event.color, borderWidth: 2 };
-              } else {
-                return { backgroundColor: "grey" };
-              }
-            }}
-            height={750}
-            scrollOffsetMinutes={480}
-            showTime={false}
-            mode="week"
-            showTime={true}
-            swipeEnabled={true}
-            onPressCell={() => alert("cell pressed")}
-            onPressDateHeader={(date) => {
-              let selectedDate = parseInt(date.toString().slice(8, 10));
-              //console.log(selectedDate);
-              this.setState({ selectedDate: selectedDate });
-
-              let monthNum = moment(date).month();
-              this.setState({ selectedMonth: monthNum });
-              let month = this.months[monthNum];
-
-              this.setState({
-                panelTop: "plan for " + month + " " + selectedDate,
-              });
-              this._panel.show();
-
-              this.setState({ isPlanBtnDisable: false });
-              this.setState({ isFromWeekView: true });
-            }}
-            onPressEvent={() => alert("event pressed")}
-          />
-        </View>
-      );
     }
+    // else {
+    //   console.log("render week cal");
+    //   //console.log("this state", this.state.eventsThisMonth);
+    //   calView = (
+    //     <View
+    //       style={
+    //         ({ backgroundColor: RED, justifyContent: "flex-start" },
+    //         [{ transform: [{ scaleY: 1 }] }])
+    //       }
+    //     >
+    //       <Calendar
+    //         // events={[{ title: "test", start: new Date(), end: new Date() }]}
+    //         refs={this.weekCalRef}
+    //         contentContainerStyle={{ justifyContent: "flex-start" }}
+    //         events={this.state.fullEventList}
+    //         eventCellStyle={(event) => {
+    //           if (event.color) {
+    //             return { backgroundColor: event.color, borderWidth: 2 };
+    //           } else {
+    //             return { backgroundColor: "grey" };
+    //           }
+    //         }}
+    //         height={750}
+    //         scrollOffsetMinutes={480}
+    //         showTime={false}
+    //         mode="week"
+    //         showTime={true}
+    //         swipeEnabled={true}
+    //         onPressCell={() => alert("cell pressed")}
+    //         onPressDateHeader={(date) => {
+    //           let selectedDate = parseInt(date.toString().slice(8, 10));
+    //           //console.log(selectedDate);
+    //           this.setState({ selectedDate: selectedDate });
+
+    //           let monthNum = moment(date).month();
+    //           this.setState({ selectedMonth: monthNum });
+    //           let month = this.months[monthNum];
+
+    //           this.setState({
+    //             panelTop: "plan for " + month + " " + selectedDate,
+    //           });
+    //           this._panel.show();
+
+    //           this.setState({ isPlanBtnDisable: false });
+    //           this.setState({ isFromWeekView: true });
+    //         }}
+    //         onPressEvent={() => alert("event pressed")}
+    //       />
+    //     </View>
+    //   );
+    // }
 
     return (
       <View
@@ -2899,7 +2946,7 @@ export class CalendarPlanScreen extends React.Component {
           justifyContent: "center",
         }}
       >
-        {/* <View style={{backgroundColor:"red"}}>
+        {/* <View style={{backgroundColor:RED}}>
         <Button
           title="Get permissions"
           onPress={this.dataModel.askPermission}
@@ -2925,7 +2972,7 @@ export class CalendarPlanScreen extends React.Component {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
-              //backgroundColor:"red",
+              //backgroundColor:RED,
             }}
           >
             <View
@@ -2975,7 +3022,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.2,
                   width: "80%",
                   marginTop: 0,
-                  //backgroundColor:"red"
+                  //backgroundColor:RED
                 }}
               >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
@@ -2992,7 +3039,7 @@ export class CalendarPlanScreen extends React.Component {
                 style={{
                   flex: 0.8,
                   width: "80%",
-                  //backgroundColor: "red",
+                  //backgroundColor: RED,
                   flexDirection: "row",
                   flexDirection: "column",
                   alignItems: "center",
@@ -3017,6 +3064,9 @@ export class CalendarPlanScreen extends React.Component {
                     {this.eventToday.start.slice(5, 10)} at{" "}
                     {this.eventToday.start.slice(11, 16)} for 30 min, did you
                     follow your plan?
+                    {"\n"}
+                    {"\n"}
+                    (also answer "yes" if you did it at a different time)
                   </Text>
                   <SwitchSelector
                     options={[
@@ -3134,7 +3184,7 @@ export class CalendarPlanScreen extends React.Component {
                     alignItems: "center",
                     width: "100%",
                     height: "40%",
-                    //backgroundColor:"red"
+                    //backgroundColor:RED
                   }}
                 >
                   <Text
@@ -3257,7 +3307,7 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     flexDirection: "row",
-                    // backgroundColor: "red",
+                    // backgroundColor: RED,
                   }}
                 >
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
@@ -3284,7 +3334,7 @@ export class CalendarPlanScreen extends React.Component {
                     </Text>
                   </View>
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {this.state.detailViewTemp}°C
+                    {this.state.detailViewTemp}°F
                   </Text>
                 </View>
               </View> */}
@@ -3486,10 +3536,23 @@ export class CalendarPlanScreen extends React.Component {
                         this.setState({ nextBtnState: "submit" });
                       }
                     } else if (this.state.nextBtnState === "next4no") {
-                      this.setState({ isThirdNoStepVis: "none" });
-                      this.setState({ isThirdYesStepVis: "flex" });
-                      this.setState({ btnName: "Submit" });
-                      this.setState({ nextBtnState: "submit" });
+                      if (this.state.otherActivity === "") {
+                        Alert.alert(
+                          "Invalid Name",
+                          "The field can't be empty",
+                          [
+                            {
+                              text: "OK",
+                              onPress: () => console.log("OK Pressed"),
+                            },
+                          ]
+                        );
+                      } else {
+                        this.setState({ isThirdNoStepVis: "none" });
+                        this.setState({ isThirdYesStepVis: "flex" });
+                        this.setState({ btnName: "Submit" });
+                        this.setState({ nextBtnState: "submit" });
+                      }
                     }
                     // else if (this.state.nextBtnState === "next4no") {
                     //   this.setState({ isThirdNoStepVis: "none" });
@@ -3519,7 +3582,7 @@ export class CalendarPlanScreen extends React.Component {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
-              //backgroundColor:"red"
+              //backgroundColor:RED
             }}
           >
             <View
@@ -3571,7 +3634,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.2,
                   width: "80%",
                   marginTop: 0,
-                  //backgroundColor:"red"
+                  //backgroundColor:RED
                 }}
               >
                 <Text style={{ fontSize: 24, fontWeight: "bold" }}>
@@ -3591,7 +3654,7 @@ export class CalendarPlanScreen extends React.Component {
                 style={{
                   flex: 0.8,
                   width: "80%",
-                  //backgroundColor: "red",
+                  //backgroundColor: RED,
                   flexDirection: "row",
                   alignItems: "flex-start",
                   top: "20%",
@@ -3894,11 +3957,24 @@ export class CalendarPlanScreen extends React.Component {
                       this.state.nextBtnState === "next2" ||
                       this.state.nextBtnState === "next3no"
                     ) {
-                      this.setState({ btnName: "Submit" });
-                      this.setState({ nextBtnState: "submit" });
-                      this.setState({ isSecondYesStepVis: "none" });
-                      this.setState({ isThirdYesStepVis: "flex" });
-                      this.setState({ isThirdNoStepVis: "none" });
+                      if (this.state.otherActivity === "") {
+                        Alert.alert(
+                          "Invalid Name",
+                          "The field can't be empty",
+                          [
+                            {
+                              text: "OK",
+                              onPress: () => console.log("OK Pressed"),
+                            },
+                          ]
+                        );
+                      } else {
+                        this.setState({ btnName: "Submit" });
+                        this.setState({ nextBtnState: "submit" });
+                        this.setState({ isSecondYesStepVis: "none" });
+                        this.setState({ isThirdYesStepVis: "flex" });
+                        this.setState({ isThirdNoStepVis: "none" });
+                      }
                     } else if (this.state.nextBtnState === "next2no") {
                       this.setState({ btnName: "next" });
                       this.setState({ nextBtnState: "next3no" });
@@ -3946,7 +4022,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.06,
                   width: "100%",
                   flexDirection: "row",
-                  // backgroundColor:"red",
+                  // backgroundColor:RED,
 
                   justifyContent: "flex-end",
                   alignItems: "flex-start",
@@ -4010,7 +4086,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.06,
                   width: "100%",
                   flexDirection: "row",
-                  // backgroundColor:"red",
+                  // backgroundColor:RED,
 
                   justifyContent: "flex-end",
                   alignItems: "flex-start",
@@ -4032,7 +4108,9 @@ export class CalendarPlanScreen extends React.Component {
                   style={{
                     flex: 0.1,
                     width: "100%",
-                    backgroundColor: "#BDBDBD",
+                    backgroundColor: "white",
+                    borderColor: "black",
+                    borderWidth: 2,
                     borderRadius: 15,
                     flexDirection: "column",
                     justifyContent: "center",
@@ -4048,7 +4126,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       alignItems: "center",
                       flexDirection: "row",
-                      // backgroundColor: "red",
+                      // backgroundColor: RED,
                     }}
                   >
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
@@ -4075,7 +4153,7 @@ export class CalendarPlanScreen extends React.Component {
                       </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                      {this.state.detailViewTemp}°C
+                      {this.state.detailViewTemp}°F
                     </Text>
                   </View>
                 </View>
@@ -4084,7 +4162,9 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 0.1,
                     marginTop: 10,
                     width: "100%",
-                    backgroundColor: "#BDBDBD",
+                    backgroundColor: "white",
+                    borderColor: "black",
+                    borderWidth: 2,
                     borderRadius: 15,
                     flexDirection: "column",
                     justifyContent: "center",
@@ -4142,7 +4222,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.06,
                   width: "100%",
                   flexDirection: "row",
-                  // backgroundColor:"red",
+                  // backgroundColor:RED,
 
                   justifyContent: "flex-end",
                   alignItems: "flex-start",
@@ -4163,7 +4243,9 @@ export class CalendarPlanScreen extends React.Component {
                   style={{
                     flex: 0.2,
                     width: "100%",
-                    backgroundColor: "#BDBDBD",
+                    backgroundColor: "white",
+                    borderWidth: 2,
+                    borderColor: "black",
                     borderRadius: 15,
                     flexDirection: "column",
                     justifyContent: "center",
@@ -4172,14 +4254,14 @@ export class CalendarPlanScreen extends React.Component {
                 >
                   <View
                     style={{
-                      flex: 0.3,
+                      flex: 0.4,
                       width: "90%",
                       marginTop: 10,
                       marginLeft: 10,
                       marginBottom: 0,
                     }}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    <Text style={{ fontSize: 15, fontWeight: "bold" }}>
                       Records on {this.eventToday.title},{" "}
                       {this.state.detailViewTop}
                     </Text>
@@ -4193,7 +4275,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       alignItems: "center",
                       flexDirection: "row",
-                      // backgroundColor: "red",
+                      // backgroundColor: RED,
                     }}
                   >
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
@@ -4220,7 +4302,7 @@ export class CalendarPlanScreen extends React.Component {
                       </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                      {this.state.detailViewTemp}°C
+                      {this.state.detailViewTemp}°F
                     </Text>
                   </View>
                 </View>
@@ -4276,7 +4358,7 @@ export class CalendarPlanScreen extends React.Component {
                   flex: 0.05,
                   width: "100%",
                   flexDirection: "row",
-                  // backgroundColor:"red",
+                  // backgroundColor:RED,
 
                   justifyContent: "flex-end",
                   alignItems: "flex-start",
@@ -4362,7 +4444,7 @@ export class CalendarPlanScreen extends React.Component {
                       justifyContent: "space-between",
                       alignItems: "center",
                       flexDirection: "row",
-                      // backgroundColor: "red",
+                      // backgroundColor: RED,
                     }}
                   >
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
@@ -4389,7 +4471,7 @@ export class CalendarPlanScreen extends React.Component {
                       </Text>
                     </View>
                     <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                      {this.state.detailViewTemp}°C
+                      {this.state.detailViewTemp}°F
                     </Text>
                   </View>
                 </View>
@@ -4551,7 +4633,7 @@ export class CalendarPlanScreen extends React.Component {
                     style={{
                       backgroundColor: "black",
                       // color: "white",
-                      width: 90,
+                      width: 120,
                       height: 30,
                       borderRadius: 15,
                       marginTop: 5,
@@ -4604,7 +4686,7 @@ export class CalendarPlanScreen extends React.Component {
                   </Text>
                 </View>
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {this.state.detailViewTemp}°C
+                  {this.state.detailViewTemp}°F
                 </Text>
               </View>
             </View>
@@ -4940,7 +5022,7 @@ export class CalendarPlanScreen extends React.Component {
                 justifyContent: "space-between",
                 alignItems: "flex-start",
                 marginTop: 1,
-                //backgroundColor:"red"
+                //backgroundColor:RED
               }}
             >
               <View
@@ -4952,7 +5034,7 @@ export class CalendarPlanScreen extends React.Component {
                   justifyContent: "space-between",
                   alignItems: "center",
                   marginTop: 10,
-                  //backgroundColor:"red"
+                  //backgroundColor:RED
                 }}
               >
                 <TouchableOpacity

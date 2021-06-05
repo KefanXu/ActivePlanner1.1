@@ -113,9 +113,9 @@ export class LoginScreen extends React.Component {
       historicalWeatherItem.date = new Date(
         weatherHistoryJSON.list[0].dt * 1000
       );
-      historicalWeatherItem.temp = parseInt(
+      historicalWeatherItem.temp = parseInt(parseInt(
         weatherHistoryJSON.list[0].main.temp - 273
-      );
+      )*(9 / 5) + 32);
       fullHistoryWeatherList.push(historicalWeatherItem);
     }
     //console.log(fullHistoryWeatherList);
@@ -136,7 +136,7 @@ export class LoginScreen extends React.Component {
       }
     }
 
-    let weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${WEATHER_API_KEY}`;
+    let weatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${WEATHER_API_KEY}`;
     let currWeatherResponse = await fetch(weatherURL);
     let weatherJson = await currWeatherResponse.json();
     let weatherNow = {
@@ -152,7 +152,7 @@ export class LoginScreen extends React.Component {
     // this.setState({ imageURI: imageURI });
 
     let weatherForecastList = [];
-    let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&units=metric&appid=${WEATHER_API_KEY}`;
+    let weatherForecastURL = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=${16}&units=imperial&appid=${WEATHER_API_KEY}`;
     let weatherForecastResponse = await fetch(weatherForecastURL);
     let weatherForecastJSON = await weatherForecastResponse.json();
     for (let weather of weatherForecastJSON.list) {

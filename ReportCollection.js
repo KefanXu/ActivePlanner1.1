@@ -19,10 +19,12 @@ import { FlatList } from "react-native-gesture-handler";
 import moment, { min } from "moment";
 import { MaterialIcons } from "@expo/vector-icons";
 import SwitchSelector from "react-native-switch-selector";
+import { Ionicons } from "@expo/vector-icons";
 
 export class ReportCollection extends React.Component {
   constructor(props) {
     super(props);
+    this.needsUpdate = false;
     this.userKey = this.props.route.params.userKey;
     this.userPlans = this.props.route.params.userPlans;
     this.pastPlans = this.props.route.params.pastPlans;
@@ -98,10 +100,10 @@ export class ReportCollection extends React.Component {
       isThirdYesStepVis: "none",
       isSecondNoStepVis: "none",
       isThirdNoStepVis: "none",
-      nextBtnState: "submit",
+      nextBtnState: "next",
       otherActivity: "",
       reportDate: "",
-      btnName: "Submit",
+      btnName: "Next",
       preList: this.preList,
       isBackBtnVis: true,
       pastPlans: this.pastPlans,
@@ -177,6 +179,8 @@ export class ReportCollection extends React.Component {
                     onPress={() => {
                       this.eventToday = item;
                       this.setState({ isReportModalVis: true });
+                      this.setState({ btnName: "Next" });
+                      this.setState({ nextBtnState: "next" });
                       // let updateList = this.state.pastPlans;
                       // let index = updateList.indexOf(item);
                       // if (index > -1) {
@@ -212,7 +216,7 @@ export class ReportCollection extends React.Component {
       );
     } else {
       planTodayView = (
-        <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+        <Text style={{ fontSize: 16, fontWeight: "bold", marginLeft: 40 }}>
           No activity planned for today
         </Text>
       );
@@ -221,7 +225,7 @@ export class ReportCollection extends React.Component {
       <View
         style={{
           alignContent: "center",
-          alignItems:"center",
+          alignItems: "center",
           width: "100%",
           height: "100%",
           flexDirection: "column",
@@ -328,8 +332,11 @@ export class ReportCollection extends React.Component {
                   >
                     You planned {this.eventToday.title} on{" "}
                     {this.eventToday.start.slice(5, 10)} at{" "}
-                    {this.eventToday.start.slice(11, 16)} for 30 min, did you
-                    follow your plan?
+                    {this.eventToday.start.slice(11, 16)}, did you follow your
+                    plan?
+                    {"\n"}
+                    {"\n"}
+                    (also answer "yes" if you did it at a different time)
                   </Text>
                   <SwitchSelector
                     options={[
@@ -625,6 +632,7 @@ export class ReportCollection extends React.Component {
 
                     if (this.state.nextBtnState === "submit") {
                       this.resetReport();
+                      this.needsUpdate = true;
 
                       let eventToUpdate = this.eventToday;
                       eventToUpdate.isActivityCompleted =
@@ -736,10 +744,23 @@ export class ReportCollection extends React.Component {
                         this.setState({ nextBtnState: "submit" });
                       }
                     } else if (this.state.nextBtnState === "next4no") {
-                      this.setState({ isThirdNoStepVis: "none" });
-                      this.setState({ isThirdYesStepVis: "flex" });
-                      this.setState({ btnName: "Submit" });
-                      this.setState({ nextBtnState: "submit" });
+                      if (this.state.otherActivity === "") {
+                        Alert.alert(
+                          "Invalid Name",
+                          "The field can't be empty",
+                          [
+                            {
+                              text: "OK",
+                              onPress: () => console.log("OK Pressed"),
+                            },
+                          ]
+                        );
+                      } else {
+                        this.setState({ isThirdNoStepVis: "none" });
+                        this.setState({ isThirdYesStepVis: "flex" });
+                        this.setState({ btnName: "Submit" });
+                        this.setState({ nextBtnState: "submit" });
+                      }
                     }
                     // else if (this.state.nextBtnState === "next4no") {
                     //   this.setState({ isThirdNoStepVis: "none" });
@@ -1074,7 +1095,7 @@ export class ReportCollection extends React.Component {
                       this.setState({ isThirdNoStepVis: "none" });
                       this.setState({ isThirdYesStepVis: "none" });
                       //this.resetReport();
-
+                      this.needsUpdate = true;
                       let dailyReport = {};
                       dailyReport.isDailyReport = true;
                       dailyReport.isExerciseToday = this.state.isOtherActivity;
@@ -1149,11 +1170,24 @@ export class ReportCollection extends React.Component {
                       this.state.nextBtnState === "next2" ||
                       this.state.nextBtnState === "next3no"
                     ) {
-                      this.setState({ btnName: "Submit" });
-                      this.setState({ nextBtnState: "submit" });
-                      this.setState({ isSecondYesStepVis: "none" });
-                      this.setState({ isThirdYesStepVis: "flex" });
-                      this.setState({ isThirdNoStepVis: "none" });
+                      if (this.state.otherActivity === "") {
+                        Alert.alert(
+                          "Invalid Name",
+                          "The field can't be empty",
+                          [
+                            {
+                              text: "OK",
+                              onPress: () => console.log("OK Pressed"),
+                            },
+                          ]
+                        );
+                      } else {
+                        this.setState({ btnName: "Submit" });
+                        this.setState({ nextBtnState: "submit" });
+                        this.setState({ isSecondYesStepVis: "none" });
+                        this.setState({ isThirdYesStepVis: "flex" });
+                        this.setState({ isThirdNoStepVis: "none" });
+                      }
                     } else if (this.state.nextBtnState === "next2no") {
                       this.setState({ btnName: "next" });
                       this.setState({ nextBtnState: "next3no" });
@@ -1166,24 +1200,55 @@ export class ReportCollection extends React.Component {
             </View>
           </View>
         </Modal>
-        <Text
+        <View
           style={{
-            fontSize: 30,
-            fontWeight: "bold",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-start",
             marginTop: 50,
-            marginLeft: 20,
           }}
         >
-          Uncompleted Reports
-        </Text>
-        <View style={{ flex: 0.5, backgroundColor: "#D8D8D8", width: "95%", padding: 10, borderRadius:20, marginTop:20 }}>
-          <Text style={{ fontSize: 25, marginLeft: 40, fontWeight: "bold" }}>
+          <View style={{}}>
+            <TouchableOpacity
+              onPress={() => {
+                this.props.navigation.navigate("Home Screen", {
+                  needsUpdate: this.needsUpdate,
+                });
+              }}
+            >
+              <Ionicons name="arrow-back-circle" size={40} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Text
+              style={{
+                fontSize: 25,
+                fontWeight: "bold",
+                // marginTop: 50,
+                marginLeft: 20,
+              }}
+            >
+              Uncompleted Reports
+            </Text>
+          </View>
+        </View>
+        <View
+          style={{
+            flex: 0.5,
+            backgroundColor: "#D8D8D8",
+            width: "95%",
+            padding: 10,
+            borderRadius: 20,
+            marginTop: 20,
+          }}
+        >
+          <Text style={{ fontSize: 20, marginLeft: 40, fontWeight: "bold" }}>
             Activity Today
           </Text>
-          <View style={{ flex: 0.2 }}>{planTodayView}</View>
+          <View style={{ flex: 0.3 }}>{planTodayView}</View>
           <Text
             style={{
-              fontSize: 25,
+              fontSize: 20,
               marginLeft: 40,
               fontWeight: "bold",
               marginTop: 20,
@@ -1242,9 +1307,12 @@ export class ReportCollection extends React.Component {
                     <View style={{ flex: 0.2, marginRight: 20 }}>
                       <TouchableOpacity
                         disabled={false}
-                        onPress={() => {
+                        onPress={async () => {
                           this.eventToday = item;
                           this.setState({ isReportModalVis: true });
+                          this.setState({ btnName: "Next" });
+                          this.setState({ nextBtnState: "next" });
+
                           // let updateList = this.state.pastPlans;
                           // let index = updateList.indexOf(item);
                           // if (index > -1) {
@@ -1279,10 +1347,19 @@ export class ReportCollection extends React.Component {
             />
           </View>
         </View>
-        <View style={{ flex: 0.5, backgroundColor: "#D8D8D8", width: "95%", padding: 10, borderRadius:20, marginTop:20 }}>
+        <View
+          style={{
+            flex: 0.5,
+            backgroundColor: "#D8D8D8",
+            width: "95%",
+            padding: 10,
+            borderRadius: 20,
+            marginTop: 20,
+          }}
+        >
           <Text
             style={{
-              fontSize: 25,
+              fontSize: 20,
               marginLeft: 40,
               fontWeight: "bold",
               marginTop: 20,
@@ -1334,6 +1411,8 @@ export class ReportCollection extends React.Component {
                       onPress={() => {
                         this.setState({ reportDate: item.start });
                         this.setState({ isNoEventDayReportModalVis: true });
+                        this.setState({ btnName: "Submit" });
+                        this.setState({ nextBtnState: "submit" });
                       }}
                       style={{
                         backgroundColor: "black",
