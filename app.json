@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Physicify",
-    "slug": "Physicify",
+    "name": "Physicify 2",
+    "slug": "Physicify-2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,8 +18,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "edu.umich.si.inteco.physicify2",
-      "buildNumber": "1.0.0",
+      "bundleIdentifier": "com.physicity",
+      "buildNumber": "1.0.1",
       "config":{
         "googleSignIn":{
           "reservedClientId":"com.googleusercontent.apps.858218224278-5k545fdqrtnhevp0lefpl7ht1ebf3gap"

@@ -1678,7 +1678,7 @@ export class CalendarPlanScreen extends React.Component {
               speed={1}
             >
               <Text style={{ fontWeight: "bold", textAlign: "center" }}>
-                Update Calendar...
+                Updating Calendar...
               </Text>
             </AnimatedLoader>
           </View>

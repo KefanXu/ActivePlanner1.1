@@ -10,7 +10,7 @@ const config = {
   // clientId:
   //   "858218224278-2rdlmrgknnj1m8m7hourt0r59iuiiagm.apps.googleusercontent.com",
   iosStandaloneAppClientId:
-    "858218224278-5k545fdqrtnhevp0lefpl7ht1ebf3gap.apps.googleusercontent.com",
+    "858218224278-0d4utg27sf6mkdm5ohe9un0kmn1jt2se.apps.googleusercontent.com",
   iosClientId:
     "858218224278-nsuhfmntn6alt59c74sl312i5od457dm.apps.googleusercontent.com",
   scopes: [
@@ -276,6 +276,25 @@ class DataModel {
     });
     console.log("identifier1", identifier);
     return identifier;
+  };
+
+  createDailyNotifications = async () => {
+    let startDate = new Date();
+    for (let i = 0; i <= 14; i++) {
+      let nextDate = startDate.setDate(startDate.getDate() + 1);
+      let trigger = new Date(
+        Date.parse(moment(nextDate).format().slice(0, 11) + "20:00:00")
+      );
+      await Notification.scheduleNotificationAsync({
+        content: {
+          title: "How's everything going",
+          body: "Take some time to report you day!",
+          data: { data: "goes here" },
+        },
+        trigger,
+      });
+    }
+    console.log("createDailyNotifications");
   };
 
   scheduleReportNotification = async (newEvent) => {

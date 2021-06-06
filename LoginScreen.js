@@ -261,6 +261,7 @@ export class LoginScreen extends React.Component {
     let isWeatherNotExist = await this.dataModel.isWeatherNotExist(key);
     //console.log("weatherCollectionSnapshot.empty", isWeatherNotExist);
     if (isWeatherNotExist) {
+      await this.dataModel.createDailyNotifications();
       [lastMonthWeather, thisMonthWeather, nextMonthWeather] =
         await this.fetchWeatherInfo(userPlans);
       //console.log("lastMonthWeather", lastMonthWeather);
@@ -437,6 +438,8 @@ export class LoginScreen extends React.Component {
             />
           </View>
         </View> */}
+        <Text style={{fontSize:42, fontWeight:"bold",marginBottom:100}}>Physicify 2</Text>
+
         <View
           style={{
             flex: 0.2,
