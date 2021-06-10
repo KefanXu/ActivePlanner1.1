@@ -376,6 +376,7 @@ export class CalendarPlanScreen extends React.Component {
     //
   };
   onFocus = async () => {
+    console.log("onFocus");
     if (this.props.route.params.needsUpdate) {
       this.setState({ isLoaderVis: true });
       this.dataModel = getDataModel();
@@ -1488,7 +1489,7 @@ export class CalendarPlanScreen extends React.Component {
 
     if (this.state.eventFilteredList) {
       if (!this.state.timeFilteredList) {
-        await this.resetCalendarView();
+        //await this.resetCalendarView();
         await this.setState({ timeFilteredList: true });
         await this.setState({ eventFilteredList: false });
       } else {
@@ -1846,178 +1847,7 @@ export class CalendarPlanScreen extends React.Component {
                   </Text>
                 </TouchableOpacity>
               </View>
-              <View
-                style={{
-                  flex: 0.8,
-                  width: "95%",
-                  marginTop: 5,
-                  flexDirection: "column",
-                  // backgroundColor:RED
-                }}
-              >
-                <Text
-                  style={{
-                    flex: 0.2,
-                    fontWeight: "bold",
-                    marginLeft: 10,
-                    marginBottom: 10,
-                  }}
-                >
-                  by Weekday
-                </Text>
-                <View
-                  style={{
-                    flex: 0.8,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    borderColor:"black",
-                    borderWidth:1,
-                    alignItems: "center",
-                    backgroundColor: "white",
-                    borderRadius: 10,
-                    width: "100%",
-                    padding: 10,
-                  }}
-                >
-                  <VictoryChart
-                    theme={victoryTheme}
-                    labels={({ datum }) => datum.y}
-                    height={100}
-                    width={300}
-                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
-                    // style={{axis:{stroke: "transparent"}}}
-                  >
-                    <VictoryGroup
-                      offset={10}
-                      style={{ data: { width: 10 } }}
-                      colorScale={[GREEN, RED]}
-                    >
-                    
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          { x: "Sun", y: this.state.weekDayList[0].completed },
-                          { x: "Mon", y: this.state.weekDayList[1].completed },
-                          { x: "Tue", y: this.state.weekDayList[2].completed },
-                          { x: "Wed", y: this.state.weekDayList[3].completed },
-                          { x: "Thu", y: this.state.weekDayList[4].completed },
-                          { x: "Fri", y: this.state.weekDayList[5].completed },
-                          { x: "Sat", y: this.state.weekDayList[6].completed },
-                        ]}
-                      />
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          {
-                            x: "Sun",
-                            y: this.state.weekDayList[0].uncompleted,
-                          },
-                          {
-                            x: "Mon",
-                            y: this.state.weekDayList[1].uncompleted,
-                          },
-                          {
-                            x: "Tue",
-                            y: this.state.weekDayList[2].uncompleted,
-                          },
-                          {
-                            x: "Wed",
-                            y: this.state.weekDayList[3].uncompleted,
-                          },
-                          {
-                            x: "Thu",
-                            y: this.state.weekDayList[4].uncompleted,
-                          },
-                          {
-                            x: "Fri",
-                            y: this.state.weekDayList[5].uncompleted,
-                          },
-                          {
-                            x: "Sat",
-                            y: this.state.weekDayList[6].uncompleted,
-                          },
-                        ]}
-                      />
-                    </VictoryGroup>
-                  </VictoryChart>
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 0.8,
-                  width: "95%",
-                  marginTop: 5,
-                  flexDirection: "column",
-                  // backgroundColor:RED
-                }}
-              >
-                <Text
-                  style={{
-                    flex: 0.2,
-                    fontWeight: "bold",
-                    marginLeft: 10,
-                    marginBottom: 10,
-                  }}
-                >
-                  by Timing
-                </Text>
-                <View
-                  style={{
-                    flex: 0.8,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    backgroundColor: "white",
-                                        borderColor:"black",
-                    borderWidth:1,
-                    borderRadius: 10,
-                    width: "100%",
-                    padding: 10,
-                  }}
-                >
-                  <VictoryChart
-                    theme={victoryTheme}
-                    labels={({ datum }) => datum.y}
-                    height={100}
-                    width={150}
-                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
-                    // style={{axis:{stroke: "transparent"}}}
-                  >
-                    <VictoryGroup
-                      offset={10}
-                      style={{ data: { width: 10 } }}
-                      colorScale={[GREEN, RED]}
-                    >
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          {
-                            x: "Before 12pm",
-                            y: this.state.timingCollectionList[0].completed,
-                          },
-                          {
-                            x: "After 12pm",
-                            y: this.state.timingCollectionList[1].completed,
-                          },
-                        ]}
-                      />
-                      <VictoryBar
-                        labels={({ datum }) => datum.y}
-                        data={[
-                          {
-                            x: "Before 12pm",
-                            y: this.state.timingCollectionList[0].uncompleted,
-                          },
-                          {
-                            x: "After 12pm",
-                            y: this.state.timingCollectionList[1].uncompleted,
-                          },
-                        ]}
-                      />
-                    </VictoryGroup>
-                  </VictoryChart>
-                </View>
-              </View>
+             
               {/* <View
                 style={{
                   flex: 0.8,
@@ -2382,13 +2212,11 @@ export class CalendarPlanScreen extends React.Component {
                   }}
                 >
                   <FlatList
+                    showsHorizontalScrollIndicator = {false}
                     horizontal={true}
-                    style={{ flex: 1 }}
                     contentContainerStyle={{
                       flexDirection: "row",
                       justifyContent: "space-between",
-                      width: "100%",
-                      height: "100%",
 
                       // backgroundColor:RED
                     }}
@@ -2495,6 +2323,178 @@ export class CalendarPlanScreen extends React.Component {
                       </View>
                     )}
                   />
+                </View>
+              </View>
+               <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:RED
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Weekday
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    borderColor:"black",
+                    borderWidth:1,
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={100}
+                    width={300}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={[GREEN, RED]}
+                    >
+                    
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          { x: "Sun", y: this.state.weekDayList[0].completed },
+                          { x: "Mon", y: this.state.weekDayList[1].completed },
+                          { x: "Tue", y: this.state.weekDayList[2].completed },
+                          { x: "Wed", y: this.state.weekDayList[3].completed },
+                          { x: "Thu", y: this.state.weekDayList[4].completed },
+                          { x: "Fri", y: this.state.weekDayList[5].completed },
+                          { x: "Sat", y: this.state.weekDayList[6].completed },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Sun",
+                            y: this.state.weekDayList[0].uncompleted,
+                          },
+                          {
+                            x: "Mon",
+                            y: this.state.weekDayList[1].uncompleted,
+                          },
+                          {
+                            x: "Tue",
+                            y: this.state.weekDayList[2].uncompleted,
+                          },
+                          {
+                            x: "Wed",
+                            y: this.state.weekDayList[3].uncompleted,
+                          },
+                          {
+                            x: "Thu",
+                            y: this.state.weekDayList[4].uncompleted,
+                          },
+                          {
+                            x: "Fri",
+                            y: this.state.weekDayList[5].uncompleted,
+                          },
+                          {
+                            x: "Sat",
+                            y: this.state.weekDayList[6].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.8,
+                  width: "95%",
+                  marginTop: 5,
+                  flexDirection: "column",
+                  // backgroundColor:RED
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 0.2,
+                    fontWeight: "bold",
+                    marginLeft: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  by Timing
+                </Text>
+                <View
+                  style={{
+                    flex: 0.8,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                                        borderColor:"black",
+                    borderWidth:1,
+                    borderRadius: 10,
+                    width: "100%",
+                    padding: 10,
+                  }}
+                >
+                  <VictoryChart
+                    theme={victoryTheme}
+                    labels={({ datum }) => datum.y}
+                    height={100}
+                    width={150}
+                    // style={{parent:{maxWidth:"100%", maxHeight:"100%"}}}
+                    // style={{axis:{stroke: "transparent"}}}
+                  >
+                    <VictoryGroup
+                      offset={10}
+                      style={{ data: { width: 10 } }}
+                      colorScale={[GREEN, RED]}
+                    >
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].completed,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].completed,
+                          },
+                        ]}
+                      />
+                      <VictoryBar
+                        labels={({ datum }) => datum.y}
+                        data={[
+                          {
+                            x: "Before 12pm",
+                            y: this.state.timingCollectionList[0].uncompleted,
+                          },
+                          {
+                            x: "After 12pm",
+                            y: this.state.timingCollectionList[1].uncompleted,
+                          },
+                        ]}
+                      />
+                    </VictoryGroup>
+                  </VictoryChart>
                 </View>
               </View>
               {/* <View
@@ -4379,7 +4379,9 @@ export class CalendarPlanScreen extends React.Component {
                   style={{
                     flex: 0.2,
                     width: "100%",
-                    backgroundColor: "#BDBDBD",
+                    backgroundColor: "white",
+                    borderColor:"black",
+                    borderWidth:2,
                     borderRadius: 15,
                     flexDirection: "column",
                     justifyContent: "center",
@@ -4839,7 +4841,7 @@ export class CalendarPlanScreen extends React.Component {
                         this.setState({ userDefinedActivityText: text })
                       }
                     ></TextInput>
-                    <View style={{ marginRight: "5%", flex: 0.2 }}>
+                    <View style={{ marginRight: 2, flex: 0.2 }}>
                       <TouchableOpacity
                         onPress={async () => {
                           let activityList = this.state.activityData;

@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.physicity",
-      "buildNumber": "1.0.1",
+      "buildNumber": "1.0.3",
       "config":{
         "googleSignIn":{
           "reservedClientId":"com.googleusercontent.apps.858218224278-5k545fdqrtnhevp0lefpl7ht1ebf3gap"

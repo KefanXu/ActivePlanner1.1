@@ -23,6 +23,7 @@ import moment, { min } from "moment";
 const RED = "#D55E00";
 const GREEN = "#009E73";
 const BACKGROUND_COLOR = "white";
+const HIGHLIGHT_COLOR = "#56B4E9";
 
 
 export class MonthCalendar extends React.Component {
@@ -418,7 +419,7 @@ export class MonthCalendar extends React.Component {
                         this.props.monthCalCurrDate.getMonth(),
                         item
                       ).getDay() === this.state.targetDate && item != -1
-                        ? "#819FF7"
+                        ? HIGHLIGHT_COLOR
                         : backColor,
 
                     flex: 1,
@@ -603,7 +604,7 @@ export class MonthCalendar extends React.Component {
                         this.props.monthCalCurrDate.getMonth(),
                         item
                       ).getDay() === this.state.targetDate && item != -1
-                        ? "#819FF7"
+                        ? HIGHLIGHT_COLOR
                         : backColor,
                     flex: 1,
                     height: "100%",
