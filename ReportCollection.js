@@ -376,7 +376,7 @@ export class ReportCollection extends React.Component {
                       { label: "No", value: false },
                       { label: "Yes", value: true },
                     ]}
-                    initial={this.state.secSwitchSelectorInitVal}
+                    initial={0}
                     buttonMargin={5}
                     borderWidth={2}
                     borderColor="black"

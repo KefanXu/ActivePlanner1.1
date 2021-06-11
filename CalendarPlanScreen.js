@@ -14,6 +14,7 @@ import {
   Dimensions,
   Button,
   Animated,
+  AppState,
 } from "react-native";
 import { getDataModel } from "./DataModel";
 import { MonthCalendar } from "./Calendar";
@@ -62,8 +63,8 @@ import { FlatList } from "react-native-gesture-handler";
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const BACKGROUND_COLOR = "white";
-const RED = "#D55E00";
-const GREEN = "#009E73";
+const RED = "#EE442F";
+const GREEN = "#63ACBE";
 const PIECHART = {
   pie: {
     style: {
@@ -324,6 +325,10 @@ export class CalendarPlanScreen extends React.Component {
       todayPlan: this.planToday,
 
       isLoaderVis: false,
+      appState: AppState.currentState,
+
+      isActivityTypeSelected: false,
+      isTimeSelected: false,
     };
     //console.log("weatherThisMonth",this.state.weatherThisMonth);
   }
@@ -367,6 +372,7 @@ export class CalendarPlanScreen extends React.Component {
     }
   };
   componentDidMount = async () => {
+    AppState.addEventListener("change", this._handleAppStateChange);
     this.dataModel = getDataModel();
     await this.dataModel.asyncInit();
     this.focusUnsubscribe = this.props.navigation.addListener(
@@ -374,6 +380,32 @@ export class CalendarPlanScreen extends React.Component {
       this.onFocus
     );
     //
+  };
+  componentWillUnmount = () => {
+    AppState.removeEventListener("change", this._handleAppStateChange);
+  };
+  _handleAppStateChange = async (nextAppState) => {
+    if (
+      (this.state.appState === "inactive" ||
+        this.state.appState === "background") &&
+      nextAppState === "active"
+    ) {
+      console.log("App has come to the foreground!");
+      this.setState({ isLoaderVis: true });
+      this.dataModel = getDataModel();
+      await this.dataModel.asyncInit();
+
+      await this.dataModel.loadUserPlans(this.userKey);
+      this.userPlans = this.dataModel.getUserPlans();
+      //this.processRecords(this.userPlans);
+      this.getUnfinishedReport();
+      this.setState({ isLoaderVis: false });
+      this.reportPopUp(this.userPlans);
+    }
+    this.setState({ appState: nextAppState });
+
+    //setAppStateVisible(appState.current);
+    //console.log("AppState", appState.current);
   };
   onFocus = async () => {
     console.log("onFocus");
@@ -385,12 +417,12 @@ export class CalendarPlanScreen extends React.Component {
       await this.dataModel.loadUserPlans(this.userKey);
       this.userPlans = this.dataModel.getUserPlans();
 
-      this.reportPopUp(this.userPlans);
       this.processRecords(this.userPlans);
       this.getUnfinishedReport();
       await this.resetCalendarView();
       this.setState({ isLoaderVis: false });
     }
+    this.reportPopUp(this.userPlans);
 
     if (this.isNoEventDayReportModalVis) {
       this.setState({ isNoEventDayReportModalVis: true });
@@ -639,6 +671,7 @@ export class CalendarPlanScreen extends React.Component {
   };
 
   reportPopUp = async (userPlanList) => {
+    console.log("report pop up");
     let currentDate = moment(new Date()).format().slice(0, 10);
     let weatherList = [];
     //console.log("userPlanList", userPlanList);
@@ -654,6 +687,11 @@ export class CalendarPlanScreen extends React.Component {
         if (currentDate === eventDate) {
           if (event.isReported == false && event.title) {
             this.isReportModalVis = true;
+            //console.log("reportPopUp",event);
+            // if (this.state.isReportModalVis) {
+            //   await this.setState({ isReportModalVis: true });
+            // }
+            this.setState({ isReportModalVis: true });
             this.eventToday = event;
 
             let detailViewCalendar = [];
@@ -694,10 +732,13 @@ export class CalendarPlanScreen extends React.Component {
     }
     if (isNoEventToday) {
       this.isNoEventDayReportModalVis = true;
+      this.setState({ isNoEventDayReportModalVis: true });
       this.btnName = "Submit";
       this.nextBtnState = "submit";
+      this.setState({ btnName: "Submit" });
+      this.setState({ nextBtnState: "submit" });
     }
-    //console.log("this.isReportModalVis", this.isReportModalVis);
+    console.log("this.state.isReportModalVis", this.state.isReportModalVis);
   };
   onPress = (item, monthNum, month) => {
     console.log("item,monthNum,month", item, monthNum, month);
@@ -1061,6 +1102,22 @@ export class CalendarPlanScreen extends React.Component {
   };
 
   onPlanBtnPressed = async () => {
+    if (!this.state.isActivityTypeSelected) {
+      Alert.alert(
+        "Missing Activity Type",
+        "Please select an exercise",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+      );
+      return;
+    }
+    // if (!this.state.isTimeSelected) {
+    //   Alert.alert(
+    //     "Missing Start time",
+    //     "Please select a start time",
+    //     [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+    //   );
+    //   return;
+    // }
     if (this.state.isPlannedToday) {
       Alert.alert(
         "You already planned today",
@@ -1188,6 +1245,8 @@ export class CalendarPlanScreen extends React.Component {
     this.setState({ isPlannedToday: true });
     this.setState({ isPlannedDate: newEvent.start });
     await this.resetCalendarView();
+    this.setState({isActivityTypeSelected: false});
+    this.setState({isTimeSelected: false})
 
     //this.componentWillMount
     // this.monthCalRef.current.reSetEvents(this.state.eventsThisMonth);
@@ -1331,6 +1390,7 @@ export class CalendarPlanScreen extends React.Component {
     );
   };
   activityFilter = async (item) => {
+    //this.setState({ isLoaderVis: true });
     this.selectedActivity = item.label;
     this.isActivitySelected = true;
     let newListByActivity = [];
@@ -1478,6 +1538,7 @@ export class CalendarPlanScreen extends React.Component {
     this.monthCalRef.current.processEvents();
     this.monthCalRefLast.current.processEvents();
     this.monthCalRefNext.current.processEvents();
+    //this.setState({ isLoaderVis: true });
   };
   dateTimeFilter = async (date) => {
     //let setDate = moment(date);
@@ -1572,7 +1633,7 @@ export class CalendarPlanScreen extends React.Component {
             }}
           >
             I did
-            <Text style={{ color: "#00FFFF" }}>
+            <Text style={{ color: "blue" }}>
               {" " + this.eventToday.title}
             </Text>{" "}
             at
@@ -1609,12 +1670,12 @@ export class CalendarPlanScreen extends React.Component {
             }}
           >
             I didn't do
-            <Text style={{ color: "#00FFFF" }}>
+            <Text style={{ color: "blue" }}>
               {" " + this.eventToday.title}
             </Text>{" "}
             as I planned because {this.eventToday.reason}
             {"\n"}I did{" "}
-            <Text style={{ color: "#00FFFF" }}>
+            <Text style={{ color: "blue" }}>
               {this.eventToday.otherActivity}
             </Text>{" "}
             instead
@@ -1646,7 +1707,7 @@ export class CalendarPlanScreen extends React.Component {
             }}
           >
             I didn't
-            <Text style={{ color: "#00FFFF" }}>
+            <Text style={{ color: "blue" }}>
               {" " + this.eventToday.title}
             </Text>{" "}
             at
@@ -1847,7 +1908,7 @@ export class CalendarPlanScreen extends React.Component {
                   </Text>
                 </TouchableOpacity>
               </View>
-             
+
               {/* <View
                 style={{
                   flex: 0.8,
@@ -2096,8 +2157,8 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
-                                        borderColor:"black",
-                    borderWidth:1,
+                    borderColor: "black",
+                    borderWidth: 1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 10,
@@ -2204,15 +2265,15 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
-                                        borderColor:"black",
-                    borderWidth:1,
+                    borderColor: "black",
+                    borderWidth: 1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 5,
                   }}
                 >
                   <FlatList
-                    showsHorizontalScrollIndicator = {false}
+                    showsHorizontalScrollIndicator={false}
                     horizontal={true}
                     contentContainerStyle={{
                       flexDirection: "row",
@@ -2325,7 +2386,7 @@ export class CalendarPlanScreen extends React.Component {
                   />
                 </View>
               </View>
-               <View
+              <View
                 style={{
                   flex: 0.8,
                   width: "95%",
@@ -2349,8 +2410,8 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 0.8,
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    borderColor:"black",
-                    borderWidth:1,
+                    borderColor: "black",
+                    borderWidth: 1,
                     alignItems: "center",
                     backgroundColor: "white",
                     borderRadius: 10,
@@ -2371,7 +2432,6 @@ export class CalendarPlanScreen extends React.Component {
                       style={{ data: { width: 10 } }}
                       colorScale={[GREEN, RED]}
                     >
-                    
                       <VictoryBar
                         labels={({ datum }) => datum.y}
                         data={[
@@ -2447,8 +2507,8 @@ export class CalendarPlanScreen extends React.Component {
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "white",
-                                        borderColor:"black",
-                    borderWidth:1,
+                    borderColor: "black",
+                    borderWidth: 1,
                     borderRadius: 10,
                     width: "100%",
                     padding: 10,
@@ -4380,8 +4440,8 @@ export class CalendarPlanScreen extends React.Component {
                     flex: 0.2,
                     width: "100%",
                     backgroundColor: "white",
-                    borderColor:"black",
-                    borderWidth:2,
+                    borderColor: "black",
+                    borderWidth: 2,
                     borderRadius: 15,
                     flexDirection: "column",
                     justifyContent: "center",
@@ -4790,6 +4850,7 @@ export class CalendarPlanScreen extends React.Component {
                       data={this.state.activityData}
                       initValue={this.state.activityPickerInitVal}
                       onChange={async (item) => {
+                        this.setState({isActivityTypeSelected: true})
                         await this.activityFilter(item);
                       }}
                     />
@@ -4989,6 +5050,7 @@ export class CalendarPlanScreen extends React.Component {
                     is24Hour={true}
                     display="default"
                     onChange={async (e, date) => {
+                      this.setState({isTimeSelected: true});
                       await this.dateTimeFilter(date);
                     }}
                     style={{

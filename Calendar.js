@@ -20,10 +20,11 @@ import EventCalendar from "react-native-events-calendar";
 import { Calendar } from "react-native-big-calendar";
 import { log } from "react-native-reanimated";
 import moment, { min } from "moment";
-const RED = "#D55E00";
-const GREEN = "#009E73";
+const RED = "#EE442F";
+const GREEN = "#63ACBE";
+const YELLOW = "#F0E442";
 const BACKGROUND_COLOR = "white";
-const HIGHLIGHT_COLOR = "#56B4E9";
+const HIGHLIGHT_COLOR = "#F9F4EC";
 
 
 export class MonthCalendar extends React.Component {
@@ -476,6 +477,7 @@ export class MonthCalendar extends React.Component {
                                     textAlign: "center",
                                     fontSize: 8,
                                     fontWeight: "bold",
+                                    color:"white"
                                   }}
                                 >
                                   {item.title
@@ -490,7 +492,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "#F0E442",
+                                    backgroundColor: YELLOW,
                                     borderRadius: 5,
                                     flex: 1,
                                     height: 15,
@@ -531,6 +533,7 @@ export class MonthCalendar extends React.Component {
                                       textAlign: "center",
                                       fontSize: 8,
                                       fontWeight: "bold",
+                                      color:"white"
                                     }}
                                   >
                                     {/* {item.start} */}
@@ -651,6 +654,7 @@ export class MonthCalendar extends React.Component {
                                     textAlign: "center",
                                     fontSize: 8,
                                     fontWeight: "bold",
+                                    color:"white"
                                   }}
                                 >
                                   {/* {item.start} */}
@@ -666,7 +670,7 @@ export class MonthCalendar extends React.Component {
                                 <View
                                   style={{
                                     width: "100%",
-                                    backgroundColor: "#F0E442",
+                                    backgroundColor: YELLOW,
                                     height: 15,
                                     alignItems: "center",
                                     justifyContent: "center",
@@ -706,6 +710,7 @@ export class MonthCalendar extends React.Component {
                                       textAlign: "center",
                                       fontSize: 8,
                                       fontWeight: "bold",
+                                      color:"white"
                                     }}
                                   >
                                     {/* {item.start} */}
