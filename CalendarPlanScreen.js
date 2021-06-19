@@ -397,8 +397,9 @@ export class CalendarPlanScreen extends React.Component {
 
       await this.dataModel.loadUserPlans(this.userKey);
       this.userPlans = this.dataModel.getUserPlans();
-      //this.processRecords(this.userPlans);
+      this.processRecords(this.userPlans);
       this.getUnfinishedReport();
+      await this.resetCalendarView();
       this.setState({ isLoaderVis: false });
       this.reportPopUp(this.userPlans);
     }
